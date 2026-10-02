@@ -75,4 +75,5 @@ desktop.ini
 
 # Temporary logs & scratch
 *.log
+result*.json
 scratch/

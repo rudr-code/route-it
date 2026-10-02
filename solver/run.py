@@ -1,0 +1,207 @@
+"""Command line interface runner for Route.it solvers (QPSO and baseline PSO).
+
+Usage example:
+    python -m solver.run --instance benchmarks/instances/A-n32-k5.vrp --seed 1 --particles 40 --iters 500 --out result.json
+"""
+
+from __future__ import annotations
+
+import argparse
+from pathlib import Path
+import sys
+from typing import Sequence
+
+# Ensure project root is in sys.path when executed directly
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
+
+from solver.io import load_cvrplib, load_solomon, save_solution_json
+from solver.models import Problem, Solution
+from solver.pso import PSOConfig, solve_pso
+from solver.qpso import QPSOConfig, solve_qpso
+
+
+def load_instance(path_str: str | Path) -> Problem:
+    """Load a problem instance based on file extension (.vrp or .txt)."""
+    p = Path(path_str)
+    if not p.is_file():
+        raise FileNotFoundError(f"Instance file not found: {p}")
+
+    suffix = p.suffix.lower()
+    if suffix == ".vrp":
+        return load_cvrplib(p)
+    elif suffix == ".txt":
+        return load_solomon(p)
+    else:
+        raise ValueError(f"Unsupported file format '{suffix}'. Expected .vrp or .txt")
+
+
+def run_solver(
+    instance_path: str | Path,
+    solver_name: str = "qpso",
+    seed: int = 1,
+    particles: int = 40,
+    iters: int = 500,
+    alpha_max: float = 1.0,
+    alpha_min: float = 0.5,
+    max_vehicles: int | None = None,
+    out_path: str | Path | None = None,
+    verbose: bool = True,
+) -> Solution:
+    """Load instance, execute selected solver, and optionally persist solution."""
+    if verbose:
+        print(f"Loading instance: {instance_path}")
+
+    problem = load_instance(instance_path)
+
+    if verbose:
+        print(
+            f"Loaded '{problem.id}' with {problem.num_customers} customers, "
+            f"{problem.num_vehicles} vehicles, capacity {problem.vehicles[0].capacity:.1f}"
+        )
+
+    last_print_time = 0.0
+
+    def progress_callback(iteration: int, gbest_cost: float) -> None:
+        if verbose and (iteration % 50 == 0 or iteration == iters or iteration == 1):
+            print(f"  [Iter {iteration:4d}/{iters:4d}] Current Best Cost: {gbest_cost:10.2f}")
+
+    if solver_name.lower() == "qpso":
+        if verbose:
+            print(f"Running QPSO (particles={particles}, iters={iters}, seed={seed}, alpha=[{alpha_max}, {alpha_min}])...")
+        cfg = QPSOConfig(
+            num_particles=particles,
+            max_iters=iters,
+            alpha_max=alpha_max,
+            alpha_min=alpha_min,
+            seed=seed,
+            max_vehicles=max_vehicles,
+        )
+        solution, _ = solve_qpso(problem, cfg, callback=progress_callback)
+    elif solver_name.lower() == "pso":
+        if verbose:
+            print(f"Running Baseline PSO (particles={particles}, iters={iters}, seed={seed})...")
+        pso_cfg = PSOConfig(
+            num_particles=particles,
+            max_iters=iters,
+            seed=seed,
+            max_vehicles=max_vehicles,
+        )
+        solution, _ = solve_pso(problem, pso_cfg, callback=progress_callback)
+    else:
+        raise ValueError(f"Unknown solver '{solver_name}'. Choose 'qpso' or 'pso'.")
+
+    if verbose:
+        print("\n" + "=" * 50)
+        print(f"Algorithm:       {solution.algorithm}")
+        print(f"Total Cost:      {solution.total_cost:.2f}")
+        print(f"Feasible:        {solution.is_feasible}")
+        print(f"Routes:          {len(solution.routes)}")
+        print(f"Execution Time:  {solution.execution_time_sec:.3f} s")
+        if solution.violations:
+            print(f"Violations:      {solution.violations}")
+        print("=" * 50)
+
+    if out_path:
+        save_solution_json(solution, out_path)
+        if verbose:
+            print(f"Solution saved to {out_path}")
+
+    return solution
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """CLI entrypoint."""
+    parser = argparse.ArgumentParser(
+        description="Route.it Solver CLI Runner (QPSO & Baseline PSO)."
+    )
+    parser.add_argument(
+        "--instance",
+        "-i",
+        type=str,
+        required=True,
+        help="Path to problem instance (.vrp or .txt)",
+    )
+    parser.add_argument(
+        "--solver",
+        "-s",
+        type=str,
+        default="qpso",
+        choices=["qpso", "pso"],
+        help="Optimization algorithm to run (default: qpso)",
+    )
+    parser.add_argument(
+        "--seed",
+        type=int,
+        default=1,
+        help="Random seed for reproducible results (default: 1)",
+    )
+    parser.add_argument(
+        "--particles",
+        "-p",
+        type=int,
+        default=40,
+        help="Swarm size / number of particles (default: 40)",
+    )
+    parser.add_argument(
+        "--iters",
+        type=int,
+        default=500,
+        help="Maximum optimization iterations (default: 500)",
+    )
+    parser.add_argument(
+        "--alpha-max",
+        type=float,
+        default=1.0,
+        help="QPSO initial alpha coefficient (default: 1.0)",
+    )
+    parser.add_argument(
+        "--alpha-min",
+        type=float,
+        default=0.5,
+        help="QPSO final alpha coefficient (default: 0.5)",
+    )
+    parser.add_argument(
+        "--max-vehicles",
+        type=int,
+        default=None,
+        help="Optional maximum number of vehicle routes allowed",
+    )
+    parser.add_argument(
+        "--out",
+        "-o",
+        type=str,
+        default=None,
+        help="Path to output JSON file to save the final solution",
+    )
+    parser.add_argument(
+        "--quiet",
+        "-q",
+        action="store_true",
+        help="Suppress console progress output",
+    )
+
+    args = parser.parse_args(argv)
+
+    try:
+        run_solver(
+            instance_path=args.instance,
+            solver_name=args.solver,
+            seed=args.seed,
+            particles=args.particles,
+            iters=args.iters,
+            alpha_max=args.alpha_max,
+            alpha_min=args.alpha_min,
+            max_vehicles=args.max_vehicles,
+            out_path=args.out,
+            verbose=not args.quiet,
+        )
+        return 0
+    except Exception as exc:  # noqa: BLE001
+        print(f"Error running solver: {exc}", file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
