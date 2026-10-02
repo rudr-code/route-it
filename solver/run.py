@@ -46,6 +46,9 @@ def run_solver(
     alpha_max: float = 1.0,
     alpha_min: float = 0.5,
     max_vehicles: int | None = None,
+    ls_freq: int = 20,
+    ls_top_k: int = 3,
+    no_ls: bool = False,
     out_path: str | Path | None = None,
     verbose: bool = True,
 ) -> Solution:
@@ -61,15 +64,18 @@ def run_solver(
             f"{problem.num_vehicles} vehicles, capacity {problem.vehicles[0].capacity:.1f}"
         )
 
-    last_print_time = 0.0
-
     def progress_callback(iteration: int, gbest_cost: float) -> None:
         if verbose and (iteration % 50 == 0 or iteration == iters or iteration == 1):
             print(f"  [Iter {iteration:4d}/{iters:4d}] Current Best Cost: {gbest_cost:10.2f}")
 
     if solver_name.lower() == "qpso":
+        actual_ls_freq = 0 if no_ls else ls_freq
         if verbose:
-            print(f"Running QPSO (particles={particles}, iters={iters}, seed={seed}, alpha=[{alpha_max}, {alpha_min}])...")
+            mode_str = "Memetic QPSO+LS" if actual_ls_freq > 0 else "Pure QPSO"
+            print(
+                f"Running {mode_str} (particles={particles}, iters={iters}, seed={seed}, "
+                f"alpha=[{alpha_max}, {alpha_min}], ls_freq={actual_ls_freq}, ls_top_k={ls_top_k})..."
+            )
         cfg = QPSOConfig(
             num_particles=particles,
             max_iters=iters,
@@ -77,6 +83,8 @@ def run_solver(
             alpha_min=alpha_min,
             seed=seed,
             max_vehicles=max_vehicles,
+            local_search_freq=actual_ls_freq,
+            local_search_top_k=ls_top_k,
         )
         solution, _ = solve_qpso(problem, cfg, callback=progress_callback)
     elif solver_name.lower() == "pso":
@@ -169,6 +177,23 @@ def main(argv: Sequence[str] | None = None) -> int:
         help="Optional maximum number of vehicle routes allowed",
     )
     parser.add_argument(
+        "--ls-freq",
+        type=int,
+        default=20,
+        help="Apply local search every m iterations (default: 20, 0 to disable)",
+    )
+    parser.add_argument(
+        "--ls-top-k",
+        type=int,
+        default=3,
+        help="Number of top particles refined with local search (default: 3)",
+    )
+    parser.add_argument(
+        "--no-ls",
+        action="store_true",
+        help="Disable memetic local search entirely",
+    )
+    parser.add_argument(
         "--out",
         "-o",
         type=str,
@@ -194,6 +219,9 @@ def main(argv: Sequence[str] | None = None) -> int:
             alpha_max=args.alpha_max,
             alpha_min=args.alpha_min,
             max_vehicles=args.max_vehicles,
+            ls_freq=args.ls_freq,
+            ls_top_k=args.ls_top_k,
+            no_ls=args.no_ls,
             out_path=args.out,
             verbose=not args.quiet,
         )

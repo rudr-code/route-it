@@ -116,7 +116,7 @@ def test_cli_runner_execution(a_n32_instance: Path, tmp_path: Path) -> None:
     assert out_file.is_file()
 
     sol = load_solution_json(out_file)
-    assert sol.algorithm == "QPSO"
+    assert sol.algorithm in ("QPSO", "QPSO+LS")
     assert sol.is_feasible is True
     assert sol.seed == 1
     assert sol.total_cost > 0.0

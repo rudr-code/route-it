@@ -3,15 +3,22 @@
 Implements classical QPSO (Sun, Feng & Xu, 2004) over a continuous random-key space.
 Each particle is a vector in [0, 1]^n, decoded into a giant tour via argsort,
 and evaluated using the Prins Split algorithm.
+Supports memetic local search integration (2-opt, relocate, swap) with random-key write-back.
 """
 
 from __future__ import annotations
 
 import time
-from typing import Any, Callable
+from typing import Callable
 import numpy as np
 from pydantic import BaseModel, Field
 
+from solver.local_search import (
+    build_neighbour_list,
+    flatten_routes,
+    project_tour_to_keys,
+    run_local_search,
+)
 from solver.models import Problem, Solution
 from solver.split import _split_cost_numba, prins_split
 
@@ -25,6 +32,22 @@ class QPSOConfig(BaseModel):
     alpha_min: float = Field(0.5, gt=0.0, description="Final contraction-expansion coefficient")
     seed: int | None = Field(None, description="Random seed for reproducible execution")
     max_vehicles: int | None = Field(None, description="Optional cap on vehicle count")
+
+    # Memetic local search settings
+    local_search_freq: int = Field(
+        20,
+        description="Apply local search every m iterations (<=0 to disable)",
+    )
+    local_search_top_k: int = Field(
+        3,
+        ge=1,
+        description="Number of top particles to refine with local search",
+    )
+    use_neighbour_list: bool = Field(
+        True,
+        description="Whether to use nearest-neighbour list pruning in local search",
+    )
+    k_nearest: int = Field(15, ge=2, description="Number of nearest neighbours per customer")
 
 
 def solve_qpso(
@@ -75,6 +98,13 @@ def solve_qpso(
     M = config.num_particles
     T = config.max_iters
 
+    # Precompute neighbour list if local search is enabled
+    neighbour_mat = (
+        build_neighbour_list(dist_mat, config.k_nearest)
+        if (config.local_search_freq > 0 and config.use_neighbour_list)
+        else None
+    )
+
     # 1. Initialize particle positions uniformly in [0, 1]^n
     X = rng.uniform(0.0, 1.0, size=(M, n))
 
@@ -87,7 +117,6 @@ def solve_qpso(
 
     # Initial evaluation
     for i in range(M):
-        # argsort gives 0-based indices; add 1 to get 1-based customer indices
         tour = np.argsort(X[i]) + 1
         cost = _split_cost_numba(tour, dist_mat, demands, capacity, limit_v)
         pbest_costs[i] = cost
@@ -133,24 +162,70 @@ def solve_qpso(
                     gbest_cost = cost
                     gbest_x = np.copy(X[i])
 
+        # 3. Memetic Step: Local Search on top k particles every m iterations
+        if config.local_search_freq > 0 and (t + 1) % config.local_search_freq == 0:
+            top_k_indices = np.argsort(pbest_costs)[: config.local_search_top_k]
+
+            for idx in top_k_indices:
+                p_tour = np.argsort(P[idx]) + 1
+                _, current_routes, is_feas, _ = prins_split(
+                    problem, p_tour, max_vehicles=config.max_vehicles
+                )
+                if not is_feas:
+                    continue
+
+                route_indices = [
+                    [problem.get_customer_index(sid) for sid in r.stop_ids]
+                    for r in current_routes
+                ]
+
+                improved_routes, ls_cost = run_local_search(
+                    route_indices, dist_mat, demands, capacity, neighbour_mat
+                )
+
+                if ls_cost < pbest_costs[idx] - 1e-7:
+                    improved_tour = flatten_routes(improved_routes)
+                    new_keys = project_tour_to_keys(P[idx], improved_tour)
+                    P[idx] = new_keys
+                    X[idx] = np.copy(new_keys)
+                    pbest_costs[idx] = ls_cost
+
+                    if ls_cost < gbest_cost:
+                        gbest_cost = ls_cost
+                        gbest_x = np.copy(new_keys)
+
         cost_history.append(float(gbest_cost))
         if callback is not None:
             callback(t + 1, float(gbest_cost))
 
-    elapsed_time = time.perf_counter() - start_time
-
-    # 3. Final route assembly using full prins_split
+    # 4. Final refinement on global best
     best_tour = np.argsort(gbest_x) + 1
     total_cost, routes, is_feasible, violations = prins_split(
         problem, best_tour, max_vehicles=config.max_vehicles
     )
+
+    if config.local_search_freq > 0 and is_feasible:
+        route_indices = [
+            [problem.get_customer_index(sid) for sid in r.stop_ids]
+            for r in routes
+        ]
+        improved_routes, final_ls_cost = run_local_search(
+            route_indices, dist_mat, demands, capacity, neighbour_mat
+        )
+        if final_ls_cost < total_cost - 1e-7:
+            improved_tour = flatten_routes(improved_routes)
+            total_cost, routes, is_feasible, violations = prins_split(
+                problem, improved_tour, max_vehicles=config.max_vehicles
+            )
+
+    elapsed_time = time.perf_counter() - start_time
 
     solution = Solution(
         routes=routes,
         total_cost=total_cost,
         is_feasible=is_feasible,
         violations=violations,
-        algorithm="QPSO",
+        algorithm="QPSO+LS" if config.local_search_freq > 0 else "QPSO",
         execution_time_sec=elapsed_time,
         seed=config.seed,
     )
