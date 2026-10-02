@@ -18,6 +18,7 @@ if str(project_root) not in sys.path:
 
 from solver.io import load_cvrplib, load_solomon, save_solution_json
 from solver.models import Problem, Solution
+from solver.ortools_baseline import ORToolsConfig, solve_ortools
 from solver.pso import PSOConfig, solve_pso
 from solver.qpso import QPSOConfig, solve_qpso
 
@@ -49,6 +50,7 @@ def run_solver(
     ls_freq: int = 20,
     ls_top_k: int = 3,
     no_ls: bool = False,
+    time_limit_sec: float = 10.0,
     out_path: str | Path | None = None,
     verbose: bool = True,
 ) -> Solution:
@@ -97,8 +99,13 @@ def run_solver(
             max_vehicles=max_vehicles,
         )
         solution, _ = solve_pso(problem, pso_cfg, callback=progress_callback)
+    elif solver_name.lower() == "ortools":
+        if verbose:
+            print(f"Running Google OR-Tools Baseline (time_limit={time_limit_sec:.1f}s)...")
+        ortools_cfg = ORToolsConfig(time_limit_sec=time_limit_sec)
+        solution = solve_ortools(problem, ortools_cfg)
     else:
-        raise ValueError(f"Unknown solver '{solver_name}'. Choose 'qpso' or 'pso'.")
+        raise ValueError(f"Unknown solver '{solver_name}'. Choose 'qpso', 'pso', or 'ortools'.")
 
     if verbose:
         print("\n" + "=" * 50)
@@ -136,7 +143,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         "-s",
         type=str,
         default="qpso",
-        choices=["qpso", "pso"],
+        choices=["qpso", "pso", "ortools"],
         help="Optimization algorithm to run (default: qpso)",
     )
     parser.add_argument(
@@ -157,6 +164,13 @@ def main(argv: Sequence[str] | None = None) -> int:
         type=int,
         default=500,
         help="Maximum optimization iterations (default: 500)",
+    )
+    parser.add_argument(
+        "--time-limit",
+        "-t",
+        type=float,
+        default=10.0,
+        help="Time limit in seconds (primarily for OR-Tools, default: 10.0)",
     )
     parser.add_argument(
         "--alpha-max",
@@ -222,6 +236,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             ls_freq=args.ls_freq,
             ls_top_k=args.ls_top_k,
             no_ls=args.no_ls,
+            time_limit_sec=args.time_limit,
             out_path=args.out,
             verbose=not args.quiet,
         )
