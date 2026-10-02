@@ -1,82 +1,71 @@
-# Route.it Benchmark Instances Directory
+# Benchmark Instances Guide
 
-This directory stores benchmark instances for evaluating Route.it's quantum-inspired solver (QPSO) against standard metaheuristics and baseline solvers (Google OR-Tools).
-
-> [!IMPORTANT]
-> **Data Integrity Principle**:
-> All benchmark results and metrics reported in Route.it documentation and research papers originate strictly from genuine execution runs executed on instances stored in this directory.
+This directory stores benchmark instances for Route.it. All reported benchmark metrics must originate strictly from actual execution runs on instances stored here.
 
 ---
 
-## 1. Solomon CVRPTW Benchmark Set (1987)
+## 1. Where to Get Benchmark Instances
 
-The 100-customer Solomon benchmark is the standard international test suite for Capacitated Vehicle Routing Problems with Time Windows (CVRPTW).
+### CVRPLIB X-Instances (Uchoa et al., 2017)
+- **Official Portal**: [CVRPLIB Database](http://vrp.galgos.inf.puc-rio.br/index.php/en/)
+- **Section**: Go to **Instances** -> **CVRP** -> **Set X (Uchoa et al. 2017)**.
+- Download the `.vrp` files directly and place them into this directory (`benchmarks/instances/`).
 
-### Required Files
-Place the following standard `.txt` files directly into `benchmarks/instances/`:
-- **Clustered Customers**:
-  - `C101.txt` (short scheduling horizon, tight time windows)
-  - `C102.txt`, `C103.txt`, `C104.txt`, `C105.txt`, `C106.txt`, `C107.txt`, `C108.txt`, `C109.txt`
-  - `C201.txt` - `C208.txt` (long scheduling horizon, larger vehicle capacity)
-- **Randomly Distributed Customers**:
-  - `R101.txt` - `R112.txt`
-  - `R201.txt` - `R211.txt`
-- **Mixed Clustered & Random Customers**:
-  - `RC101.txt` - `RC108.txt`
-  - `RC201.txt` - `RC208.txt`
+### Solomon CVRPTW Instances (Solomon, 1987)
+- **SINTEF Portal**: [SINTEF Solomon Benchmark](https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/)
+- **Alternative Mirror**: [Solomon VRPTW Repository](http://web.cba.neu.edu/~msolomon/problems.htm)
+- Download the 100-customer `.txt` files directly into this directory (`benchmarks/instances/`).
 
-### Official Download Sources
-You can download the canonical Solomon benchmark files from:
-- **SINTEF Applied Mathematics**: https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/
-- **Solomon Benchmark Repository (Wichmann)**: http://web.cba.neu.edu/~msolomon/problems.htm
+---
 
-### File Format Specification
+## 2. Recommended Initial Benchmark Instances
+
+To evaluate performance across different problem topologies and constraint regimes, start with these **11 primary instances**:
+
+### A. 5 Small CVRPLIB X-Instances
+These are the 5 smallest modern instances from the Uchoa et al. (2017) benchmark set:
+1. `X-n101-k25.vrp` (100 customers, 25 vehicles, tight capacity)
+2. `X-n106-k14.vrp` (105 customers, 14 vehicles)
+3. `X-n110-k9.vrp` (109 customers, 9 vehicles)
+4. `X-n115-k10.vrp` (114 customers, 10 vehicles)
+5. `X-n120-k6.vrp` (119 customers, 6 vehicles, wide routes)
+
+### B. 6 Solomon CVRPTW Instances
+A balanced selection across geographical distribution and scheduling horizons:
+1. `C101.txt` — **Clustered** customers, short scheduling horizon, tight time windows.
+2. `C201.txt` — **Clustered** customers, long scheduling horizon, larger vehicle capacity.
+3. `R101.txt` — **Randomly distributed** customers, short scheduling horizon, tight time windows.
+4. `R201.txt` — **Randomly distributed** customers, long scheduling horizon, larger capacity.
+5. `RC101.txt` — **Random-Clustered** mixture, short horizon, tight time windows.
+6. `RC201.txt` — **Random-Clustered** mixture, long horizon, larger capacity.
+
+---
+
+## 3. Directory Layout
+Place the downloaded files directly here:
 ```
-<Instance Name>
-VEHICLE
-NUMBER     CAPACITY
-   25         200
-
-CUSTOMER
-CUST NO.  XCOORD.   YCOORD.    DEMAND   READY TIME  DUE DATE   SERVICE TIME
-    0        40.0      50.0       0.0          0.0    1236.0            0.0
-    1        45.0      68.0      10.0        912.0     967.0           90.0
-...
+benchmarks/instances/
+├── README.md
+├── A-n32-k5.vrp       # Standard test fixture (pre-included)
+├── X-n101-k25.vrp
+├── X-n106-k14.vrp
+├── X-n110-k9.vrp
+├── X-n115-k10.vrp
+├── X-n120-k6.vrp
+├── C101.txt
+├── C201.txt
+├── R101.txt
+├── R201.txt
+├── RC101.txt
+└── RC201.txt
 ```
 
 ---
 
-## 2. CVRPLIB Benchmark Instances (TSPLIB Format)
+## 4. Verifying Instances
 
-The CVRPLIB benchmark repository provides classic CVRP instances across various sizes and topologies (Augerat et al. 1995, Christofides & Eilon 1969, Uchoa et al. 2017).
-
-### Suggested Instances
-- `A-n32-k5.vrp` (Included as standard reference fixture)
-- `A-n45-k6.vrp`
-- `B-n31-k5.vrp`
-- `P-n16-k8.vrp`
-
-### Official Download Source
-- **CVRPLIB Database**: http://vrp.galgos.inf.puc-rio.br/index.php/en/
-
-### File Format Specification
+Run the validation script from the repository root to verify file presence and parsing integrity:
+```bash
+python benchmarks/check_instances.py
 ```
-NAME : A-n32-k5
-COMMENT : (Augerat et al, Min no of trucks: 5, Optimal value: 784)
-TYPE : CVRP
-DIMENSION : 32
-EDGE_WEIGHT_TYPE : EUC_2D
-CAPACITY : 100
-NODE_COORD_SECTION
- 1 82 76
- 2 96 44
-...
-DEMAND_SECTION
- 1 0
- 2 19
-...
-DEPOT_SECTION
- 1
- -1
-EOF
-```
+This script validates that each instance file is present, parses cleanly without schema errors, and displays parsed customer counts, vehicle counts, and capacities.

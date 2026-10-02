@@ -1,0 +1,13 @@
+instance_name,benchmark_type,num_customers,num_vehicles,capacity,best_known_cost,best_known_vehicles,source_url,notes
+C101,Solomon,100,25,200,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Clustered customers type 1
+C201,Solomon,100,25,700,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Clustered customers type 2
+R101,Solomon,100,25,200,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Random customers type 1
+R201,Solomon,100,25,1000,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Random customers type 2
+RC101,Solomon,100,25,200,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Random-clustered type 1
+RC201,Solomon,100,25,1000,,,https://www.sintef.no/projectweb/top/vrp/vrptw/solomon-benchmark/,Random-clustered type 2
+X-n101-k25,CVRPLIB-X,100,25,206,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Uchoa et al. (2017)
+X-n106-k14,CVRPLIB-X,105,14,,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Uchoa et al. (2017)
+X-n110-k9,CVRPLIB-X,109,9,,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Uchoa et al. (2017)
+X-n115-k10,CVRPLIB-X,114,10,,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Uchoa et al. (2017)
+X-n120-k6,CVRPLIB-X,119,6,,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Uchoa et al. (2017)
+A-n32-k5,CVRPLIB-A,31,5,100,,,http://vrp.galgos.inf.puc-rio.br/index.php/en/,Reference fixture instance
