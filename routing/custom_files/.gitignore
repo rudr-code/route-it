@@ -1,0 +1,6 @@
+# Ignore raw OSM PBF data and Valhalla generated tiles
+*.osm.pbf
+*.tar
+valhalla.json
+valhalla_tiles/
+valhalla_tiles.tar

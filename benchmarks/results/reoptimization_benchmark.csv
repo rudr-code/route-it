@@ -1,0 +1,5 @@
+event_id,event_description,timestamp,tiered_tier,tiered_latency_ms,tiered_cost_after,tiered_delta_f,tiered_stability_penalty,tiered_stops_changed,tiered_feasible,restart_latency_ms,restart_cost_after,restart_stability_penalty,restart_stops_changed,restart_feasible,speedup_factor
+evt_mild_cong,Mild Congestion (Delta F <= Theta),0.0,DO_NOTHING,0.448,829.98,-0.0,0.0,0,True,425.95,7365.85,1050.0,21,True,950.78
+evt_mod_cong,Corridor Congestion (Tier 1 Path Repair),0.0,TIER_1_PATH_REPAIR,1.638,9908.63,9078.65,0.0,0,True,441.15,9779.54,1100.0,22,True,269.32
+evt_road_block,Localized Edge Blockage (Tier 2 Local Repair),0.0,TIER_2_LOCAL_REPAIR,659.04,8960.5,8130.52,100.0,2,True,402.9,10004.97,1050.0,21,True,0.61
+evt_corridor_closure,Multi-Route Closure (Tier 3 Warm Start),0.0,TIER_3_QPSO_WARM_START,969.302,8071.65,7241.67,1050.0,21,True,450.18,7801.37,1250.0,25,True,0.46

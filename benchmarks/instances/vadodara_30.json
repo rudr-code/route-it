@@ -1,0 +1,389 @@
+{
+  "id": "vadodara_30",
+  "depot": {
+    "id": "depot",
+    "lat": 22.3108,
+    "lon": 73.1811,
+    "ready_time": 0.0,
+    "due_time": 28800.0,
+    "service_time": 0.0
+  },
+  "customers": [
+    {
+      "id": "C01",
+      "lat": 22.313,
+      "lon": 73.1725,
+      "demand": 18.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C02",
+      "lat": 22.2965,
+      "lon": 73.175,
+      "demand": 14.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C03",
+      "lat": 22.321,
+      "lon": 73.148,
+      "demand": 22.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C04",
+      "lat": 22.3245,
+      "lon": 73.205,
+      "demand": 16.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C05",
+      "lat": 22.3235,
+      "lon": 73.186,
+      "demand": 20.0,
+      "ready_time": 900.0,
+      "due_time": 16200.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C06",
+      "lat": 22.268,
+      "lon": 73.195,
+      "demand": 25.0,
+      "ready_time": 3600.0,
+      "due_time": 21600.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C07",
+      "lat": 22.253,
+      "lon": 73.198,
+      "demand": 28.0,
+      "ready_time": 3600.0,
+      "due_time": 21600.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C08",
+      "lat": 22.342,
+      "lon": 73.218,
+      "demand": 15.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C09",
+      "lat": 22.302,
+      "lon": 73.238,
+      "demand": 24.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C10",
+      "lat": 22.285,
+      "lon": 73.153,
+      "demand": 19.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C11",
+      "lat": 22.338,
+      "lon": 73.179,
+      "demand": 17.0,
+      "ready_time": 900.0,
+      "due_time": 16200.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C12",
+      "lat": 22.325,
+      "lon": 73.162,
+      "demand": 21.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C13",
+      "lat": 22.335,
+      "lon": 73.151,
+      "demand": 26.0,
+      "ready_time": 3600.0,
+      "due_time": 21600.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C14",
+      "lat": 22.287,
+      "lon": 73.161,
+      "demand": 16.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C15",
+      "lat": 22.348,
+      "lon": 73.201,
+      "demand": 18.0,
+      "ready_time": 900.0,
+      "due_time": 16200.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C16",
+      "lat": 22.319,
+      "lon": 73.191,
+      "demand": 12.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C17",
+      "lat": 22.368,
+      "lon": 73.184,
+      "demand": 22.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C18",
+      "lat": 22.322,
+      "lon": 73.242,
+      "demand": 27.0,
+      "ready_time": 3600.0,
+      "due_time": 21600.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C19",
+      "lat": 22.272,
+      "lon": 73.152,
+      "demand": 15.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C20",
+      "lat": 22.264,
+      "lon": 73.164,
+      "demand": 20.0,
+      "ready_time": 900.0,
+      "due_time": 16200.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C21",
+      "lat": 22.316,
+      "lon": 73.163,
+      "demand": 14.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C22",
+      "lat": 22.281,
+      "lon": 73.125,
+      "demand": 23.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C23",
+      "lat": 22.2995,
+      "lon": 73.2085,
+      "demand": 19.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C24",
+      "lat": 22.293,
+      "lon": 73.214,
+      "demand": 13.0,
+      "ready_time": 900.0,
+      "due_time": 16200.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C25",
+      "lat": 22.3015,
+      "lon": 73.219,
+      "demand": 18.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C26",
+      "lat": 22.3025,
+      "lon": 73.201,
+      "demand": 15.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C27",
+      "lat": 22.298,
+      "lon": 73.197,
+      "demand": 16.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C28",
+      "lat": 22.294,
+      "lon": 73.192,
+      "demand": 14.0,
+      "ready_time": 0.0,
+      "due_time": 14400.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C29",
+      "lat": 22.33,
+      "lon": 73.141,
+      "demand": 21.0,
+      "ready_time": 1800.0,
+      "due_time": 18000.0,
+      "service_time": 300.0,
+      "priority": 1
+    },
+    {
+      "id": "C30",
+      "lat": 22.306,
+      "lon": 73.118,
+      "demand": 25.0,
+      "ready_time": 3600.0,
+      "due_time": 21600.0,
+      "service_time": 300.0,
+      "priority": 1
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "VAN_01",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_02",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_03",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_04",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_05",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_06",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_07",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "VAN_08",
+      "capacity": 100.0,
+      "shift_start": 0.0,
+      "shift_end": 28800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    }
+  ],
+  "travel_time_matrix": null,
+  "distance_matrix": null
+}

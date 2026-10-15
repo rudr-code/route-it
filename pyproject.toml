@@ -73,3 +73,7 @@ ignore = [
 testpaths = ["tests"]
 pythonpath = ["."]
 addopts = "-v --strict-markers"
+markers = [
+    "integration: mark test as integration test requiring external or live services",
+]
+

@@ -84,12 +84,62 @@ def test_prins_split_max_vehicles_constraint() -> None:
     # Capacity is 10.0, so both customers cannot fit in 1 vehicle (6 + 6 = 12 > 10)
     vehicles = [Vehicle(id="V_1", capacity=10.0)]
     problem = Problem(id="toy_cap", depot=depot, customers=customers, vehicles=vehicles)
-    problem.compute_euclidean_matrices()
-
     tour = [1, 2]
-    # Enforce max_vehicles = 1
     cost, routes, is_feasible, violations = prins_split(problem, tour, max_vehicles=1)
 
     assert is_feasible is False
     assert "max_vehicles" in violations
     assert len(routes) == 2  # Partitioned into 2 routes because 1 is impossible
+
+
+def test_prins_split_time_windows_forces_split() -> None:
+    """Test that conflicting time windows force 2 vehicles even when capacity allows 1."""
+    depot = Depot(id="depot", lat=0.0, lon=0.0, ready_time=0.0, due_time=100.0)
+    # Total demand = 5 + 5 = 10 <= capacity 20
+    # But C1 is at (10, 0) due at 12 (arr=10), service=5, leaves at 15
+    # C2 is at (0, 10) due at 12! From C1 (10, 0) to C2 (0, 10), travel time is hypot(10, 10)=14.14
+    # Arrives at C2 at 15 + 14.14 = 29.14 >> due 12!
+    customers = [
+        Customer(id="C1", lat=10.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=12.0, service_time=5.0),
+        Customer(id="C2", lat=0.0, lon=10.0, demand=5.0, ready_time=0.0, due_time=12.0, service_time=5.0),
+    ]
+    vehicles = [Vehicle(id="V1", capacity=20.0), Vehicle(id="V2", capacity=20.0)]
+    problem = Problem(id="tw_split", depot=depot, customers=customers, vehicles=vehicles)
+    problem.compute_euclidean_matrices(speed=1.0)
+
+    from solver.models import Solution
+    from solver.validate import validate_solution
+
+    # With hard time windows, single route [C1, C2] is impossible; Split must output 2 routes
+    cost, routes, is_feasible, violations = prins_split(
+        problem, [1, 2], hard_time_windows=True
+    )
+
+    assert is_feasible is True
+    assert violations == {}
+    assert len(routes) == 2
+    assert routes[0].stop_ids == ["C1"]
+    assert routes[1].stop_ids == ["C2"]
+
+    val_res = validate_solution(problem, Solution(routes=routes, total_cost=cost, is_feasible=is_feasible))
+    assert val_res.is_valid is True
+
+
+def test_prins_split_driver_duty_limit() -> None:
+    """Test that max duty limit flags excessive route duration."""
+    depot = Depot(id="depot", lat=0.0, lon=0.0, ready_time=0.0, due_time=200.0)
+    customers = [
+        Customer(id="C1", lat=20.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=100.0, service_time=10.0),
+    ]
+    # Route depot -> C1 -> depot takes 20 + 10 + 20 = 50s
+    vehicles = [Vehicle(id="V1", capacity=20.0)]
+    problem = Problem(id="duty_toy", depot=depot, customers=customers, vehicles=vehicles)
+    problem.compute_euclidean_matrices(speed=1.0)
+
+    # Max duty duration 40s < 50s
+    cost, routes, is_feasible, violations = prins_split(
+        problem, [1], max_duty_duration=40.0, hard_duty_limit=True
+    )
+    assert is_feasible is False
+    assert "driver_duty_limit" in violations
+

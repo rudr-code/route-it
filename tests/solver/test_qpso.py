@@ -120,3 +120,51 @@ def test_cli_runner_execution(a_n32_instance: Path, tmp_path: Path) -> None:
     assert sol.is_feasible is True
     assert sol.seed == 1
     assert sol.total_cost > 0.0
+
+
+def test_qpso_cvrptw_with_adaptive_penalty_and_priorities() -> None:
+    """Verify QPSO solves CVRPTW instance respecting time windows, priorities, and duty limits."""
+    from solver.models import Customer, Depot, Problem, Vehicle
+    from solver.validate import validate_solution
+
+    depot = Depot(id="depot", lat=0.0, lon=0.0, ready_time=0.0, due_time=200.0)
+    customers = [
+        Customer(id="C1", lat=5.0, lon=0.0, demand=10.0, ready_time=0.0, due_time=20.0, service_time=5.0, priority=2),
+        Customer(id="C2", lat=15.0, lon=0.0, demand=15.0, ready_time=15.0, due_time=60.0, service_time=5.0, priority=1),
+        Customer(id="C3", lat=25.0, lon=0.0, demand=15.0, ready_time=25.0, due_time=100.0, service_time=5.0, priority=1),
+        Customer(id="C4", lat=0.0, lon=10.0, demand=12.0, ready_time=0.0, due_time=50.0, service_time=5.0, priority=1),
+        Customer(id="C5", lat=0.0, lon=20.0, demand=18.0, ready_time=10.0, due_time=80.0, service_time=5.0, priority=2),
+    ]
+    vehicles = [
+        Vehicle(id="V1", capacity=50.0, shift_start=0.0, shift_end=150.0),
+        Vehicle(id="V2", capacity=50.0, shift_start=0.0, shift_end=150.0),
+    ]
+    problem = Problem(id="toy_cvrptw", depot=depot, customers=customers, vehicles=vehicles)
+    problem.compute_euclidean_matrices(speed=1.0)
+
+    cfg = QPSOConfig(
+        num_particles=20,
+        max_iters=35,
+        seed=42,
+        adaptive_penalty=True,
+        enforce_priority_early_service=True,
+        priority_early_ratio=0.6,
+        apply_tw_repair=True,
+    )
+
+    sol, hist = solve_qpso(problem, cfg)
+
+    assert sol.is_feasible is True
+    assert len(sol.violations) == 0
+    assert sol.total_cost > 0.0
+
+    # Independent validation verification
+    val = validate_solution(
+        problem,
+        sol,
+        enforce_priority_early_service=True,
+        priority_early_ratio=0.6,
+    )
+    assert val.is_valid is True
+    assert val.customer_count == 5
+

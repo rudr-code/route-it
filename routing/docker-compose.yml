@@ -1,0 +1,26 @@
+services:
+  valhalla:
+    image: ghcr.io/valhalla/valhalla-scripted:latest
+    container_name: route_it_valhalla
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    volumes:
+      # Map custom_files directory containing vadodara.osm.pbf and built valhalla tiles
+      - ./custom_files:/custom_files
+    environment:
+      # Disable elevation to keep build lightweight (<30s, avoids downloading SRTM tiles)
+      - build_elevation=False
+      # Build admin database for country boundaries & left-hand driving rules (India)
+      - build_admins=True
+      # Build timezone database for time-dependent routing (critical for CVRPTW)
+      - build_time_zones=True
+      # Consolidate graph tiles into valhalla_tiles.tar for fast container restarts
+      - build_tar=True
+      # Only rebuild tiles if the .osm.pbf hash changes
+      - force_rebuild=False
+      # Start valhalla_service HTTP daemon after processing
+      - serve_tiles=True
+      # Limit concurrency to 2 threads to prevent CPU/memory exhaustion on build/serve
+      - server_threads=2
+

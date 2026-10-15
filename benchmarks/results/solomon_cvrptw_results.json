@@ -1,0 +1,57 @@
+{
+  "timestamp": "2026-10-03 21:44:56",
+  "solver": "Route.it QPSO + Time-Aware Prins Split + Adaptive Penalty + Repair",
+  "results": [
+    {
+      "instance": "C101_25",
+      "filename": "C101.txt",
+      "family": "C1 (Clustered)",
+      "num_customers": 25,
+      "capacity": 200.0,
+      "num_routes": 10,
+      "total_distance": 427.53,
+      "total_duration": 6542.26,
+      "total_waiting_time": 3864.73,
+      "total_service_time": 2250.0,
+      "is_feasible": true,
+      "violations_count": 0,
+      "violations": {},
+      "execution_time_sec": 55.1,
+      "seed": 42
+    },
+    {
+      "instance": "R101_25",
+      "filename": "R101.txt",
+      "family": "R1 (Random)",
+      "num_customers": 25,
+      "capacity": 200.0,
+      "num_routes": 18,
+      "total_distance": 1042.42,
+      "total_duration": 2565.86,
+      "total_waiting_time": 1273.45,
+      "total_service_time": 250.0,
+      "is_feasible": true,
+      "violations_count": 0,
+      "violations": {},
+      "execution_time_sec": 0.09,
+      "seed": 42
+    },
+    {
+      "instance": "RC101_25",
+      "filename": "RC101.txt",
+      "family": "RC1 (Mixed)",
+      "num_customers": 25,
+      "capacity": 200.0,
+      "num_routes": 9,
+      "total_distance": 870.72,
+      "total_duration": 1610.74,
+      "total_waiting_time": 490.03,
+      "total_service_time": 250.0,
+      "is_feasible": true,
+      "violations_count": 0,
+      "violations": {},
+      "execution_time_sec": 0.07,
+      "seed": 42
+    }
+  ]
+}

@@ -4,16 +4,16 @@
   "particles": 30,
   "iterations": 100,
   "pure_qpso": {
-    "cost": 1351.5988396857656,
+    "cost": 1351.5988,
     "feasible": true,
     "routes": 5,
-    "time_sec": 1.9241980999941006
+    "time_sec": 17.7120283000404
   },
   "memetic_qpso_ls": {
-    "cost": 872.4324886222598,
+    "cost": 872.4325,
     "feasible": true,
     "routes": 5,
-    "time_sec": 0.15966229999321513
+    "time_sec": 0.2047839000588283
   },
-  "improvement_pct": 35.451817284402786
+  "improvement_pct": 35.45181454733461
 }

@@ -1,0 +1,173 @@
+import { useState, useCallback, useRef } from 'react';
+import { api } from '../api/client';
+import { useWebSocket } from '../api/ws';
+import type {
+  SolutionResponse,
+  SolveJob,
+  WsMessage,
+  ProblemCreateRequest,
+  SolveRequest,
+} from '../api/types';
+
+export interface ConvergencePoint {
+  iter: number;
+  cost: number;
+}
+
+export interface SolverState {
+  problemId: string | null;
+  job: SolveJob | null;
+  solution: SolutionResponse | null;
+  previousSolution: SolutionResponse | null;  // before last event
+  convergence: ConvergencePoint[];
+  isLoading: boolean;
+  error: string | null;
+  oracleType: 'euclidean' | 'valhalla';
+}
+
+export interface SolverActions {
+  loadScenario: (scenario: ProblemCreateRequest) => Promise<void>;
+  solve: (params: Partial<SolveRequest>) => Promise<void>;
+  fetchSolution: () => Promise<void>;
+  reset: () => void;
+}
+
+const DEFAULT_STATE: SolverState = {
+  problemId: null,
+  job: null,
+  solution: null,
+  previousSolution: null,
+  convergence: [],
+  isLoading: false,
+  error: null,
+  oracleType: 'euclidean',
+};
+
+export function useSolver(): [SolverState, SolverActions] {
+  const [state, setState] = useState<SolverState>(DEFAULT_STATE);
+  const oracleRef = useRef<'euclidean' | 'valhalla'>('euclidean');
+
+  const setError = (error: string | null) =>
+    setState((s) => ({ ...s, error, isLoading: false }));
+
+  const loadScenario = useCallback(async (scenario: ProblemCreateRequest) => {
+    setState((s) => ({ ...s, isLoading: true, error: null }));
+    try {
+      // Delete existing problem if same ID exists
+      if (scenario.id) {
+        try { await api.deleteProblem(scenario.id); } catch {}
+      }
+      const prob = await api.createProblem(scenario);
+      setState((s) => ({
+        ...s,
+        problemId: prob.id,
+        job: null,
+        solution: null,
+        previousSolution: null,
+        convergence: [],
+        isLoading: false,
+        error: null,
+      }));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }, []);
+
+  const solve = useCallback(
+    async (params: Partial<SolveRequest>) => {
+      setState((s) => {
+        if (!s.problemId) return s;
+        return { ...s, isLoading: true, error: null, convergence: [], job: null };
+      });
+
+      const problemId = state.problemId;
+      if (!problemId) { setError('No problem loaded'); return; }
+
+      const req: SolveRequest = {
+        num_particles: params.num_particles ?? 25,
+        max_iters: params.max_iters ?? 60,
+        cost_oracle_type: params.cost_oracle_type ?? 'euclidean',
+        valhalla_url: params.valhalla_url ?? 'http://localhost:8002',
+        seed: params.seed ?? 42,
+        apply_tw_repair: params.apply_tw_repair ?? true,
+        enforce_priority_early_service: params.enforce_priority_early_service ?? false,
+      };
+      oracleRef.current = req.cost_oracle_type;
+
+      try {
+        const job = await api.solveProblem(problemId, req);
+        setState((s) => ({
+          ...s,
+          job,
+          oracleType: req.cost_oracle_type,
+          isLoading: true,
+        }));
+      } catch (e: unknown) {
+        setError(e instanceof Error ? e.message : String(e));
+      }
+    },
+    [state.problemId],
+  );
+
+  const fetchSolution = useCallback(async () => {
+    const pid = state.problemId;
+    if (!pid) return;
+    try {
+      const sol = await api.getSolution(pid);
+      setState((s) => ({ ...s, solution: sol, isLoading: false }));
+    } catch (e: unknown) {
+      setError(e instanceof Error ? e.message : String(e));
+    }
+  }, [state.problemId]);
+
+  const reset = useCallback(() => setState(DEFAULT_STATE), []);
+
+  // WebSocket message handler
+  const handleWsMessage = useCallback((msg: WsMessage) => {
+    switch (msg.type) {
+      case 'solve_progress':
+        setState((s) => ({
+          ...s,
+          convergence: [
+            ...s.convergence,
+            { iter: msg.iteration, cost: msg.gbest_cost },
+          ],
+          job: s.job
+            ? { ...s.job, progress_iteration: msg.iteration, current_cost: msg.gbest_cost }
+            : s.job,
+        }));
+        break;
+
+      case 'solve_completed':
+        setState((s) => ({ ...s, isLoading: false }));
+        // Fetch solution after completion
+        if (state.problemId) {
+          api.getSolution(state.problemId)
+            .then((sol) =>
+              setState((ss) => ({ ...ss, solution: sol, isLoading: false })),
+            )
+            .catch(() => {});
+        }
+        break;
+
+      case 'solve_failed':
+        setError(msg.error);
+        break;
+
+      case 'reoptimization_update':
+        // Solution already fetched by useEvents; just update isLoading
+        setState((s) => ({ ...s, isLoading: false }));
+        break;
+
+      default:
+        break;
+    }
+  }, [state.problemId]); // eslint-disable-line
+
+  useWebSocket(state.problemId, handleWsMessage);
+
+  return [
+    state,
+    { loadScenario, solve, fetchSolution, reset },
+  ];
+}
