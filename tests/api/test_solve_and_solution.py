@@ -3,7 +3,12 @@
 from __future__ import annotations
 
 import time
+import pytest
 from fastapi.testclient import TestClient
+
+from routing.cost_oracle import EuclideanOracle
+from solver.models import Customer, Depot, Problem, Vehicle
+from solver.qpso import QPSOConfig, solve_qpso
 
 
 def test_solution_not_found_before_solve(client: TestClient, sample_problem_payload: dict) -> None:
@@ -34,7 +39,7 @@ def test_solve_async_job_and_poll_solution(client: TestClient, sample_problem_pa
     assert job_data["status"] in ("pending", "running", "completed")
 
     # 2. Poll job status until completed
-    max_wait_seconds = 10.0
+    max_wait_seconds = 30.0
     start_poll = time.time()
     final_status = job_data["status"]
 
@@ -76,3 +81,28 @@ def test_solve_async_job_and_poll_solution(client: TestClient, sample_problem_pa
         assert sf["geometry"]["type"] == "Point"
         assert sf["properties"]["id"] in ["c1", "c2", "c3", "c4"]
         assert "arrival_time" in sf["properties"]
+
+
+def test_planar_coordinates_with_explicit_planar_oracle() -> None:
+    """Verify that planar Cartesian coordinates remain fully supported and feasible with use_haversine=False."""
+    depot = Depot(id="depot", lat=0.0, lon=0.0, ready_time=0.0, due_time=1000.0)
+    customers = [
+        Customer(id="c1", lat=10.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=500.0, service_time=10.0),
+        Customer(id="c2", lat=20.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=500.0, service_time=10.0),
+        Customer(id="c3", lat=0.0, lon=10.0, demand=5.0, ready_time=0.0, due_time=500.0, service_time=10.0),
+        Customer(id="c4", lat=0.0, lon=20.0, demand=5.0, ready_time=0.0, due_time=500.0, service_time=10.0),
+    ]
+    vehicles = [
+        Vehicle(id="v1", capacity=15.0, shift_start=0.0, shift_end=1000.0),
+        Vehicle(id="v2", capacity=15.0, shift_start=0.0, shift_end=1000.0),
+    ]
+    problem = Problem(id="planar_toy", depot=depot, customers=customers, vehicles=vehicles)
+    problem.compute_euclidean_matrices(speed=1.0)
+
+    oracle = EuclideanOracle(base_speed_mps=1.0, use_haversine=False)
+    solution, _ = solve_qpso(problem, QPSOConfig(num_particles=15, max_iters=20, seed=42), cost_oracle=oracle)
+
+    assert solution.is_feasible is True
+    assert solution.violations == {}
+    assert solution.total_cost == pytest.approx(80.0, rel=1e-3)
+

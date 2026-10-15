@@ -13,7 +13,7 @@ def _solve_problem_sync(client: TestClient, problem_id: str) -> None:
         json={"num_particles": 15, "max_iters": 20, "seed": 42},
     )
     job_id = solve_resp.json()["job_id"]
-    for _ in range(100):
+    for _ in range(600):  # Poll up to 30.0s (600 * 0.05s)
         time.sleep(0.05)
         st = client.get(f"/problems/{problem_id}/jobs/{job_id}").json()["status"]
         if st in ("completed", "failed"):

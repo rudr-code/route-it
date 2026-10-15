@@ -7,13 +7,13 @@
     "cost": 1351.5988,
     "feasible": true,
     "routes": 5,
-    "time_sec": 17.7120283000404
+    "time_sec": 0.16511030006222427
   },
   "memetic_qpso_ls": {
     "cost": 872.4325,
     "feasible": true,
     "routes": 5,
-    "time_sec": 0.2047839000588283
+    "time_sec": 0.1510250000283122
   },
   "improvement_pct": 35.45181454733461
 }

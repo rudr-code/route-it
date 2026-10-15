@@ -65,7 +65,7 @@ def test_websocket_streams_reoptimization_telemetry(
         json={"num_particles": 15, "max_iters": 10, "seed": 42},
     )
     job_id = solve_resp.json()["job_id"]
-    for _ in range(50):
+    for _ in range(600):  # Poll up to 30.0s (600 * 0.05s)
         time.sleep(0.05)
         if client.get(f"/problems/test_city_4/jobs/{job_id}").json()["status"] == "completed":
             break

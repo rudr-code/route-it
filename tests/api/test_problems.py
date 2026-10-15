@@ -15,10 +15,10 @@ def test_create_and_get_problem(client: TestClient, sample_problem_payload: dict
     assert created["num_customers"] == 4
     assert created["num_vehicles"] == 2
     assert created["bbox"] == {
-        "min_lat": 0.0,
-        "min_lon": 0.0,
-        "max_lat": 20.0,
-        "max_lon": 20.0,
+        "min_lat": 22.295,
+        "min_lon": 73.17,
+        "max_lat": 22.32,
+        "max_lon": 73.19,
     }
 
     # 2. Get problem by ID
