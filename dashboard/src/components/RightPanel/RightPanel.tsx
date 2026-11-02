@@ -1,9 +1,8 @@
 import { ROUTE_COLORS } from '../Map/RouteMap';
 import type { Route } from '../../api/types';
 
-function formatEta(val: number): string {
-  // If val > 1440, it's seconds from midnight; convert to minutes
-  const totalMins = val > 1440 ? Math.floor(val / 60) : Math.floor(val);
+function formatEta(arrivalSecs: number): string {
+  const totalMins = Math.floor(arrivalSecs / 60);
   const h = (Math.floor(totalMins / 60) % 24).toString().padStart(2, '0');
   const m = (totalMins % 60).toString().padStart(2, '0');
   return `${h}:${m}`;
@@ -16,11 +15,9 @@ type CustomerMeta = {
   priority: number; // int ge=1; 2+ = high priority
 };
 
-function twStatus(arrival: number, c: CustomerMeta | undefined): 'ok' | 'late' | 'unknown' {
+function twStatus(arrivalSecs: number, c: CustomerMeta | undefined): 'ok' | 'late' | 'unknown' {
   if (!c) return 'unknown';
-  const arrMins = arrival > 1440 ? arrival / 60 : arrival;
-  const dueMins = c.due_time > 1440 ? c.due_time / 60 : c.due_time;
-  if (arrMins > dueMins) return 'late';
+  if (arrivalSecs > c.due_time) return 'late';
   return 'ok';
 }
 
@@ -34,15 +31,13 @@ function RouteCard({ route, index, customerMap }: RouteCardProps) {
   const color = ROUTE_COLORS[index % ROUTE_COLORS.length];
   const stopCount = route.stop_ids.length;
 
-  // Handle distance in metres vs km
-  const distKm = route.distance > 500 ? (route.distance / 1000).toFixed(1) : route.distance.toFixed(1);
+  // Strict SI contract: distance in metres, convert directly to km
+  const distKm = (route.distance / 1000).toFixed(1);
 
-  // Handle duration in seconds vs minutes
-  const durHours = route.duration > 300 ? route.duration / 3600 : route.duration / 60;
-  const durText =
-    durHours >= 1
-      ? `${durHours.toFixed(1)}h`
-      : `${Math.round(route.duration > 300 ? route.duration / 60 : route.duration)}m`;
+  // Strict SI contract: duration in seconds, convert directly to h/m
+  const durMins = Math.round(route.duration / 60);
+  const durHours = route.duration / 3600;
+  const durText = durHours >= 1 ? `${durHours.toFixed(1)}h` : `${durMins}m`;
 
   return (
     <div className="route-card" style={{ borderLeft: `3px solid ${color}` }}>

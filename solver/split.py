@@ -587,7 +587,15 @@ def _split_dag_with_pred(
                     best_v = v
 
             if best_cost < 1e12:
-                return best_cost, pred_mat[:, best_v], best_v
+                pred_1d = np.full(n + 1, -1, dtype=np.int64)
+                curr_node = n
+                curr_layer = best_v
+                while curr_node > 0 and curr_layer > 0:
+                    p = int(pred_mat[curr_node, curr_layer])
+                    pred_1d[curr_node] = p
+                    curr_node = p
+                    curr_layer -= 1
+                return best_cost, pred_1d, best_v
 
             cost_unc, pred_unc, _ = _split_dag_with_pred(
                 tour, cost_data, demands, capacity, max_vehicles=-1
@@ -737,7 +745,15 @@ def _split_dag_with_pred(
                 best_v = v
 
         if best_cost < 1e12:
-            return best_cost, pred_mat[:, best_v], best_v
+            pred_1d = np.full(n + 1, -1, dtype=np.int64)
+            curr_node = n
+            curr_layer = best_v
+            while curr_node > 0 and curr_layer > 0:
+                p = int(pred_mat[curr_node, curr_layer])
+                pred_1d[curr_node] = p
+                curr_node = p
+                curr_layer -= 1
+            return best_cost, pred_1d, best_v
 
         cost_unc, pred_unc, _ = _split_dag_with_pred(
             tour, cost_data, demands, capacity, max_vehicles=-1,
@@ -912,7 +928,15 @@ def _split_dag_with_pred(
             best_v = v
 
     if best_cost < 1e12:
-        return best_cost, pred_mat[:, best_v], best_v
+        pred_1d = np.full(n + 1, -1, dtype=np.int64)
+        curr_node = n
+        curr_layer = best_v
+        while curr_node > 0 and curr_layer > 0:
+            p = int(pred_mat[curr_node, curr_layer])
+            pred_1d[curr_node] = p
+            curr_node = p
+            curr_layer -= 1
+        return best_cost, pred_1d, best_v
 
     cost_unc, pred_unc, _ = _split_dag_with_pred(
         tour, cost_data, demands, capacity, max_vehicles=-1,
@@ -929,6 +953,7 @@ def prins_split(
     problem: Problem,
     tour: Sequence[int] | np.ndarray,
     max_vehicles: int | None = None,
+    allow_extra_vehicles: bool = False,
     cost_oracle: Any | None = None,
     cost_tensor: CostTensor | None = None,
     max_duty_duration: float | None = None,
@@ -994,7 +1019,12 @@ def prins_split(
             due_times[idx] = early_due
 
     capacity = problem.vehicles[0].capacity if problem.vehicles else 100.0
-    limit_v = max_vehicles if max_vehicles is not None else -1
+    if max_vehicles is not None:
+        limit_v = max_vehicles
+    elif problem.vehicles and not allow_extra_vehicles:
+        limit_v = len(problem.vehicles)
+    else:
+        limit_v = -1
 
     max_duty = -1.0
     if max_duty_duration is not None:
@@ -1056,7 +1086,7 @@ def prins_split(
             cost_data,
             demands,
             capacity,
-            limit_v,
+            -1,
             t_start=cost_tensor.t_start,
             bucket_size=cost_tensor.bucket_size,
             service_times=services,
@@ -1081,10 +1111,14 @@ def prins_split(
             curr = p
         segments.reverse()
 
-    if max_vehicles is not None and len(segments) > max_vehicles:
+    eff_max_v = max_vehicles if max_vehicles is not None else (len(problem.vehicles) if (problem.vehicles and not allow_extra_vehicles) else None)
+    if eff_max_v is not None and len(segments) > eff_max_v:
         is_feasible = False
+        violations.setdefault("fleet_size", []).append(
+            f"Required {len(segments)} routes, exceeding available fleet size of {eff_max_v}"
+        )
         violations.setdefault("max_vehicles", []).append(
-            f"Required {len(segments)} routes, exceeding max limit of {max_vehicles}"
+            f"Required {len(segments)} routes, exceeding max limit of {eff_max_v}"
         )
 
     # Build Route objects with time-dependent simulation
@@ -1098,7 +1132,15 @@ def prins_split(
     total_dist = 0.0
 
     for r_idx, seg in enumerate(segments):
-        veh_id = vehicle_pool[r_idx].id if r_idx < len(vehicle_pool) else f"V_{r_idx + 1}"
+        if r_idx < len(vehicle_pool):
+            veh_id = vehicle_pool[r_idx].id
+        else:
+            veh_id = f"V_{r_idx + 1}"
+            if not allow_extra_vehicles:
+                is_feasible = False
+                violations.setdefault("fleet_size", []).append(
+                    f"Route {r_idx + 1} assigned synthetic vehicle '{veh_id}' exceeding fleet size {len(vehicle_pool)}"
+                )
         stop_ids: list[str] = []
         arrival_times: list[float] = []
         route_load = 0.0
@@ -1188,5 +1230,5 @@ def prins_split(
         )
 
     # For feasible solution: true distance. For infeasible: penalized cost
-    solution_cost = total_dist if is_feasible else cost
+    solution_cost = total_dist if is_feasible else max(cost, total_dist + 10000.0)
     return solution_cost, routes, is_feasible, violations

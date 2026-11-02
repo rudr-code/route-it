@@ -21,7 +21,7 @@ def sample_problem() -> Problem:
         Vehicle(id="v1", capacity=100.0, shift_start=0.0, shift_end=80.0),
         Vehicle(id="v2", capacity=100.0, shift_start=0.0, shift_end=80.0),
     ]
-    problem = Problem(id="sample", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="sample", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
     return problem
 

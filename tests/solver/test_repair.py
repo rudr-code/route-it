@@ -22,7 +22,7 @@ def problem_with_tight_window() -> Problem:
         Customer(id="C3", lat=25.0, lon=0.0, demand=10.0, ready_time=0.0, due_time=80.0, service_time=5.0),
     ]
     vehicles = [Vehicle(id="V1", capacity=50.0)]
-    problem = Problem(id="repair_toy", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="repair_toy", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
     return problem
 

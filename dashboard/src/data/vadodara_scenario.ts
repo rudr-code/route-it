@@ -54,12 +54,13 @@ const RAW_STOPS: Array<{
 
 export const vadodaraScenario: ProblemCreateRequest = {
   id: 'vadodara_demo',
+  coordinate_system: 'geographic',
   depot: {
     id: 'depot',
     lat: DEPOT_LAT,
     lon: DEPOT_LON,
-    ready_time: 420,   // 07:00
-    due_time: 1080,    // 18:00
+    ready_time: 25200,   // 07:00 (seconds from midnight)
+    due_time: 64800,    // 18:00 (seconds from midnight)
     service_time: 0,
     name: 'Vadodara Central Depot',
   },
@@ -68,17 +69,19 @@ export const vadodaraScenario: ProblemCreateRequest = {
     lat: s.lat,
     lon: s.lon,
     demand: s.demand,
-    ready_time: s.ready_time,
-    due_time: s.due_time,
-    service_time: s.service_time,
+    ready_time: s.ready_time * 60,     // minutes -> seconds
+    due_time: s.due_time * 60,         // minutes -> seconds
+    service_time: s.service_time * 60, // minutes -> seconds
     // Backend Customer.priority is int ge=1. 1=standard, 2=high-priority.
-    // Sending boolean false caused 422: "Input should be >= 1".
     priority: s.priority ? 2 : 1,
   })),
   vehicles: [
-    { id: 'V_1', capacity: 80, shift_start: 420, shift_end: 1080 },
-    { id: 'V_2', capacity: 80, shift_start: 420, shift_end: 1080 },
-    { id: 'V_3', capacity: 80, shift_start: 420, shift_end: 1080 },
+    { id: 'V_1', capacity: 80, shift_start: 25200, shift_end: 64800 },
+    { id: 'V_2', capacity: 80, shift_start: 25200, shift_end: 64800 },
+    { id: 'V_3', capacity: 80, shift_start: 25200, shift_end: 64800 },
+    { id: 'V_4', capacity: 80, shift_start: 25200, shift_end: 64800 },
+    { id: 'V_5', capacity: 80, shift_start: 25200, shift_end: 64800 },
+    { id: 'V_6', capacity: 80, shift_start: 25200, shift_end: 64800 },
   ],
 };
 

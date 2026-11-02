@@ -15,11 +15,14 @@ from __future__ import annotations
 
 import copy
 from enum import Enum
+import logging
 import math
 import time
 from typing import Any, Sequence
 import numpy as np
 from pydantic import BaseModel, Field
+
+logger = logging.getLogger(__name__)
 
 from dynamic.events import AnyDynamicEvent
 from routing.cost_oracle import CostOracle, Location, to_location
@@ -207,8 +210,16 @@ def evaluate_solution_under_oracle(
             continue
 
         veh = next((v for v in problem.vehicles if v.id == r.vehicle_id), None)
-        c_dist = veh.cost_per_distance if veh is not None else 1.0
-        c_time = veh.cost_per_time if veh is not None else 1.0
+        if veh is None:
+            logger.warning(
+                "Route vehicle_id '%s' not found in problem.vehicles; falling back to unit costs (c_dist=1.0, c_time=1.0)",
+                r.vehicle_id,
+            )
+            c_dist = 1.0
+            c_time = 1.0
+        else:
+            c_dist = veh.cost_per_distance
+            c_time = veh.cost_per_time
 
         curr_time = max(current_time, problem.depot.ready_time)
         prev_loc = depot_loc
@@ -283,10 +294,18 @@ class DynamicReoptimizer:
         self.audit_log: list[ReoptimizationRecord] = []
 
     def _calc_route_cost(self, r: Route) -> float:
-        """Calculate route cost with safe fallback if vehicle ID is not explicitly in problem.vehicles."""
+        """Calculate route cost with explicit warning if vehicle ID is not in problem.vehicles."""
         veh = next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None) if self.problem.vehicles else None
-        c_dist = veh.cost_per_distance if veh is not None else 1.0
-        c_time = veh.cost_per_time if veh is not None else 1.0
+        if veh is None:
+            logger.warning(
+                "Route vehicle_id '%s' not found in problem.vehicles; falling back to unit costs (c_dist=1.0, c_time=1.0)",
+                r.vehicle_id,
+            )
+            c_dist = 1.0
+            c_time = 1.0
+        else:
+            c_dist = veh.cost_per_distance
+            c_time = veh.cost_per_time
         return r.distance * c_dist + r.duration * c_time
 
     def check_impact(

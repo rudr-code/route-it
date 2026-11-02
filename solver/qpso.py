@@ -37,6 +37,7 @@ class QPSOConfig(BaseModel):
     alpha_min: float = Field(0.5, gt=0.0, description="Final contraction-expansion coefficient")
     seed: int | None = Field(None, description="Random seed for reproducible execution")
     max_vehicles: int | None = Field(None, description="Optional cap on vehicle count")
+    allow_extra_vehicles: bool = Field(False, description="Allow generating more routes than available fleet")
 
     # Driver duty limit and time window constraints
     max_duty_duration: float | None = Field(None, description="Max allowed shift duration per route")
@@ -143,7 +144,7 @@ def solve_qpso(
             due_times[idx] = early_due
 
     capacity = problem.vehicles[0].capacity if problem.vehicles else 100.0
-    limit_v = config.max_vehicles if config.max_vehicles is not None else -1
+    limit_v = config.max_vehicles if config.max_vehicles is not None else (len(problem.vehicles) if (problem.vehicles and not config.allow_extra_vehicles) else -1)
 
     max_duty = -1.0
     if config.max_duty_duration is not None:
@@ -342,6 +343,7 @@ def solve_qpso(
         problem,
         best_tour,
         max_vehicles=config.max_vehicles,
+        allow_extra_vehicles=config.allow_extra_vehicles,
         cost_oracle=cost_oracle,
         cost_tensor=cost_tensor,
         max_duty_duration=config.max_duty_duration,
@@ -369,6 +371,7 @@ def solve_qpso(
                 problem,
                 improved_tour,
                 max_vehicles=config.max_vehicles,
+                allow_extra_vehicles=config.allow_extra_vehicles,
                 cost_oracle=cost_oracle,
                 cost_tensor=cost_tensor,
                 max_duty_duration=config.max_duty_duration,

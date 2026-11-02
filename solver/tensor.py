@@ -79,8 +79,12 @@ def precompute_cost_tensor(
                 num_buckets=1,
             )
 
-        # Build default unscaled Euclidean oracle for planar benchmarks
-        cost_oracle = EuclideanOracle(base_speed_mps=1.0, use_haversine=False, planar_scale=1.0)
+        # Build default oracle respecting problem.coordinate_system
+        cost_oracle = EuclideanOracle(
+            coordinate_system=problem.coordinate_system,
+            base_speed_mps=8.333 if problem.coordinate_system == "geographic" else 1.0,
+            planar_scale=1.0,
+        )
 
     # Fast path 2: CostOracle is stationary (no dynamic traffic adapter)
     if cost_oracle.traffic_adapter is None:

@@ -47,6 +47,7 @@ export interface ProblemCreateRequest {
   depot: Depot;
   customers: Customer[];
   vehicles?: Vehicle[];
+  coordinate_system?: 'geographic' | 'planar';
 }
 
 export interface ProblemResponse {
@@ -63,6 +64,7 @@ export interface SolveRequest {
   max_iters: number;
   cost_oracle_type: 'euclidean' | 'valhalla';
   valhalla_url: string;
+  coordinate_system?: 'geographic' | 'planar';
   seed: number;
   apply_tw_repair: boolean;
   enforce_priority_early_service: boolean;

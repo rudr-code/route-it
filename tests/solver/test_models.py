@@ -96,7 +96,7 @@ def test_problem_euclidean_matrices() -> None:
     c1 = Customer(id="1", lat=3.0, lon=4.0, demand=10.0, ready_time=0.0, due_time=100.0, service_time=0.0)
     v1 = Vehicle(id="V1", capacity=50.0)
 
-    prob = Problem(id="geom_prob", depot=depot, customers=[c1], vehicles=[v1])
+    prob = Problem(id="geom_prob", depot=depot, customers=[c1], vehicles=[v1], coordinate_system="planar")
     assert prob.distance_matrix is None
 
     prob.compute_euclidean_matrices(speed=2.0)

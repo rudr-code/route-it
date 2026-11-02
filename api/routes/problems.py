@@ -83,9 +83,10 @@ def _run_solve_worker(
                 traffic_adapter=traffic_adapter,
             )
         else:
+            coord_sys = req.coordinate_system or problem.coordinate_system
             oracle = EuclideanOracle(
-                base_speed_mps=1.0,
-                use_haversine=None,  # Auto-detect degrees vs planar
+                base_speed_mps=8.333 if coord_sys == "geographic" else 1.0,
+                coordinate_system=coord_sys,
                 traffic_adapter=traffic_adapter,
             )
         store.save_oracle(problem.id, oracle)
@@ -200,8 +201,9 @@ def create_problem(
         depot=req.depot,
         customers=req.customers,
         vehicles=vehicles,
+        coordinate_system=req.coordinate_system,
     )
-    problem.compute_euclidean_matrices(speed=1.0)
+    problem.compute_euclidean_matrices(speed=8.333 if req.coordinate_system == "geographic" else 1.0)
     store.save_problem(problem)
 
     bbox = _compute_bbox(req.depot, req.customers)

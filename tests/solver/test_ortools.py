@@ -19,7 +19,7 @@ def test_ortools_hand_crafted() -> None:
         Customer(id="4", lat=2.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=100.0, service_time=0.0),
     ]
     vehicles = [Vehicle(id=f"V_{i+1}", capacity=10.0) for i in range(4)]
-    problem = Problem(id="toy_ortools", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="toy_ortools", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices()
 
     cfg = ORToolsConfig(time_limit_sec=2.0)

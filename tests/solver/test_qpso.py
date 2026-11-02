@@ -139,7 +139,7 @@ def test_qpso_cvrptw_with_adaptive_penalty_and_priorities() -> None:
         Vehicle(id="V1", capacity=50.0, shift_start=0.0, shift_end=150.0),
         Vehicle(id="V2", capacity=50.0, shift_start=0.0, shift_end=150.0),
     ]
-    problem = Problem(id="toy_cvrptw", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="toy_cvrptw", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
 
     cfg = QPSOConfig(

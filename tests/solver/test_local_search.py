@@ -124,7 +124,7 @@ def test_local_search_never_worsens_cost_and_preserves_feasibility() -> None:
     # Test on 3 diverse random tours
     for _ in range(3):
         tour = rng.permutation(np.arange(1, problem.num_customers + 1))
-        cost, routes_obj, is_feas, _ = prins_split(problem, tour)
+        cost, routes_obj, is_feas, _ = prins_split(problem, tour, allow_extra_vehicles=True)
         assert is_feas is True
 
         route_indices = [

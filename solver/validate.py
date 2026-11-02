@@ -133,8 +133,20 @@ def validate_solution(
             f"Unknown customer ID(s) visited: {sorted(list(unknown_ids))[:10]}"
         )
 
-    # 2. Fleet Size Limit Check (only if max_vehicles is specified)
-    if max_vehicles is not None and len(solution.routes) > max_vehicles:
+    # 2. Fleet Size Limit & Registered Vehicle ID Check
+    if problem.vehicles:
+        known_veh_ids = {v.id for v in problem.vehicles}
+        for r_idx, route in enumerate(solution.routes):
+            if route.vehicle_id not in known_veh_ids:
+                violations.setdefault("fleet_size", []).append(
+                    f"Route {r_idx + 1} assigned vehicle '{route.vehicle_id}' which does not exist in problem.vehicles"
+                )
+        eff_max = max_vehicles if max_vehicles is not None else len(problem.vehicles)
+        if len(solution.routes) > eff_max:
+            violations.setdefault("fleet_size", []).append(
+                f"Solution uses {len(solution.routes)} routes, exceeding available fleet size of {eff_max}"
+            )
+    elif max_vehicles is not None and len(solution.routes) > max_vehicles:
         violations.setdefault("fleet_size", []).append(
             f"Solution uses {len(solution.routes)} routes, exceeding max limit of {max_vehicles}"
         )

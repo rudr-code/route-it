@@ -22,6 +22,9 @@ class ProblemCreateRequest(BaseModel):
     depot: Depot = Field(..., description="Depot location, hours, and service turnaround")
     customers: list[Customer] = Field(..., min_length=1, description="List of customer delivery stops")
     vehicles: list[Vehicle] | None = Field(None, description="Optional vehicle fleet specifications")
+    coordinate_system: Literal["geographic", "planar"] = Field(
+        "geographic", description="Coordinate reference system ('geographic' or 'planar')"
+    )
 
 
 class ProblemResponse(BaseModel):
@@ -47,6 +50,9 @@ class SolveRequest(BaseModel):
         "euclidean", description="Routing oracle engine"
     )
     valhalla_url: str = Field("http://localhost:8002", description="Valhalla service URL")
+    coordinate_system: Literal["geographic", "planar"] | None = Field(
+        None, description="Coordinate system override ('geographic' or 'planar')"
+    )
     seed: int = Field(42, description="Random seed for reproducibility")
     apply_tw_repair: bool = Field(True, description="Run time-window repair operator")
     enforce_priority_early_service: bool = Field(

@@ -22,7 +22,7 @@ def prewarm_numba_jit() -> None:
         Customer(id="c2", lat=2.0, lon=0.0, demand=1.0, ready_time=0.0, due_time=100.0, service_time=5.0),
     ]
     vehicles = [Vehicle(id="v1", capacity=10.0, shift_start=0.0, shift_end=1000.0)]
-    prob = Problem(id="warmup_prob", depot=depot, customers=customers, vehicles=vehicles)
+    prob = Problem(id="warmup_prob", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     prob.compute_euclidean_matrices()
     solve_qpso(prob, QPSOConfig(num_particles=5, max_iters=2, seed=42))
 

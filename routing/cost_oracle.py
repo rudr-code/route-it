@@ -18,7 +18,7 @@ import json
 import logging
 import math
 import sqlite3
-from typing import Any, Callable, Sequence
+from typing import Any, Callable, Literal, Sequence
 import urllib.error
 import urllib.request
 
@@ -760,43 +760,43 @@ class EuclideanOracle(CostOracle):
         traffic_adapter: TrafficAdapter | None = None,
         use_haversine: bool | None = None,
         planar_scale: float = 1.0,
+        coordinate_system: Literal["geographic", "planar"] | None = None,
     ) -> None:
         """Initialize Euclidean oracle.
 
         Args:
-            base_speed_mps: Base vehicle speed (default 8.333 m/s for haversine, 1.0 for planar).
+            base_speed_mps: Base vehicle speed (default 8.333 m/s for geographic, 1.0 for planar).
             cache: Optional cost cache.
             traffic_adapter: Optional traffic adapter.
-            use_haversine: If None, automatically detects lat/lon degree coordinates.
+            use_haversine: Deprecated alias for coordinate_system == 'geographic'.
             planar_scale: Scaling factor for planar Euclidean distance (default: 1.0).
+            coordinate_system: 'geographic' (Haversine distance in metres) or 'planar' (Euclidean hypot).
         """
         super().__init__(cache=cache, traffic_adapter=traffic_adapter)
-        self.use_haversine = use_haversine
+        if coordinate_system is not None:
+            self.coordinate_system: Literal["geographic", "planar"] = coordinate_system
+        elif use_haversine is not None:
+            self.coordinate_system = "geographic" if use_haversine else "planar"
+        else:
+            self.coordinate_system = "geographic"
+
         self.planar_scale = float(planar_scale)
         if base_speed_mps is None:
-            self.base_speed_mps = 8.333 if use_haversine is True else 1.0
+            self.base_speed_mps = 8.333 if self.coordinate_system == "geographic" else 1.0
         else:
             if base_speed_mps <= 0.0:
                 raise ValueError("base_speed_mps must be positive")
             self.base_speed_mps = float(base_speed_mps)
 
-    def _should_use_haversine(self, loc1: Location, loc2: Location) -> bool:
-        if self.use_haversine is not None:
-            return self.use_haversine
-        # Auto-detect degree bounds [-90, 90] and [-180, 180]
-        return (
-            -90.0 <= loc1.lat <= 90.0
-            and -90.0 <= loc2.lat <= 90.0
-            and -180.0 <= loc1.lon <= 180.0
-            and -180.0 <= loc2.lon <= 180.0
-            and not (loc1.lat == 0.0 and loc1.lon == 0.0 and loc2.lat > 90.0)
-        )
+    @property
+    def use_haversine(self) -> bool:
+        return self.coordinate_system == "geographic"
 
     def _query_base_cost(self, origin: Location, dest: Location) -> tuple[float, float]:
         if origin.id == dest.id:
             return 0.0, 0.0
 
-        if self._should_use_haversine(origin, dest):
+        if self.coordinate_system == "geographic":
             # Haversine distance in metres
             r = 6371000.0
             phi1, phi2 = math.radians(origin.lat), math.radians(dest.lat)
@@ -811,7 +811,7 @@ class EuclideanOracle(CostOracle):
             duration_sec = dist_m / speed
             return duration_sec, dist_m
         else:
-            # Planar Euclidean distance unscaled
+            # Planar Euclidean distance
             dist = math.hypot(origin.lat - dest.lat, origin.lon - dest.lon) * self.planar_scale
             duration_sec = dist / self.base_speed_mps
             return duration_sec, dist

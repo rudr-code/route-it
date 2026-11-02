@@ -28,7 +28,7 @@ def test_prins_split_hand_crafted() -> None:
         Customer(id="4", lat=2.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=100.0, service_time=0.0),
     ]
     vehicles = [Vehicle(id=f"V_{i+1}", capacity=10.0) for i in range(4)]
-    problem = Problem(id="toy_split", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="toy_split", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices()
 
     tour = [1, 2, 3, 4]
@@ -83,7 +83,7 @@ def test_prins_split_max_vehicles_constraint() -> None:
     ]
     # Capacity is 10.0, so both customers cannot fit in 1 vehicle (6 + 6 = 12 > 10)
     vehicles = [Vehicle(id="V_1", capacity=10.0)]
-    problem = Problem(id="toy_cap", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="toy_cap", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     tour = [1, 2]
     cost, routes, is_feasible, violations = prins_split(problem, tour, max_vehicles=1)
 
@@ -104,7 +104,7 @@ def test_prins_split_time_windows_forces_split() -> None:
         Customer(id="C2", lat=0.0, lon=10.0, demand=5.0, ready_time=0.0, due_time=12.0, service_time=5.0),
     ]
     vehicles = [Vehicle(id="V1", capacity=20.0), Vehicle(id="V2", capacity=20.0)]
-    problem = Problem(id="tw_split", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="tw_split", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
 
     from solver.models import Solution
@@ -133,7 +133,7 @@ def test_prins_split_driver_duty_limit() -> None:
     ]
     # Route depot -> C1 -> depot takes 20 + 10 + 20 = 50s
     vehicles = [Vehicle(id="V1", capacity=20.0)]
-    problem = Problem(id="duty_toy", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="duty_toy", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
 
     # Max duty duration 40s < 50s

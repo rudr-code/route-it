@@ -96,7 +96,7 @@ def test_planar_coordinates_with_explicit_planar_oracle() -> None:
         Vehicle(id="v1", capacity=15.0, shift_start=0.0, shift_end=1000.0),
         Vehicle(id="v2", capacity=15.0, shift_start=0.0, shift_end=1000.0),
     ]
-    problem = Problem(id="planar_toy", depot=depot, customers=customers, vehicles=vehicles)
+    problem = Problem(id="planar_toy", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
     problem.compute_euclidean_matrices(speed=1.0)
 
     oracle = EuclideanOracle(base_speed_mps=1.0, use_haversine=False)

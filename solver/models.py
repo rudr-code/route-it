@@ -7,7 +7,7 @@ and Solution components (Route, Solution).
 from __future__ import annotations
 
 import math
-from typing import Any
+from typing import Any, Literal
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 
@@ -17,9 +17,9 @@ class Depot(BaseModel):
     id: str = "depot"
     lat: float = Field(..., description="Latitude or Y-coordinate")
     lon: float = Field(..., description="Longitude or X-coordinate")
-    ready_time: float = Field(0.0, ge=0.0, description="Depot opening time")
-    due_time: float = Field(float("inf"), description="Depot closing time")
-    service_time: float = Field(0.0, ge=0.0, description="Depot handling / turnaround time")
+    ready_time: float = Field(0.0, ge=0.0, description="Depot opening time in seconds")
+    due_time: float = Field(float("inf"), description="Depot closing time in seconds")
+    service_time: float = Field(0.0, ge=0.0, description="Depot handling / turnaround time in seconds")
 
     @field_validator("due_time", mode="before")
     @classmethod
@@ -40,9 +40,9 @@ class Customer(BaseModel):
     lat: float = Field(..., description="Latitude or Y-coordinate")
     lon: float = Field(..., description="Longitude or X-coordinate")
     demand: float = Field(..., ge=0.0, description="Units of capacity required")
-    ready_time: float = Field(..., ge=0.0, description="Earliest service start time (e_i)")
-    due_time: float = Field(..., description="Latest service start time (l_i)")
-    service_time: float = Field(..., ge=0.0, description="Duration to service stop (s_i)")
+    ready_time: float = Field(..., ge=0.0, description="Earliest service start time in seconds (e_i)")
+    due_time: float = Field(..., description="Latest service start time in seconds (l_i)")
+    service_time: float = Field(..., ge=0.0, description="Duration to service stop in seconds (s_i)")
     priority: int = Field(1, ge=1, description="Customer priority score (higher = higher priority)")
 
     @field_validator("due_time", mode="before")
@@ -68,11 +68,11 @@ class Vehicle(BaseModel):
 
     id: str = Field(..., description="Unique vehicle identifier")
     capacity: float = Field(..., gt=0.0, description="Max load capacity (Q)")
-    shift_start: float = Field(0.0, ge=0.0, description="Shift start time")
-    shift_end: float = Field(float("inf"), description="Shift conclusion time")
+    shift_start: float = Field(0.0, ge=0.0, description="Shift start time in seconds")
+    shift_end: float = Field(float("inf"), description="Shift conclusion time in seconds")
     fixed_cost: float = Field(0.0, ge=0.0, description="Fixed mobilization cost")
-    cost_per_time: float = Field(1.0, ge=0.0, description="Operational cost per unit time")
-    cost_per_distance: float = Field(1.0, ge=0.0, description="Operational cost per unit distance")
+    cost_per_time: float = Field(1.0, ge=0.0, description="Operational cost per unit time (seconds)")
+    cost_per_distance: float = Field(1.0, ge=0.0, description="Operational cost per unit distance (metres)")
 
     @field_validator("shift_end", mode="before")
     @classmethod
@@ -99,6 +99,10 @@ class Problem(BaseModel):
     depot: Depot = Field(..., description="Central distribution depot")
     customers: list[Customer] = Field(..., description="List of customers to service")
     vehicles: list[Vehicle] = Field(..., description="Available vehicle fleet")
+    coordinate_system: Literal["geographic", "planar"] = Field(
+        "geographic",
+        description="Coordinate reference system: 'geographic' (WGS84 lat/lon in degrees) or 'planar' (Cartesian x/y)",
+    )
     travel_time_matrix: list[list[float]] | None = Field(
         None,
         description="NxN travel time matrix index 0=depot, 1..N=customers",
@@ -171,7 +175,16 @@ class Problem(BaseModel):
             lat_i, lon_i = nodes[i]
             for j in range(i + 1, n):
                 lat_j, lon_j = nodes[j]
-                d = math.hypot(lat_i - lat_j, lon_i - lon_j)
+                if self.coordinate_system == "geographic":
+                    # Haversine distance in metres
+                    r = 6371000.0
+                    phi1, phi2 = math.radians(lat_i), math.radians(lat_j)
+                    dphi = math.radians(lat_j - lat_i)
+                    dlam = math.radians(lon_j - lon_i)
+                    a = math.sin(dphi / 2.0) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2.0) ** 2
+                    d = 2.0 * r * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+                else:
+                    d = math.hypot(lat_i - lat_j, lon_i - lon_j)
                 dist_mat[i][j] = dist_mat[j][i] = d
                 t = d / speed
                 time_mat[i][j] = time_mat[j][i] = t
@@ -187,11 +200,11 @@ class Route(BaseModel):
     stop_ids: list[str] = Field(..., description="Sequence of customer stop IDs visited")
     arrival_times: list[float] = Field(
         ...,
-        description="Arrival times at each customer stop in stop_ids",
+        description="Arrival times in seconds at each customer stop in stop_ids",
     )
     load: float = Field(..., ge=0.0, description="Total demand serviced on this route")
-    distance: float = Field(0.0, ge=0.0, description="Total distance traveled")
-    duration: float = Field(0.0, ge=0.0, description="Total route duration including service")
+    distance: float = Field(0.0, ge=0.0, description="Total distance traveled in metres")
+    duration: float = Field(0.0, ge=0.0, description="Total route duration including service in seconds")
 
 
 class Solution(BaseModel):
