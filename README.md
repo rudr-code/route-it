@@ -79,9 +79,13 @@ cd "SIH 2026 Antigravity"
 # Using Makefile
 make install
 
-# Or manually using pip
+# Or manually using pip (includes uvicorn[standard] and websockets for real-time streaming)
 pip install -e ".[dev]"
 ```
+
+> [!NOTE]
+> The real-time telemetry streaming endpoint (`/ws/problems/{id}`) requires `websockets` (provided automatically via `uvicorn[standard]` and `websockets` in `pyproject.toml`).
+
 
 ### 3. Run Tests
 Verify the installation using `pytest`:

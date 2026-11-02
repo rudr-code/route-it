@@ -21,6 +21,10 @@ uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 ```
 The server will start on port `8000` with hot-reloading enabled.
 
+> [!IMPORTANT]
+> The real-time telemetry WebSocket endpoint (`/ws/problems/{id}`) requires `websockets` (or `uvicorn[standard]`), which is included in `pyproject.toml` dependencies.
+
+
 ---
 
 ## 3. API Endpoints Overview
