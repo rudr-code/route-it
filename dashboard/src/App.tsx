@@ -15,10 +15,9 @@ export default function App() {
   const [toggleMode, setToggleMode] = useState<'current' | 'previous'>('current');
   const [previousSolution, setPreviousSolution] = useState<SolutionResponse | null>(null);
 
-  const handleNewSolution = useCallback((_sol: SolutionResponse) => {
-    // The event endpoint returns the full updated solution directly.
-    // Trigger a fresh GET to sync solver state (it owns the solution state).
-    solverActions.fetchSolution();
+  const handleNewSolution = useCallback((sol: SolutionResponse) => {
+    // Directly update solver state with the newly re-optimized solution
+    solverActions.setSolution(sol);
   }, [solverActions]);
 
   const handleMapClick = useCallback((lat: number, lon: number) => {
@@ -110,6 +109,7 @@ export default function App() {
         }
         customers={vadodaraScenario.customers}
         oracleType={solverState.oracleType}
+        valhallaConnected={solverState.valhallaConnected}
         showToggle={showToggle}
         toggleMode={toggleMode}
         onToggle={() =>

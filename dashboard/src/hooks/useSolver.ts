@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { api } from '../api/client';
 import { useWebSocket } from '../api/ws';
 import type {
@@ -23,12 +23,14 @@ export interface SolverState {
   isLoading: boolean;
   error: string | null;
   oracleType: 'euclidean' | 'valhalla';
+  valhallaConnected: boolean;
 }
 
 export interface SolverActions {
   loadScenario: (scenario: ProblemCreateRequest) => Promise<void>;
   solve: (params: Partial<SolveRequest>) => Promise<void>;
   fetchSolution: () => Promise<void>;
+  setSolution: (solution: SolutionResponse) => void;
   reset: () => void;
 }
 
@@ -41,6 +43,7 @@ const DEFAULT_STATE: SolverState = {
   isLoading: false,
   error: null,
   oracleType: 'euclidean',
+  valhallaConnected: false,
 };
 
 export function useSolver(): [SolverState, SolverActions] {
@@ -120,7 +123,36 @@ export function useSolver(): [SolverState, SolverActions] {
     }
   }, [state.problemId]);
 
+  const setSolution = useCallback((solution: SolutionResponse) => {
+    setState((s) => ({ ...s, solution, isLoading: false }));
+  }, []);
+
   const reset = useCallback(() => setState(DEFAULT_STATE), []);
+
+  // Poll backend health to detect if Valhalla container is connected or offline
+  useEffect(() => {
+    let active = true;
+    const pollHealth = () => {
+      api.health()
+        .then((h) => {
+          if (active) {
+            setState((s) => ({ ...s, valhallaConnected: h.valhalla_connected }));
+          }
+        })
+        .catch(() => {
+          if (active) {
+            setState((s) => ({ ...s, valhallaConnected: false }));
+          }
+        });
+    };
+
+    pollHealth();
+    const interval = setInterval(pollHealth, 10000);
+    return () => {
+      active = false;
+      clearInterval(interval);
+    };
+  }, []);
 
   // WebSocket message handler
   const handleWsMessage = useCallback((msg: WsMessage) => {
@@ -140,13 +172,16 @@ export function useSolver(): [SolverState, SolverActions] {
 
       case 'solve_completed':
         setState((s) => ({ ...s, isLoading: false }));
-        // Fetch solution after completion
-        if (state.problemId) {
-          api.getSolution(state.problemId)
-            .then((sol) =>
-              setState((ss) => ({ ...ss, solution: sol, isLoading: false })),
-            )
-            .catch(() => {});
+        // Fetch solution after completion using problem_id from message or state
+        {
+          const pid = msg.problem_id || state.problemId;
+          if (pid) {
+            api.getSolution(pid)
+              .then((sol) =>
+                setState((ss) => ({ ...ss, solution: sol, isLoading: false })),
+              )
+              .catch(() => {});
+          }
         }
         break;
 
@@ -168,6 +203,6 @@ export function useSolver(): [SolverState, SolverActions] {
 
   return [
     state,
-    { loadScenario, solve, fetchSolution, reset },
+    { loadScenario, solve, fetchSolution, setSolution, reset },
   ];
 }

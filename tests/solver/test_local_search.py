@@ -150,11 +150,11 @@ def test_local_search_never_worsens_cost_and_preserves_feasibility() -> None:
             assert load <= capacity + 1e-7
 
 
-def test_qpso_plus_ls_benchmark_comparison() -> None:
+def test_qpso_plus_ls_benchmark_comparison(tmp_path: Path) -> None:
     """Benchmark test comparing Pure QPSO vs Memetic QPSO+LS on A-n32-k5.
 
-    Strict integrity rule: results are genuinely measured and saved to
-    benchmarks/results/a_n32_k5_ls_comparison.json.
+    Results are genuinely measured and saved to tmp_path during test runs to ensure
+    real verified records in benchmarks/results/ are never overwritten by tests.
     """
     problem = load_cvrplib(Path("benchmarks/instances/A-n32-k5.vrp"))
     fixed_seed = 42
@@ -188,10 +188,8 @@ def test_qpso_plus_ls_benchmark_comparison() -> None:
         f"Memetic QPSO cost ({sol_memetic.total_cost:.2f}) was worse than Pure QPSO ({sol_pure.total_cost:.2f})"
     )
 
-    # Save real benchmark results
-    results_dir = Path("benchmarks/results")
-    results_dir.mkdir(parents=True, exist_ok=True)
-    out_file = results_dir / "a_n32_k5_ls_comparison.json"
+    # Save benchmark results to tmp_path so real benchmarks/results files are never overwritten
+    out_file = tmp_path / "a_n32_k5_ls_comparison.json"
 
     data = {
         "instance": "A-n32-k5",

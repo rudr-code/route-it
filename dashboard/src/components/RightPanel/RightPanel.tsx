@@ -1,15 +1,12 @@
 import { ROUTE_COLORS } from '../Map/RouteMap';
 import type { Route } from '../../api/types';
 
-function minsToTime(mins: number): string {
-  const h = Math.floor(mins / 60).toString().padStart(2, '0');
-  const m = (mins % 60).toString().padStart(2, '0');
+function formatEta(val: number): string {
+  // If val > 1440, it's seconds from midnight; convert to minutes
+  const totalMins = val > 1440 ? Math.floor(val / 60) : Math.floor(val);
+  const h = (Math.floor(totalMins / 60) % 24).toString().padStart(2, '0');
+  const m = (totalMins % 60).toString().padStart(2, '0');
   return `${h}:${m}`;
-}
-
-// Backend arrival_times are in minutes (same unit as ready_time / due_time)
-function arrivalToTime(arrival: number): string {
-  return minsToTime(arrival);
 }
 
 type CustomerMeta = {
@@ -19,9 +16,11 @@ type CustomerMeta = {
   priority: number; // int ge=1; 2+ = high priority
 };
 
-function twStatus(arrivalMins: number, c: CustomerMeta | undefined): 'ok' | 'late' | 'unknown' {
+function twStatus(arrival: number, c: CustomerMeta | undefined): 'ok' | 'late' | 'unknown' {
   if (!c) return 'unknown';
-  if (arrivalMins > c.due_time) return 'late';
+  const arrMins = arrival > 1440 ? arrival / 60 : arrival;
+  const dueMins = c.due_time > 1440 ? c.due_time / 60 : c.due_time;
+  if (arrMins > dueMins) return 'late';
   return 'ok';
 }
 
@@ -34,6 +33,16 @@ interface RouteCardProps {
 function RouteCard({ route, index, customerMap }: RouteCardProps) {
   const color = ROUTE_COLORS[index % ROUTE_COLORS.length];
   const stopCount = route.stop_ids.length;
+
+  // Handle distance in metres vs km
+  const distKm = route.distance > 500 ? (route.distance / 1000).toFixed(1) : route.distance.toFixed(1);
+
+  // Handle duration in seconds vs minutes
+  const durHours = route.duration > 300 ? route.duration / 3600 : route.duration / 60;
+  const durText =
+    durHours >= 1
+      ? `${durHours.toFixed(1)}h`
+      : `${Math.round(route.duration > 300 ? route.duration / 60 : route.duration)}m`;
 
   return (
     <div className="route-card" style={{ borderLeft: `3px solid ${color}` }}>
@@ -50,8 +59,8 @@ function RouteCard({ route, index, customerMap }: RouteCardProps) {
       </div>
 
       <div className="route-stats">
-        <span>⏱ {(route.duration / 60).toFixed(1)}h</span>
-        <span>📍 {route.distance.toFixed(1)} km</span>
+        <span>⏱ {durText}</span>
+        <span>📍 {distKm} km</span>
       </div>
 
       <div className="stop-list">
@@ -65,7 +74,7 @@ function RouteCard({ route, index, customerMap }: RouteCardProps) {
               <span className="stop-id">
                 {isPriority ? '⚡' : '•'} {c?.name ?? cid}
               </span>
-              <span className="stop-eta">ETA {arrivalToTime(arrival)}</span>
+              <span className="stop-eta">ETA {formatEta(arrival)}</span>
               {status === 'late' && <span className="tw-badge late">LATE</span>}
             </div>
           );
@@ -82,6 +91,7 @@ interface RightPanelProps {
   routes: Route[];
   customers: Array<{ id: string; name?: string; ready_time: number; due_time: number; priority: number }>;
   oracleType: 'euclidean' | 'valhalla';
+  valhallaConnected?: boolean;
   showToggle: boolean;
   toggleMode: 'current' | 'previous';
   onToggle: () => void;
@@ -91,6 +101,7 @@ export function RightPanel({
   routes,
   customers,
   oracleType,
+  valhallaConnected = false,
   showToggle,
   toggleMode,
   onToggle,
@@ -99,13 +110,20 @@ export function RightPanel({
     customers.map((c) => [c.id, { name: c.name, ready_time: c.ready_time, due_time: c.due_time, priority: c.priority }]),
   );
 
+  const isLiveValhalla = oracleType === 'valhalla' && valhallaConnected === true;
+  const trafficLabel = isLiveValhalla
+    ? '🟢 Traffic: live [Valhalla]'
+    : oracleType === 'valhalla' && !valhallaConnected
+    ? '🟡 Traffic: simulated [Valhalla offline]'
+    : '🟡 Traffic: simulated';
+
   return (
     <div className="right-panel glass-panel">
       <div className="panel-header">
         <span className="panel-title">Fleet Routes</span>
         <div className="panel-header-right">
-          <div className={`traffic-badge ${oracleType === 'valhalla' ? 'live' : 'simulated'}`}>
-            {oracleType === 'valhalla' ? '🟢 Traffic: live [Valhalla]' : '🟡 Traffic: simulated'}
+          <div className={`traffic-badge ${isLiveValhalla ? 'live' : 'simulated'}`}>
+            {trafficLabel}
           </div>
         </div>
       </div>

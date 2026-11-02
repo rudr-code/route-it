@@ -282,6 +282,13 @@ class DynamicReoptimizer:
         self.config = config or ReoptimizerConfig()
         self.audit_log: list[ReoptimizationRecord] = []
 
+    def _calc_route_cost(self, r: Route) -> float:
+        """Calculate route cost with safe fallback if vehicle ID is not explicitly in problem.vehicles."""
+        veh = next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None) if self.problem.vehicles else None
+        c_dist = veh.cost_per_distance if veh is not None else 1.0
+        c_time = veh.cost_per_time if veh is not None else 1.0
+        return r.distance * c_dist + r.duration * c_time
+
     def check_impact(
         self,
         current_solution: Solution,
@@ -300,11 +307,7 @@ class DynamicReoptimizer:
         cost_under_new, is_blocked, has_tw_viol = evaluate_solution_under_oracle(
             current_solution, self.problem, self.cost_oracle, current_time
         )
-        cost_before = sum(
-            r.distance * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_distance if self.problem.vehicles else 1.0)
-            + r.duration * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_time if self.problem.vehicles else 1.0)
-            for r in current_solution.routes
-        )
+        cost_before = sum(self._calc_route_cost(r) for r in current_solution.routes)
         if cost_before <= 0.0:
             cost_before = current_solution.total_cost
         delta_f = cost_under_new - cost_before
@@ -582,11 +585,7 @@ class DynamicReoptimizer:
                 )
             )
 
-        tot_cost = sum(
-            r.distance * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_distance if self.problem.vehicles else 1.0)
-            + r.duration * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_time if self.problem.vehicles else 1.0)
-            for r in rebuilt_routes
-        )
+        tot_cost = sum(self._calc_route_cost(r) for r in rebuilt_routes)
         return Solution(
             routes=rebuilt_routes,
             total_cost=round(tot_cost, 2),
@@ -809,11 +808,7 @@ class DynamicReoptimizer:
                 )
             )
 
-        total_cost = sum(
-            r.distance * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_distance if self.problem.vehicles else 1.0)
-            + r.duration * (next((v for v in self.problem.vehicles if v.id == r.vehicle_id), None).cost_per_time if self.problem.vehicles else 1.0)
-            for r in routes
-        )
+        total_cost = sum(self._calc_route_cost(r) for r in routes)
         return Solution(
             routes=routes,
             total_cost=round(total_cost, 2),

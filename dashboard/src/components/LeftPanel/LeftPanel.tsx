@@ -105,10 +105,17 @@ export function LeftPanel({ solverState, convergence, onLoadScenario, onSolve }:
               className="setting-input setting-select"
               disabled={isRunning}
             >
-              <option value="euclidean">Euclidean</option>
-              <option value="valhalla">Valhalla</option>
+              <option value="euclidean">Euclidean (Simulated)</option>
+              <option value="valhalla">
+                Valhalla {solverState.valhallaConnected ? '(Live)' : '(Offline - Simulated)'}
+              </option>
             </select>
           </label>
+          {oracle === 'valhalla' && !solverState.valhallaConnected && (
+            <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '4px', gridColumn: 'span 2' }}>
+              ⚠ Valhalla offline (port 8002); traffic is simulated
+            </div>
+          )}
         </div>
       </div>
 
