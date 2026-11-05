@@ -16,6 +16,6 @@
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src"],
+  "include": ["src", "../benchmarks/instances/vadodara_30.json"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }

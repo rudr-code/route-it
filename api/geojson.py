@@ -70,19 +70,10 @@ def solution_to_geojson(
         # Attempt high-fidelity road polyline from Valhalla if available
         if isinstance(cost_oracle, ValhallaOracle):
             try:
-                # Query route segments
-                valhalla_coords: list[list[float]] = []
-                for i in range(len(waypoints) - 1):
-                    orig_pt = waypoints[i]
-                    dest_pt = waypoints[i + 1]
-                    res = cost_oracle.route(orig_pt, dest_pt)
-                    if res.shape:
-                        for lat, lon in res.shape:
-                            valhalla_coords.append([round(lon, 6), round(lat, 6)])
-                    else:
-                        valhalla_coords.append([round(orig_pt[1], 6), round(orig_pt[0], 6)])
-                        valhalla_coords.append([round(dest_pt[1], 6), round(dest_pt[0], 6)])
-                coords = valhalla_coords
+                stops_seq = [problem.depot] + [cust_map[sid] for sid in route.stop_ids if sid in cust_map] + [problem.depot]
+                res = cost_oracle.route(stops_seq)
+                valhalla_coords = res.get("coordinates", [])
+                coords = valhalla_coords if valhalla_coords else [[round(lon, 6), round(lat, 6)] for lat, lon in waypoints]
             except Exception:
                 coords = [[round(lon, 6), round(lat, 6)] for lat, lon in waypoints]
         else:
@@ -127,7 +118,7 @@ def solution_to_geojson(
             "properties": {
                 "feature_type": "depot",
                 "id": problem.depot.id,
-                "name": "Central Depot",
+                "name": problem.depot.name or "Central Depot",
                 "ready_time": problem.depot.ready_time,
                 "due_time": problem.depot.due_time,
                 "service_time": problem.depot.service_time,
@@ -152,6 +143,7 @@ def solution_to_geojson(
                 "properties": {
                     "feature_type": "customer",
                     "id": cust.id,
+                    "name": cust.name or f"Customer {cust.id}",
                     "demand": cust.demand,
                     "ready_time": cust.ready_time,
                     "due_time": cust.due_time,

@@ -34,7 +34,7 @@ def test_build_vadodara_problem_structure() -> None:
     assert 73.10 <= problem.depot.lon <= 73.30
 
     assert len(problem.customers) == 30
-    assert len(problem.vehicles) == 8
+    assert len(problem.vehicles) == 6
 
     # Verify unique IDs
     cust_ids = [c.id for c in problem.customers]
@@ -182,3 +182,25 @@ def test_demo_main_execution_mocked_valhalla_live_mode(tmp_path: Path) -> None:
         data = json.load(f)
 
     assert "Valhalla (Live @" in data["metadata"]["routing_engine"]
+
+
+def test_dashboard_scenario_matches_canonical_vadodara_json() -> None:
+    """Verify that the dashboard scenario data and benchmarks/instances/vadodara_30.json share identical customers, coordinates, and demands."""
+    json_path = Path("benchmarks/instances/vadodara_30.json")
+    with json_path.open("r", encoding="utf-8") as f:
+        canonical_data = json.load(f)
+
+    # 1. Verify canonical structure
+    canonical_custs = canonical_data["customers"]
+    assert len(canonical_custs) == 30
+    assert sum(c["demand"] for c in canonical_custs) == 235.0
+    assert len(canonical_data["vehicles"]) == 6
+    assert all(v["capacity"] == 80.0 for v in canonical_data["vehicles"])
+
+    # 2. Verify dashboard vadodara_scenario.ts imports this exact canonical JSON
+    ts_path = Path("dashboard/src/data/vadodara_scenario.ts")
+    ts_content = ts_path.read_text(encoding="utf-8")
+    assert "vadodara_30.json" in ts_content
+    assert "rawVadodaraJson.customers.map" in ts_content
+    assert "rawVadodaraJson.vehicles.map" in ts_content
+

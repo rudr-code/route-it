@@ -20,6 +20,7 @@ class Depot(BaseModel):
     ready_time: float = Field(0.0, ge=0.0, description="Depot opening time in seconds")
     due_time: float = Field(float("inf"), description="Depot closing time in seconds")
     service_time: float = Field(0.0, ge=0.0, description="Depot handling / turnaround time in seconds")
+    name: str | None = Field(None, description="Human-readable location label")
 
     @field_validator("due_time", mode="before")
     @classmethod
@@ -44,6 +45,7 @@ class Customer(BaseModel):
     due_time: float = Field(..., description="Latest service start time in seconds (l_i)")
     service_time: float = Field(..., ge=0.0, description="Duration to service stop in seconds (s_i)")
     priority: int = Field(1, ge=1, description="Customer priority score (higher = higher priority)")
+    name: str | None = Field(None, description="Human-readable customer label")
 
     @field_validator("due_time", mode="before")
     @classmethod

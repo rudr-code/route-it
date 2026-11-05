@@ -33,7 +33,7 @@ def sample_problem() -> Problem:
         for i in range(1, 5)
     ]
     vehicles = [Vehicle(id="v1", capacity=100.0), Vehicle(id="v2", capacity=100.0)]
-    return Problem(id="toy_test_prob", depot=depot, customers=customers, vehicles=vehicles)
+    return Problem(id="toy_test_prob", depot=depot, customers=customers, vehicles=vehicles, coordinate_system="planar")
 
 
 def test_edge_congestion_validation_and_incidents():

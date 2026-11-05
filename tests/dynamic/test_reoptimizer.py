@@ -25,7 +25,7 @@ def test_fleet_problem() -> Problem:
     c3 = Customer(id="c3", lat=0.0, lon=10.0, demand=5.0, ready_time=10.0, due_time=100.0, service_time=10.0)
     c4 = Customer(id="c4", lat=0.0, lon=20.0, demand=5.0, ready_time=20.0, due_time=100.0, service_time=10.0)
     vehicles = [Vehicle(id="v1", capacity=30.0), Vehicle(id="v2", capacity=30.0)]
-    return Problem(id="reopt_prob", depot=depot, customers=[c1, c2, c3, c4], vehicles=vehicles)
+    return Problem(id="reopt_prob", depot=depot, customers=[c1, c2, c3, c4], vehicles=vehicles, coordinate_system="planar")
 
 
 @pytest.fixture
@@ -275,3 +275,24 @@ def test_full_restart_baseline_comparison(test_fleet_problem: Problem, initial_f
     # Tiered should have logged real wall-clock execution time > 0
     assert tiered_rec.wall_clock_time_ms > 0.0
     assert restart_ms > 0.0
+
+
+def test_reoptimizer_route_cost_warns_on_unregistered_vehicle(
+    test_fleet_problem: Problem, caplog: pytest.LogCaptureFixture
+) -> None:
+    """Verify that reoptimizer logs an explicit warning when a route vehicle ID is missing from problem.vehicles."""
+    import logging
+    reopt = DynamicReoptimizer(test_fleet_problem)
+    unregistered_route = Route(
+        vehicle_id="unknown_veh_99",
+        stop_ids=["c1"],
+        arrival_times=[10.0],
+        load=5.0,
+        distance=20.0,
+        duration=25.0,
+    )
+    with caplog.at_level(logging.WARNING):
+        cost = reopt._calc_route_cost(unregistered_route)
+    assert "unknown_veh_99' not found in problem.vehicles" in caplog.text
+    assert cost == 20.0 * 1.0 + 25.0 * 1.0
+

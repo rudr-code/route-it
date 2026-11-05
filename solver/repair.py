@@ -35,6 +35,7 @@ def _simulate_route_timeline(
     arrival_times: list[float] = []
 
     matrix = problem.travel_time_matrix
+    dist_matrix = problem.distance_matrix
 
     for cid in stop_ids:
         cust = customer_map[cid]
@@ -47,7 +48,7 @@ def _simulate_route_timeline(
             d = float(cost_oracle.distance(prev_loc, c_loc))
         elif matrix is not None:
             tt = float(matrix[prev_idx][c_idx])
-            d = float(matrix[prev_idx][c_idx])
+            d = float(dist_matrix[prev_idx][c_idx]) if dist_matrix is not None else tt
         else:
             d = math.hypot(prev_pt[0] - c_pt[0], prev_pt[1] - c_pt[1])
             tt = d
@@ -74,7 +75,7 @@ def _simulate_route_timeline(
         d = float(cost_oracle.distance(prev_loc, loc_depot))
     elif matrix is not None:
         tt = float(matrix[prev_idx][0])
-        d = float(matrix[prev_idx][0])
+        d = float(dist_matrix[prev_idx][0]) if dist_matrix is not None else tt
     else:
         d = math.hypot(prev_pt[0] - depot_pt[0], prev_pt[1] - depot_pt[1])
         tt = d

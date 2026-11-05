@@ -65,7 +65,7 @@ def inject_event(
         traffic_adapter = SimulatedEventAdapter(
             base_adapter=TimeOfDayProfileAdapter({h: 1.0 for h in range(24)})
         )
-        oracle = EuclideanOracle(base_speed_mps=1.0, traffic_adapter=traffic_adapter)
+        oracle = EuclideanOracle(base_speed_mps=8.333 if problem.coordinate_system == "geographic" else 1.0, coordinate_system=problem.coordinate_system, traffic_adapter=traffic_adapter)
         store.save_oracle(problem_id, oracle)
 
     # 3. Apply event incidents to traffic adapter

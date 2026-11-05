@@ -278,7 +278,7 @@ class DynamicReoptimizer:
     def __init__(
         self,
         problem: Problem,
-        cost_oracle: CostOracle,
+        cost_oracle: CostOracle | None = None,
         config: ReoptimizerConfig | None = None,
     ) -> None:
         """Initialize re-optimizer.
@@ -288,8 +288,13 @@ class DynamicReoptimizer:
             cost_oracle: CostOracle representing active road and traffic network.
             config: Configuration parameters.
         """
+        from routing.cost_oracle import EuclideanOracle
+
         self.problem = problem
-        self.cost_oracle = cost_oracle
+        self.cost_oracle = cost_oracle or EuclideanOracle(
+            coordinate_system=problem.coordinate_system,
+            base_speed_mps=8.333 if problem.coordinate_system == "geographic" else 1.0,
+        )
         self.config = config or ReoptimizerConfig()
         self.audit_log: list[ReoptimizationRecord] = []
 
@@ -724,6 +729,7 @@ class DynamicReoptimizer:
             depot=self.problem.depot,
             customers=uncommitted_customers,
             vehicles=self.problem.vehicles,
+            coordinate_system=self.problem.coordinate_system,
         )
 
         n_unc = len(uncommitted_customers)
@@ -886,6 +892,7 @@ def full_restart_baseline(
         depot=problem.depot,
         customers=uncommitted_customers,
         vehicles=problem.vehicles,
+        coordinate_system=problem.coordinate_system,
     )
 
     cold_config = QPSOConfig(

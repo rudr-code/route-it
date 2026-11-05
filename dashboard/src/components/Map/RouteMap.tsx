@@ -20,6 +20,7 @@ interface RouteMapProps {
   geojson: GeoJsonFeatureCollection | null;
   customers: Array<{
     id: string;
+    name?: string;
     lat: number;
     lon: number;
     demand: number;
@@ -153,9 +154,9 @@ export function RouteMap({
 
       const popup = new maplibregl.Popup({ offset: 20, className: 'route-popup' }).setHTML(`
         <div class="popup-content">
-          <strong>${c.id}</strong>
+          <strong>${c.name ? `${c.id} — ${c.name}` : c.id}</strong>
           <div>Demand: ${c.demand} | ${isPriority ? '⚡ Priority' : 'Standard'}</div>
-          <div>Window: ${minsToTime(c.ready_time)}–${minsToTime(c.due_time)}</div>
+          <div>Window: ${secsToTime(c.ready_time)}–${secsToTime(c.due_time)}</div>
         </div>
       `);
 
@@ -177,9 +178,10 @@ export function RouteMap({
     const map = mapRef.current;
     if (!map || !map.isStyleLoaded()) return;
 
-    // Remove existing route layers/sources
+    // Remove existing route layers/sources (glow layer must be removed before its source)
     for (let i = 0; i < 8; i++) {
       const rid = `${prefix}-route-${i}`;
+      if (map.getLayer(`${rid}-glow`)) map.removeLayer(`${rid}-glow`);
       if (map.getLayer(rid)) map.removeLayer(rid);
       if (map.getSource(rid)) map.removeSource(rid);
     }
@@ -277,8 +279,9 @@ export function RouteMap({
   );
 }
 
-function minsToTime(mins: number): string {
-  const h = Math.floor(mins / 60).toString().padStart(2, '0');
-  const m = (mins % 60).toString().padStart(2, '0');
+function secsToTime(secs: number): string {
+  const totalMins = Math.floor(secs / 60);
+  const h = (Math.floor(totalMins / 60) % 24).toString().padStart(2, '0');
+  const m = (totalMins % 60).toString().padStart(2, '0');
   return `${h}:${m}`;
 }

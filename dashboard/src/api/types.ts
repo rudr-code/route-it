@@ -12,6 +12,7 @@ export interface Depot {
 
 export interface Customer {
   id: string;
+  name?: string;
   lat: number;
   lon: number;
   demand: number;
@@ -35,7 +36,7 @@ export interface Vehicle {
 export interface Route {
   vehicle_id: string;
   stop_ids: string[];        // ordered list of customer IDs visited
-  arrival_times: number[];   // arrival time in minutes for each stop in stop_ids
+  arrival_times: number[];   // arrival time in seconds for each stop in stop_ids
   load: number;              // total demand on this route
   distance: number;
   duration: number;

@@ -7,11 +7,11 @@
     "routing_engine": "Valhalla (Simulated Urban Road Network)",
     "algorithm": "QPSO (Sun, Feng & Xu 2004) + Prins Split + Local Search",
     "num_customers": 30,
-    "num_routes": 6,
-    "total_distance_km": 91.98,
-    "total_duration_min": 539.6,
+    "num_routes": 4,
+    "total_distance_km": 75.05,
+    "total_duration_min": 987.6,
     "is_feasible": true,
-    "generated_at": "2026-10-15 21:24:11"
+    "generated_at": "2026-11-05 18:19:53"
   },
   "features": [
     {
@@ -20,16 +20,16 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1811,
-          22.3108
+          73.1812,
+          22.3072
         ]
       },
       "properties": {
         "id": "depot",
-        "name": "Vadodara Central Distribution Hub (Sayajigunj)",
+        "name": "Vadodara Central Distribution Hub",
         "type": "depot",
-        "ready_time": 0.0,
-        "due_time": 28800.0,
+        "ready_time": 25200.0,
+        "due_time": 64800.0,
         "marker-color": "#EF4444",
         "marker-symbol": "warehouse"
       }
@@ -40,23 +40,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.1725,
-          22.313
+          73.1667,
+          22.3105
         ]
       },
       "properties": {
         "id": "C01",
-        "name": "Alkapuri Commercial Hub",
+        "name": "Alkapuri",
         "type": "customer",
-        "demand": 18.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 4,
-        "vehicle_id": "VAN_04",
-        "stop_sequence": 1,
-        "arrival_time_min": 1.8,
-        "marker-color": "#EC4899"
+        "demand": 8.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 660.0,
+        "service_time_min": 10.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 6,
+        "arrival_time_min": 635.7,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -65,23 +65,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.175,
-          22.2965
+          73.1816,
+          22.3242
         ]
       },
       "properties": {
         "id": "C02",
-        "name": "Akota Residential Center",
+        "name": "Fatehgunj",
         "type": "customer",
-        "demand": 14.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
-        "stop_sequence": 1,
-        "arrival_time_min": 3.4,
-        "marker-color": "#06B6D4"
+        "demand": 5.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 720.0,
+        "service_time_min": 8.0,
+        "route_id": 4,
+        "vehicle_id": "V_4",
+        "stop_sequence": 2,
+        "arrival_time_min": 493.8,
+        "marker-color": "#EC4899"
       }
     },
     {
@@ -90,23 +90,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.148,
-          22.321
+          73.178,
+          22.3166
         ]
       },
       "properties": {
         "id": "C03",
-        "name": "Gotri Medical Center",
+        "name": "Sayajiganj",
         "type": "customer",
-        "demand": 22.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
-        "route_id": 1,
-        "vehicle_id": "VAN_01",
-        "stop_sequence": 3,
-        "arrival_time_min": 72.0,
-        "marker-color": "#3B82F6"
+        "demand": 12.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 600.0,
+        "service_time_min": 12.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 1,
+        "arrival_time_min": 422.2,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -115,23 +115,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.205,
-          22.3245
+          73.1823,
+          22.2721
         ]
       },
       "properties": {
         "id": "C04",
-        "name": "Karelibaug Market",
+        "name": "Manjalpur",
         "type": "customer",
-        "demand": 16.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
-        "stop_sequence": 5,
-        "arrival_time_min": 59.1,
-        "marker-color": "#8B5CF6"
+        "demand": 7.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 840.0,
+        "service_time_min": 10.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 9,
+        "arrival_time_min": 686.3,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -140,23 +140,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.186,
-          22.3235
+          73.235,
+          22.328
         ]
       },
       "properties": {
         "id": "C05",
-        "name": "Fatehgunj Post Office",
+        "name": "Waghodia",
         "type": "customer",
-        "demand": 20.0,
-        "ready_time_min": 15.0,
-        "due_time_min": 270.0,
-        "service_time_min": 5.0,
-        "route_id": 4,
-        "vehicle_id": "VAN_04",
-        "stop_sequence": 5,
-        "arrival_time_min": 72.6,
-        "marker-color": "#EC4899"
+        "demand": 9.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 780.0,
+        "service_time_min": 15.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 6,
+        "arrival_time_min": 615.7,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -165,23 +165,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.195,
-          22.268
+          73.1756,
+          22.2598
         ]
       },
       "properties": {
         "id": "C06",
-        "name": "Manjalpur Crossroads",
+        "name": "Makarpura",
         "type": "customer",
-        "demand": 25.0,
-        "ready_time_min": 60.0,
-        "due_time_min": 360.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
-        "stop_sequence": 3,
-        "arrival_time_min": 22.8,
-        "marker-color": "#06B6D4"
+        "demand": 6.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 900.0,
+        "service_time_min": 10.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 5,
+        "arrival_time_min": 627.0,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -190,23 +190,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.198,
-          22.253
+          73.1554,
+          22.3412
         ]
       },
       "properties": {
         "id": "C07",
-        "name": "Makarpura GIDC Phase 1",
+        "name": "Gorwa",
         "type": "customer",
-        "demand": 28.0,
-        "ready_time_min": 60.0,
-        "due_time_min": 360.0,
-        "service_time_min": 5.0,
-        "route_id": 3,
-        "vehicle_id": "VAN_03",
-        "stop_sequence": 1,
-        "arrival_time_min": 13.3,
-        "marker-color": "#F59E0B"
+        "demand": 4.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 720.0,
+        "service_time_min": 8.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 7,
+        "arrival_time_min": 652.9,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -215,23 +215,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.218,
-          22.342
+          73.1901,
+          22.3051
         ]
       },
       "properties": {
         "id": "C08",
-        "name": "Harni Airport Circle",
+        "name": "Productivity Road",
         "type": "customer",
-        "demand": 15.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
-        "stop_sequence": 4,
-        "arrival_time_min": 49.4,
-        "marker-color": "#8B5CF6"
+        "demand": 10.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 660.0,
+        "service_time_min": 10.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 1,
+        "arrival_time_min": 421.9,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -240,23 +240,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.238,
-          22.302
+          73.1945,
+          22.3438
         ]
       },
       "properties": {
         "id": "C09",
-        "name": "Waghodia Ring Road",
+        "name": "Nizampura",
         "type": "customer",
-        "demand": 24.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
-        "route_id": 2,
-        "vehicle_id": "VAN_02",
-        "stop_sequence": 3,
-        "arrival_time_min": 69.5,
-        "marker-color": "#10B981"
+        "demand": 8.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 840.0,
+        "service_time_min": 12.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 9,
+        "arrival_time_min": 675.7,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -265,23 +265,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.153,
-          22.285
+          73.1729,
+          22.3001
         ]
       },
       "properties": {
         "id": "C10",
-        "name": "Vasna Road Complex",
+        "name": "Akota",
         "type": "customer",
-        "demand": 19.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 3,
-        "vehicle_id": "VAN_03",
-        "stop_sequence": 4,
-        "arrival_time_min": 88.4,
-        "marker-color": "#F59E0B"
+        "demand": 11.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 720.0,
+        "service_time_min": 10.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 1,
+        "arrival_time_min": 422.3,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -290,23 +290,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.179,
-          22.338
+          73.2082,
+          22.3213
         ]
       },
       "properties": {
         "id": "C11",
-        "name": "Nizampura Plaza",
+        "name": "Harni",
         "type": "customer",
-        "demand": 17.0,
-        "ready_time_min": 15.0,
-        "due_time_min": 270.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
-        "stop_sequence": 1,
-        "arrival_time_min": 6.1,
-        "marker-color": "#8B5CF6"
+        "demand": 5.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 780.0,
+        "service_time_min": 8.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 9,
+        "arrival_time_min": 688.2,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -315,23 +315,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.162,
-          22.325
+          73.1784,
+          22.3613
         ]
       },
       "properties": {
         "id": "C12",
-        "name": "Subhanpura High Street",
+        "name": "Chhani",
         "type": "customer",
-        "demand": 21.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
-        "route_id": 1,
-        "vehicle_id": "VAN_01",
-        "stop_sequence": 4,
-        "arrival_time_min": 80.0,
-        "marker-color": "#3B82F6"
+        "demand": 7.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 900.0,
+        "service_time_min": 10.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 8,
+        "arrival_time_min": 667.4,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -340,22 +340,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.151,
-          22.335
+          73.1883,
+          22.3296
         ]
       },
       "properties": {
         "id": "C13",
-        "name": "Gorwa Industrial Area",
+        "name": "Karelibaug",
         "type": "customer",
-        "demand": 26.0,
-        "ready_time_min": 60.0,
-        "due_time_min": 360.0,
-        "service_time_min": 5.0,
+        "demand": 9.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 660.0,
+        "service_time_min": 12.0,
         "route_id": 4,
-        "vehicle_id": "VAN_04",
-        "stop_sequence": 4,
-        "arrival_time_min": 37.3,
+        "vehicle_id": "V_4",
+        "stop_sequence": 1,
+        "arrival_time_min": 425.2,
         "marker-color": "#EC4899"
       }
     },
@@ -365,22 +365,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.161,
-          22.287
+          73.2002,
+          22.3162
         ]
       },
       "properties": {
         "id": "C14",
-        "name": "Tandalja Heights",
+        "name": "Sama",
         "type": "customer",
-        "demand": 16.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
+        "demand": 6.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 840.0,
+        "service_time_min": 8.0,
         "route_id": 3,
-        "vehicle_id": "VAN_03",
-        "stop_sequence": 5,
-        "arrival_time_min": 95.1,
+        "vehicle_id": "V_3",
+        "stop_sequence": 2,
+        "arrival_time_min": 496.6,
         "marker-color": "#F59E0B"
       }
     },
@@ -390,23 +390,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.201,
-          22.348
+          73.1693,
+          22.2963
         ]
       },
       "properties": {
         "id": "C15",
-        "name": "Sama Lake Point",
+        "name": "Subhanpura",
         "type": "customer",
-        "demand": 18.0,
-        "ready_time_min": 15.0,
-        "due_time_min": 270.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
-        "stop_sequence": 3,
-        "arrival_time_min": 40.7,
-        "marker-color": "#8B5CF6"
+        "demand": 8.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 720.0,
+        "service_time_min": 10.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 2,
+        "arrival_time_min": 491.1,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -415,23 +415,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.191,
-          22.319
+          73.1761,
+          22.2892
         ]
       },
       "properties": {
         "id": "C16",
-        "name": "Pratapgunj University Gate",
+        "name": "Ellora Park",
         "type": "customer",
-        "demand": 12.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
-        "stop_sequence": 6,
-        "arrival_time_min": 67.3,
-        "marker-color": "#8B5CF6"
+        "demand": 5.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 900.0,
+        "service_time_min": 8.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 3,
+        "arrival_time_min": 513.9,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -440,23 +440,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.184,
-          22.368
+          73.203,
+          22.299
         ]
       },
       "properties": {
         "id": "C17",
-        "name": "Chhani Canal Road",
+        "name": "Panigate",
         "type": "customer",
-        "demand": 22.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
-        "route_id": 5,
-        "vehicle_id": "VAN_05",
+        "demand": 12.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 600.0,
+        "service_time_min": 15.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
         "stop_sequence": 2,
-        "arrival_time_min": 26.8,
-        "marker-color": "#8B5CF6"
+        "arrival_time_min": 493.0,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -465,23 +465,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.242,
-          22.322
+          73.2107,
+          22.2983
         ]
       },
       "properties": {
         "id": "C18",
-        "name": "Sayajipura Logistics Hub",
+        "name": "Raopura",
         "type": "customer",
-        "demand": 27.0,
-        "ready_time_min": 60.0,
-        "due_time_min": 360.0,
-        "service_time_min": 5.0,
-        "route_id": 2,
-        "vehicle_id": "VAN_02",
-        "stop_sequence": 2,
-        "arrival_time_min": 19.6,
-        "marker-color": "#10B981"
+        "demand": 7.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 720.0,
+        "service_time_min": 10.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 3,
+        "arrival_time_min": 552.5,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -490,22 +490,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.152,
-          22.272
+          73.2144,
+          22.3069
         ]
       },
       "properties": {
         "id": "C19",
-        "name": "Atladara Railway Station",
+        "name": "Navapura",
         "type": "customer",
-        "demand": 15.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
+        "demand": 9.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 780.0,
+        "service_time_min": 12.0,
         "route_id": 3,
-        "vehicle_id": "VAN_03",
-        "stop_sequence": 3,
-        "arrival_time_min": 80.5,
+        "vehicle_id": "V_3",
+        "stop_sequence": 4,
+        "arrival_time_min": 564.6,
         "marker-color": "#F59E0B"
       }
     },
@@ -515,23 +515,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.164,
-          22.264
+          73.1623,
+          22.2852
         ]
       },
       "properties": {
         "id": "C20",
-        "name": "Kalali Junction",
+        "name": "Gotri",
         "type": "customer",
-        "demand": 20.0,
-        "ready_time_min": 15.0,
-        "due_time_min": 270.0,
-        "service_time_min": 5.0,
-        "route_id": 3,
-        "vehicle_id": "VAN_03",
-        "stop_sequence": 2,
-        "arrival_time_min": 72.4,
-        "marker-color": "#F59E0B"
+        "demand": 6.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 840.0,
+        "service_time_min": 8.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 3,
+        "arrival_time_min": 504.0,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -540,23 +540,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.163,
-          22.316
+          73.2102,
+          22.3718
         ]
       },
       "properties": {
         "id": "C21",
-        "name": "Ellora Park Avenue",
+        "name": "Vadsar",
         "type": "customer",
-        "demand": 14.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 4,
-        "vehicle_id": "VAN_04",
-        "stop_sequence": 2,
-        "arrival_time_min": 8.9,
-        "marker-color": "#EC4899"
+        "demand": 10.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 720.0,
+        "service_time_min": 15.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 8,
+        "arrival_time_min": 653.7,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -565,22 +565,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.125,
-          22.281
+          73.1918,
+          22.2701
         ]
       },
       "properties": {
         "id": "C22",
-        "name": "Bhayli Township",
+        "name": "Atladra",
         "type": "customer",
-        "demand": 23.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
+        "demand": 8.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 900.0,
+        "service_time_min": 10.0,
         "route_id": 1,
-        "vehicle_id": "VAN_01",
-        "stop_sequence": 1,
-        "arrival_time_min": 13.3,
+        "vehicle_id": "V_1",
+        "stop_sequence": 8,
+        "arrival_time_min": 674.3,
         "marker-color": "#3B82F6"
       }
     },
@@ -590,23 +590,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.2085,
-          22.2995
+          73.1557,
+          22.2786
         ]
       },
       "properties": {
         "id": "C23",
-        "name": "Mandvi Gate Heritage",
+        "name": "Tandalja",
         "type": "customer",
-        "demand": 19.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
-        "stop_sequence": 5,
-        "arrival_time_min": 78.6,
-        "marker-color": "#06B6D4"
+        "demand": 5.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 660.0,
+        "service_time_min": 8.0,
+        "route_id": 2,
+        "vehicle_id": "V_2",
+        "stop_sequence": 4,
+        "arrival_time_min": 610.0,
+        "marker-color": "#10B981"
       }
     },
     {
@@ -615,23 +615,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.214,
-          22.293
+          73.1638,
+          22.2622
         ]
       },
       "properties": {
         "id": "C24",
-        "name": "Wadi Clock Tower",
+        "name": "Vasna",
         "type": "customer",
-        "demand": 13.0,
-        "ready_time_min": 15.0,
-        "due_time_min": 270.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
+        "demand": 7.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 780.0,
+        "service_time_min": 10.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
         "stop_sequence": 4,
-        "arrival_time_min": 71.8,
-        "marker-color": "#06B6D4"
+        "arrival_time_min": 614.5,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -640,23 +640,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.219,
-          22.3015
+          73.2285,
+          22.3395
         ]
       },
       "properties": {
         "id": "C25",
-        "name": "Panigate Market",
+        "name": "Warasiya",
         "type": "customer",
-        "demand": 18.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 2,
-        "vehicle_id": "VAN_02",
-        "stop_sequence": 1,
-        "arrival_time_min": 8.1,
-        "marker-color": "#10B981"
+        "demand": 9.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 840.0,
+        "service_time_min": 12.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 7,
+        "arrival_time_min": 633.6,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -665,23 +665,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.201,
-          22.3025
+          73.1967,
+          22.255
         ]
       },
       "properties": {
         "id": "C26",
-        "name": "Raopura Main Bazaar",
+        "name": "Tarsali",
         "type": "customer",
-        "demand": 15.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
-        "stop_sequence": 6,
-        "arrival_time_min": 85.3,
-        "marker-color": "#06B6D4"
+        "demand": 11.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 720.0,
+        "service_time_min": 15.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 7,
+        "arrival_time_min": 655.8,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -690,22 +690,22 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.197,
-          22.298
+          73.1463,
+          22.2817
         ]
       },
       "properties": {
         "id": "C27",
-        "name": "Dandia Bazar Circle",
+        "name": "Sevasi",
         "type": "customer",
-        "demand": 16.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
+        "demand": 6.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 900.0,
+        "service_time_min": 8.0,
         "route_id": 2,
-        "vehicle_id": "VAN_02",
-        "stop_sequence": 4,
-        "arrival_time_min": 83.0,
+        "vehicle_id": "V_2",
+        "stop_sequence": 5,
+        "arrival_time_min": 620.1,
         "marker-color": "#10B981"
       }
     },
@@ -715,23 +715,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.192,
-          22.294
+          73.1944,
+          22.3128
         ]
       },
       "properties": {
         "id": "C28",
-        "name": "Navapura Square",
+        "name": "Navayard",
         "type": "customer",
-        "demand": 14.0,
-        "ready_time_min": 0.0,
-        "due_time_min": 240.0,
-        "service_time_min": 5.0,
-        "route_id": 6,
-        "vehicle_id": "VAN_06",
-        "stop_sequence": 2,
-        "arrival_time_min": 12.0,
-        "marker-color": "#06B6D4"
+        "demand": 8.0,
+        "ready_time_min": 540.0,
+        "due_time_min": 660.0,
+        "service_time_min": 10.0,
+        "route_id": 4,
+        "vehicle_id": "V_4",
+        "stop_sequence": 3,
+        "arrival_time_min": 551.7,
+        "marker-color": "#EC4899"
       }
     },
     {
@@ -740,23 +740,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.141,
-          22.33
+          73.1779,
+          22.2482
         ]
       },
       "properties": {
         "id": "C29",
-        "name": "Laxmipura Enclave",
+        "name": "Jetalpur",
         "type": "customer",
-        "demand": 21.0,
-        "ready_time_min": 30.0,
-        "due_time_min": 300.0,
-        "service_time_min": 5.0,
-        "route_id": 4,
-        "vehicle_id": "VAN_04",
-        "stop_sequence": 3,
-        "arrival_time_min": 19.4,
-        "marker-color": "#EC4899"
+        "demand": 10.0,
+        "ready_time_min": 480.0,
+        "due_time_min": 780.0,
+        "service_time_min": 12.0,
+        "route_id": 1,
+        "vehicle_id": "V_1",
+        "stop_sequence": 6,
+        "arrival_time_min": 639.6,
+        "marker-color": "#3B82F6"
       }
     },
     {
@@ -765,23 +765,23 @@
       "geometry": {
         "type": "Point",
         "coordinates": [
-          73.118,
-          22.306
+          73.2236,
+          22.3047
         ]
       },
       "properties": {
         "id": "C30",
-        "name": "Sevasi Canal Greens",
+        "name": "Pratap Nagar",
         "type": "customer",
-        "demand": 25.0,
-        "ready_time_min": 60.0,
-        "due_time_min": 360.0,
-        "service_time_min": 5.0,
-        "route_id": 1,
-        "vehicle_id": "VAN_01",
-        "stop_sequence": 2,
-        "arrival_time_min": 40.7,
-        "marker-color": "#3B82F6"
+        "demand": 7.0,
+        "ready_time_min": 600.0,
+        "due_time_min": 840.0,
+        "service_time_min": 10.0,
+        "route_id": 3,
+        "vehicle_id": "V_3",
+        "stop_sequence": 5,
+        "arrival_time_min": 578.5,
+        "marker-color": "#F59E0B"
       }
     },
     {
@@ -791,146 +791,271 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1811,
-            22.3108
+            73.1812,
+            22.3072
           ],
           [
-            73.17362,
-            22.30484
+            73.182387,
+            22.30678
           ],
           [
-            73.16614,
-            22.29888
+            73.183573,
+            22.30636
           ],
           [
-            73.15866,
-            22.29292
+            73.18476,
+            22.30594
           ],
           [
-            73.14744,
-            22.288947
+            73.18654,
+            22.30566
           ],
           [
-            73.13622,
-            22.284973
+            73.18832,
+            22.30538
           ],
           [
-            73.125,
-            22.281
+            73.1901,
+            22.3051
           ],
           [
-            73.124067,
-            22.286
+            73.19182,
+            22.30388
           ],
           [
-            73.123133,
-            22.291
+            73.19354,
+            22.30266
           ],
           [
-            73.1222,
-            22.296
+            73.19526,
+            22.30144
           ],
           [
-            73.1208,
-            22.299333
+            73.19784,
+            22.300627
           ],
           [
-            73.1194,
-            22.302667
+            73.20042,
+            22.299813
           ],
           [
-            73.118,
-            22.306
+            73.203,
+            22.299
           ],
           [
-            73.122,
-            22.309
+            73.199413,
+            22.29704
           ],
           [
-            73.126,
-            22.312
+            73.195827,
+            22.29508
           ],
           [
-            73.13,
-            22.315
+            73.19224,
+            22.29312
           ],
           [
-            73.136,
-            22.317
+            73.18686,
+            22.291813
           ],
           [
-            73.142,
-            22.319
+            73.18148,
+            22.290507
           ],
           [
-            73.148,
-            22.321
+            73.1761,
+            22.2892
           ],
           [
-            73.149867,
-            22.3218
+            73.17446,
+            22.2838
           ],
           [
-            73.151733,
-            22.3226
+            73.17282,
+            22.2784
           ],
           [
-            73.1536,
-            22.3234
+            73.17118,
+            22.273
           ],
           [
-            73.1564,
-            22.323933
+            73.16872,
+            22.2694
           ],
           [
-            73.1592,
-            22.324467
+            73.16626,
+            22.2658
           ],
           [
-            73.162,
-            22.325
+            73.1638,
+            22.2622
           ],
           [
-            73.164547,
-            22.32216
+            73.165373,
+            22.26172
           ],
           [
-            73.167093,
-            22.31932
+            73.166947,
+            22.26124
           ],
           [
-            73.16964,
-            22.31648
+            73.16852,
+            22.26076
           ],
           [
-            73.17346,
-            22.314587
+            73.17088,
+            22.26044
           ],
           [
-            73.17728,
-            22.312693
+            73.17324,
+            22.26012
           ],
           [
-            73.1811,
-            22.3108
+            73.1756,
+            22.2598
+          ],
+          [
+            73.175907,
+            22.25748
+          ],
+          [
+            73.176213,
+            22.25516
+          ],
+          [
+            73.17652,
+            22.25284
+          ],
+          [
+            73.17698,
+            22.251293
+          ],
+          [
+            73.17744,
+            22.249747
+          ],
+          [
+            73.1779,
+            22.2482
+          ],
+          [
+            73.180407,
+            22.24956
+          ],
+          [
+            73.182913,
+            22.25092
+          ],
+          [
+            73.18542,
+            22.25228
+          ],
+          [
+            73.18918,
+            22.253187
+          ],
+          [
+            73.19294,
+            22.254093
+          ],
+          [
+            73.1967,
+            22.255
+          ],
+          [
+            73.196047,
+            22.25802
+          ],
+          [
+            73.195393,
+            22.26104
+          ],
+          [
+            73.19474,
+            22.26406
+          ],
+          [
+            73.19376,
+            22.266073
+          ],
+          [
+            73.19278,
+            22.268087
+          ],
+          [
+            73.1918,
+            22.2701
+          ],
+          [
+            73.190533,
+            22.2705
+          ],
+          [
+            73.189267,
+            22.2709
+          ],
+          [
+            73.188,
+            22.2713
+          ],
+          [
+            73.1861,
+            22.271567
+          ],
+          [
+            73.1842,
+            22.271833
+          ],
+          [
+            73.1823,
+            22.2721
+          ],
+          [
+            73.182153,
+            22.27912
+          ],
+          [
+            73.182007,
+            22.28614
+          ],
+          [
+            73.18186,
+            22.29316
+          ],
+          [
+            73.18164,
+            22.29784
+          ],
+          [
+            73.18142,
+            22.30252
+          ],
+          [
+            73.1812,
+            22.3072
           ]
         ]
       },
       "properties": {
         "route_id": "Route_1",
-        "vehicle_id": "VAN_01",
+        "vehicle_id": "V_1",
         "stops": [
+          "C08",
+          "C17",
+          "C16",
+          "C24",
+          "C06",
+          "C29",
+          "C26",
           "C22",
-          "C30",
-          "C03",
-          "C12"
+          "C04"
         ],
-        "num_stops": 4,
-        "load": 91.0,
-        "capacity": 100.0,
-        "utilization_pct": 91.0,
-        "distance_km": 17.06,
-        "duration_min": 90.1,
+        "num_stops": 9,
+        "load": 76.0,
+        "capacity": 80.0,
+        "utilization_pct": 95.0,
+        "distance_km": 19.96,
+        "duration_min": 284.1,
         "stroke": "#3B82F6",
         "stroke-width": 4.5,
         "stroke-opacity": 0.85
@@ -943,146 +1068,271 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1811,
-            22.3108
+            73.1812,
+            22.3072
           ],
           [
-            73.186153,
-            22.30894
+            73.180093,
+            22.30578
           ],
           [
-            73.191207,
-            22.30708
+            73.178987,
+            22.30436
           ],
           [
-            73.19626,
-            22.30522
+            73.17788,
+            22.30294
           ],
           [
-            73.20384,
-            22.30398
+            73.17622,
+            22.301993
           ],
           [
-            73.21142,
-            22.30274
+            73.17456,
+            22.301047
           ],
           [
-            73.219,
-            22.3015
+            73.1729,
+            22.3001
           ],
           [
-            73.222067,
-            22.3056
+            73.17242,
+            22.29934
           ],
           [
-            73.225133,
-            22.3097
+            73.17194,
+            22.29858
           ],
           [
-            73.2282,
-            22.3138
+            73.17146,
+            22.29782
           ],
           [
-            73.2328,
-            22.316533
+            73.17074,
+            22.297313
           ],
           [
-            73.2374,
-            22.319267
+            73.17002,
+            22.296807
           ],
           [
-            73.242,
-            22.322
+            73.1693,
+            22.2963
           ],
           [
-            73.241467,
-            22.318
+            73.168367,
+            22.29408
           ],
           [
-            73.240933,
-            22.314
+            73.167433,
+            22.29186
           ],
           [
-            73.2404,
-            22.31
+            73.1665,
+            22.28964
           ],
           [
-            73.2396,
-            22.307333
+            73.1651,
+            22.28816
           ],
           [
-            73.2388,
-            22.304667
+            73.1637,
+            22.28668
           ],
           [
-            73.238,
-            22.302
+            73.1623,
+            22.2852
           ],
           [
-            73.232533,
-            22.3012
+            73.16142,
+            22.28388
           ],
           [
-            73.227067,
-            22.3004
+            73.16054,
+            22.28256
           ],
           [
-            73.2216,
-            22.2996
+            73.15966,
+            22.28124
           ],
           [
-            73.2134,
-            22.299067
+            73.15834,
+            22.28036
           ],
           [
-            73.2052,
-            22.298533
+            73.15702,
+            22.27948
           ],
           [
-            73.197,
-            22.298
+            73.1557,
+            22.2786
           ],
           [
-            73.19488,
-            22.30056
+            73.154447,
+            22.27922
           ],
           [
-            73.19276,
-            22.30312
+            73.153193,
+            22.27984
           ],
           [
-            73.19064,
-            22.30568
+            73.15194,
+            22.28046
           ],
           [
-            73.18746,
-            22.307387
+            73.15006,
+            22.280873
           ],
           [
-            73.18428,
-            22.309093
+            73.14818,
+            22.281287
           ],
           [
-            73.1811,
-            22.3108
+            73.1463,
+            22.2817
+          ],
+          [
+            73.14902,
+            22.28746
+          ],
+          [
+            73.15174,
+            22.29322
+          ],
+          [
+            73.15446,
+            22.29898
+          ],
+          [
+            73.15854,
+            22.30282
+          ],
+          [
+            73.16262,
+            22.30666
+          ],
+          [
+            73.1667,
+            22.3105
+          ],
+          [
+            73.165193,
+            22.31664
+          ],
+          [
+            73.163687,
+            22.32278
+          ],
+          [
+            73.16218,
+            22.32892
+          ],
+          [
+            73.15992,
+            22.333013
+          ],
+          [
+            73.15766,
+            22.337107
+          ],
+          [
+            73.1554,
+            22.3412
+          ],
+          [
+            73.158467,
+            22.34522
+          ],
+          [
+            73.161533,
+            22.34924
+          ],
+          [
+            73.1646,
+            22.35326
+          ],
+          [
+            73.1692,
+            22.35594
+          ],
+          [
+            73.1738,
+            22.35862
+          ],
+          [
+            73.1784,
+            22.3613
+          ],
+          [
+            73.182373,
+            22.3533
+          ],
+          [
+            73.186347,
+            22.3453
+          ],
+          [
+            73.19032,
+            22.3373
+          ],
+          [
+            73.19628,
+            22.331967
+          ],
+          [
+            73.20224,
+            22.326633
+          ],
+          [
+            73.2082,
+            22.3213
+          ],
+          [
+            73.2046,
+            22.31848
+          ],
+          [
+            73.201,
+            22.31566
+          ],
+          [
+            73.1974,
+            22.31284
+          ],
+          [
+            73.192,
+            22.31096
+          ],
+          [
+            73.1866,
+            22.30908
+          ],
+          [
+            73.1812,
+            22.3072
           ]
         ]
       },
       "properties": {
         "route_id": "Route_2",
-        "vehicle_id": "VAN_02",
+        "vehicle_id": "V_2",
         "stops": [
-          "C25",
-          "C18",
-          "C09",
-          "C27"
+          "C10",
+          "C15",
+          "C20",
+          "C23",
+          "C27",
+          "C01",
+          "C07",
+          "C12",
+          "C11"
         ],
-        "num_stops": 4,
-        "load": 85.0,
-        "capacity": 100.0,
-        "utilization_pct": 85.0,
-        "distance_km": 15.99,
-        "duration_min": 92.3,
+        "num_stops": 9,
+        "load": 60.0,
+        "capacity": 80.0,
+        "utilization_pct": 75.0,
+        "distance_km": 24.46,
+        "duration_min": 282.6,
         "stroke": "#10B981",
         "stroke-width": 4.5,
         "stroke-opacity": 0.85
@@ -1095,171 +1345,271 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1811,
-            22.3108
+            73.1812,
+            22.3072
           ],
           [
-            73.183353,
-            22.29924
+            73.180773,
+            22.30908
           ],
           [
-            73.185607,
-            22.28768
+            73.180347,
+            22.31096
           ],
           [
-            73.18786,
-            22.27612
+            73.17992,
+            22.31284
           ],
           [
-            73.19124,
-            22.268413
+            73.17928,
+            22.314093
           ],
           [
-            73.19462,
-            22.260707
+            73.17864,
+            22.315347
           ],
           [
-            73.198,
-            22.253
+            73.178,
+            22.3166
           ],
           [
-            73.193467,
-            22.2552
+            73.18096,
+            22.31652
           ],
           [
-            73.188933,
-            22.2574
+            73.18392,
+            22.31644
           ],
           [
-            73.1844,
-            22.2596
+            73.18688,
+            22.31636
           ],
           [
-            73.1776,
-            22.261067
+            73.19132,
+            22.316307
           ],
           [
-            73.1708,
-            22.262533
+            73.19576,
+            22.316253
           ],
           [
-            73.164,
-            22.264
+            73.2002,
+            22.3162
           ],
           [
-            73.1624,
-            22.2656
+            73.2016,
+            22.31262
           ],
           [
-            73.1608,
-            22.2672
+            73.203,
+            22.30904
           ],
           [
-            73.1592,
-            22.2688
+            73.2044,
+            22.30546
           ],
           [
-            73.1568,
-            22.269867
+            73.2065,
+            22.303073
           ],
           [
-            73.1544,
-            22.270933
+            73.2086,
+            22.300687
           ],
           [
-            73.152,
-            22.272
+            73.2107,
+            22.2983
           ],
           [
-            73.152133,
-            22.2746
+            73.211193,
+            22.30002
           ],
           [
-            73.152267,
-            22.2772
+            73.211687,
+            22.30174
           ],
           [
-            73.1524,
-            22.2798
+            73.21218,
+            22.30346
           ],
           [
-            73.1526,
-            22.281533
+            73.21292,
+            22.304607
           ],
           [
-            73.1528,
-            22.283267
+            73.21366,
+            22.305753
           ],
           [
-            73.153,
-            22.285
+            73.2144,
+            22.3069
           ],
           [
-            73.154067,
-            22.2854
+            73.215627,
+            22.30646
           ],
           [
-            73.155133,
-            22.2858
+            73.216853,
+            22.30602
           ],
           [
-            73.1562,
-            22.2862
+            73.21808,
+            22.30558
           ],
           [
-            73.1578,
-            22.286467
+            73.21992,
+            22.305287
           ],
           [
-            73.1594,
-            22.286733
+            73.22176,
+            22.304993
           ],
           [
-            73.161,
-            22.287
+            73.2236,
+            22.3047
           ],
           [
-            73.16368,
-            22.29176
+            73.22512,
+            22.30936
           ],
           [
-            73.16636,
-            22.29652
+            73.22664,
+            22.31402
           ],
           [
-            73.16904,
-            22.30128
+            73.22816,
+            22.31868
           ],
           [
-            73.17306,
-            22.304453
+            73.23044,
+            22.321787
           ],
           [
-            73.17708,
-            22.307627
+            73.23272,
+            22.324893
           ],
           [
-            73.1811,
-            22.3108
+            73.235,
+            22.328
+          ],
+          [
+            73.234133,
+            22.3303
+          ],
+          [
+            73.233267,
+            22.3326
+          ],
+          [
+            73.2324,
+            22.3349
+          ],
+          [
+            73.2311,
+            22.336433
+          ],
+          [
+            73.2298,
+            22.337967
+          ],
+          [
+            73.2285,
+            22.3395
+          ],
+          [
+            73.22606,
+            22.34596
+          ],
+          [
+            73.22362,
+            22.35242
+          ],
+          [
+            73.22118,
+            22.35888
+          ],
+          [
+            73.21752,
+            22.363187
+          ],
+          [
+            73.21386,
+            22.367493
+          ],
+          [
+            73.2102,
+            22.3718
+          ],
+          [
+            73.208107,
+            22.3662
+          ],
+          [
+            73.206013,
+            22.3606
+          ],
+          [
+            73.20392,
+            22.355
+          ],
+          [
+            73.20078,
+            22.351267
+          ],
+          [
+            73.19764,
+            22.347533
+          ],
+          [
+            73.1945,
+            22.3438
+          ],
+          [
+            73.192727,
+            22.33648
+          ],
+          [
+            73.190953,
+            22.32916
+          ],
+          [
+            73.18918,
+            22.32184
+          ],
+          [
+            73.18652,
+            22.31696
+          ],
+          [
+            73.18386,
+            22.31208
+          ],
+          [
+            73.1812,
+            22.3072
           ]
         ]
       },
       "properties": {
         "route_id": "Route_3",
-        "vehicle_id": "VAN_03",
+        "vehicle_id": "V_3",
         "stops": [
-          "C07",
-          "C20",
+          "C03",
+          "C14",
+          "C18",
           "C19",
-          "C10",
-          "C14"
+          "C30",
+          "C05",
+          "C25",
+          "C21",
+          "C09"
         ],
-        "num_stops": 5,
-        "load": 98.0,
-        "capacity": 100.0,
-        "utilization_pct": 98.0,
-        "distance_km": 17.55,
-        "duration_min": 106.8,
+        "num_stops": 9,
+        "load": 77.0,
+        "capacity": 80.0,
+        "utilization_pct": 96.2,
+        "distance_km": 23.79,
+        "duration_min": 276.3,
         "stroke": "#F59E0B",
         "stroke-width": 4.5,
         "stroke-opacity": 0.85
@@ -1272,576 +1622,122 @@
         "type": "LineString",
         "coordinates": [
           [
-            73.1811,
-            22.3108
+            73.1812,
+            22.3072
           ],
           [
-            73.179953,
-            22.31124
-          ],
-          [
-            73.178807,
+            73.182147,
             22.31168
           ],
           [
-            73.17766,
-            22.31212
-          ],
-          [
-            73.17594,
-            22.312413
-          ],
-          [
-            73.17422,
-            22.312707
-          ],
-          [
-            73.1725,
-            22.313
-          ],
-          [
-            73.171233,
-            22.3136
-          ],
-          [
-            73.169967,
-            22.3142
-          ],
-          [
-            73.1687,
-            22.3148
-          ],
-          [
-            73.1668,
-            22.3152
-          ],
-          [
-            73.1649,
-            22.3156
-          ],
-          [
-            73.163,
-            22.316
-          ],
-          [
-            73.160067,
-            22.3188
-          ],
-          [
-            73.157133,
-            22.3216
-          ],
-          [
-            73.1542,
-            22.3244
-          ],
-          [
-            73.1498,
-            22.326267
-          ],
-          [
-            73.1454,
-            22.328133
-          ],
-          [
-            73.141,
-            22.33
-          ],
-          [
-            73.142333,
-            22.331
-          ],
-          [
-            73.143667,
-            22.332
-          ],
-          [
-            73.145,
-            22.333
-          ],
-          [
-            73.147,
-            22.333667
-          ],
-          [
-            73.149,
-            22.334333
-          ],
-          [
-            73.151,
-            22.335
-          ],
-          [
-            73.155667,
-            22.3327
-          ],
-          [
-            73.160333,
-            22.3304
-          ],
-          [
-            73.165,
-            22.3281
-          ],
-          [
-            73.172,
-            22.326567
-          ],
-          [
-            73.179,
-            22.325033
-          ],
-          [
-            73.186,
-            22.3235
-          ],
-          [
-            73.185347,
-            22.32096
-          ],
-          [
-            73.184693,
-            22.31842
+            73.183093,
+            22.31616
           ],
           [
             73.18404,
-            22.31588
+            22.32064
           ],
           [
-            73.18306,
-            22.314187
+            73.18546,
+            22.323627
           ],
           [
-            73.18208,
-            22.312493
+            73.18688,
+            22.326613
           ],
           [
-            73.1811,
-            22.3108
+            73.1883,
+            22.3296
+          ],
+          [
+            73.187407,
+            22.32852
+          ],
+          [
+            73.186513,
+            22.32744
+          ],
+          [
+            73.18562,
+            22.32636
+          ],
+          [
+            73.18428,
+            22.32564
+          ],
+          [
+            73.18294,
+            22.32492
+          ],
+          [
+            73.1816,
+            22.3242
+          ],
+          [
+            73.183307,
+            22.32192
+          ],
+          [
+            73.185013,
+            22.31964
+          ],
+          [
+            73.18672,
+            22.31736
+          ],
+          [
+            73.18928,
+            22.31584
+          ],
+          [
+            73.19184,
+            22.31432
+          ],
+          [
+            73.1944,
+            22.3128
+          ],
+          [
+            73.19264,
+            22.31168
+          ],
+          [
+            73.19088,
+            22.31056
+          ],
+          [
+            73.18912,
+            22.30944
+          ],
+          [
+            73.18648,
+            22.308693
+          ],
+          [
+            73.18384,
+            22.307947
+          ],
+          [
+            73.1812,
+            22.3072
           ]
         ]
       },
       "properties": {
         "route_id": "Route_4",
-        "vehicle_id": "VAN_04",
+        "vehicle_id": "V_4",
         "stops": [
-          "C01",
-          "C21",
-          "C29",
           "C13",
-          "C05"
-        ],
-        "num_stops": 5,
-        "load": 99.0,
-        "capacity": 100.0,
-        "utilization_pct": 99.0,
-        "distance_km": 11.19,
-        "duration_min": 80.6,
-        "stroke": "#EC4899",
-        "stroke-width": 4.5,
-        "stroke-opacity": 0.85
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "route_5",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            73.1811,
-            22.3108
-          ],
-          [
-            73.18082,
-            22.31624
-          ],
-          [
-            73.18054,
-            22.32168
-          ],
-          [
-            73.18026,
-            22.32712
-          ],
-          [
-            73.17984,
-            22.330747
-          ],
-          [
-            73.17942,
-            22.334373
-          ],
-          [
-            73.179,
-            22.338
-          ],
-          [
-            73.179667,
-            22.344
-          ],
-          [
-            73.180333,
-            22.35
-          ],
-          [
-            73.181,
-            22.356
-          ],
-          [
-            73.182,
-            22.36
-          ],
-          [
-            73.183,
-            22.364
-          ],
-          [
-            73.184,
-            22.368
-          ],
-          [
-            73.186267,
-            22.364
-          ],
-          [
-            73.188533,
-            22.36
-          ],
-          [
-            73.1908,
-            22.356
-          ],
-          [
-            73.1942,
-            22.353333
-          ],
-          [
-            73.1976,
-            22.350667
-          ],
-          [
-            73.201,
-            22.348
-          ],
-          [
-            73.203267,
-            22.3468
-          ],
-          [
-            73.205533,
-            22.3456
-          ],
-          [
-            73.2078,
-            22.3444
-          ],
-          [
-            73.2112,
-            22.3436
-          ],
-          [
-            73.2146,
-            22.3428
-          ],
-          [
-            73.218,
-            22.342
-          ],
-          [
-            73.216267,
-            22.3385
-          ],
-          [
-            73.214533,
-            22.335
-          ],
-          [
-            73.2128,
-            22.3315
-          ],
-          [
-            73.2102,
-            22.329167
-          ],
-          [
-            73.2076,
-            22.326833
-          ],
-          [
-            73.205,
-            22.3245
-          ],
-          [
-            73.203133,
-            22.3234
-          ],
-          [
-            73.201267,
-            22.3223
-          ],
-          [
-            73.1994,
-            22.3212
-          ],
-          [
-            73.1966,
-            22.320467
-          ],
-          [
-            73.1938,
-            22.319733
-          ],
-          [
-            73.191,
-            22.319
-          ],
-          [
-            73.18968,
-            22.31736
-          ],
-          [
-            73.18836,
-            22.31572
-          ],
-          [
-            73.18704,
-            22.31408
-          ],
-          [
-            73.18506,
-            22.312987
-          ],
-          [
-            73.18308,
-            22.311893
-          ],
-          [
-            73.1811,
-            22.3108
-          ]
-        ]
-      },
-      "properties": {
-        "route_id": "Route_5",
-        "vehicle_id": "VAN_05",
-        "stops": [
-          "C11",
-          "C17",
-          "C15",
-          "C08",
-          "C04",
-          "C16"
-        ],
-        "num_stops": 6,
-        "load": 100.0,
-        "capacity": 100.0,
-        "utilization_pct": 100.0,
-        "distance_km": 16.4,
-        "duration_min": 75.0,
-        "stroke": "#8B5CF6",
-        "stroke-width": 4.5,
-        "stroke-opacity": 0.85
-      }
-    },
-    {
-      "type": "Feature",
-      "id": "route_6",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [
-            73.1811,
-            22.3108
-          ],
-          [
-            73.180287,
-            22.30794
-          ],
-          [
-            73.179473,
-            22.30508
-          ],
-          [
-            73.17866,
-            22.30222
-          ],
-          [
-            73.17744,
-            22.300313
-          ],
-          [
-            73.17622,
-            22.298407
-          ],
-          [
-            73.175,
-            22.2965
-          ],
-          [
-            73.177267,
-            22.296
-          ],
-          [
-            73.179533,
-            22.2955
-          ],
-          [
-            73.1818,
-            22.295
-          ],
-          [
-            73.1852,
-            22.294667
-          ],
-          [
-            73.1886,
-            22.294333
-          ],
-          [
-            73.192,
-            22.294
-          ],
-          [
-            73.1924,
-            22.2888
-          ],
-          [
-            73.1928,
-            22.2836
-          ],
-          [
-            73.1932,
-            22.2784
-          ],
-          [
-            73.1938,
-            22.274933
-          ],
-          [
-            73.1944,
-            22.271467
-          ],
-          [
-            73.195,
-            22.268
-          ],
-          [
-            73.197533,
-            22.273
-          ],
-          [
-            73.200067,
-            22.278
-          ],
-          [
-            73.2026,
-            22.283
-          ],
-          [
-            73.2064,
-            22.286333
-          ],
-          [
-            73.2102,
-            22.289667
-          ],
-          [
-            73.214,
-            22.293
-          ],
-          [
-            73.213267,
-            22.2943
-          ],
-          [
-            73.212533,
-            22.2956
-          ],
-          [
-            73.2118,
-            22.2969
-          ],
-          [
-            73.2107,
-            22.297767
-          ],
-          [
-            73.2096,
-            22.298633
-          ],
-          [
-            73.2085,
-            22.2995
-          ],
-          [
-            73.2075,
-            22.3001
-          ],
-          [
-            73.2065,
-            22.3007
-          ],
-          [
-            73.2055,
-            22.3013
-          ],
-          [
-            73.204,
-            22.3017
-          ],
-          [
-            73.2025,
-            22.3021
-          ],
-          [
-            73.201,
-            22.3025
-          ],
-          [
-            73.198347,
-            22.30416
-          ],
-          [
-            73.195693,
-            22.30582
-          ],
-          [
-            73.19304,
-            22.30748
-          ],
-          [
-            73.18906,
-            22.308587
-          ],
-          [
-            73.18508,
-            22.309693
-          ],
-          [
-            73.1811,
-            22.3108
-          ]
-        ]
-      },
-      "properties": {
-        "route_id": "Route_6",
-        "vehicle_id": "VAN_06",
-        "stops": [
           "C02",
-          "C28",
-          "C06",
-          "C24",
-          "C23",
-          "C26"
+          "C28"
         ],
-        "num_stops": 6,
-        "load": 100.0,
-        "capacity": 100.0,
-        "utilization_pct": 100.0,
-        "distance_km": 13.79,
-        "duration_min": 94.8,
-        "stroke": "#06B6D4",
+        "num_stops": 3,
+        "load": 22.0,
+        "capacity": 80.0,
+        "utilization_pct": 27.5,
+        "distance_km": 6.83,
+        "duration_min": 144.6,
+        "stroke": "#EC4899",
         "stroke-width": 4.5,
         "stroke-opacity": 0.85
       }

@@ -4,6 +4,7 @@ const TIER_META: Record<string, { label: string; color: string; icon: string }> 
   tier_1_path_repair: { label: 'Tier 1 — Path Repair', color: '#10b981', icon: '🔧' },
   tier_2_local_repair: { label: 'Tier 2 — Local Repair', color: '#f59e0b', icon: '🔀' },
   tier_3_qpso_warm_start: { label: 'Tier 3 — QPSO Warm Start', color: '#ef4444', icon: '⚛' },
+  do_nothing: { label: 'No Re-plan Needed (Within Tolerance)', color: '#6366f1', icon: '✓' },
   no_replan: { label: 'No Re-plan', color: '#6366f1', icon: '✓' },
   infeasible_no_better: { label: 'No Improvement Found', color: '#94a3b8', icon: '—' },
 };
@@ -14,7 +15,7 @@ interface TierBannerProps {
 }
 
 export function TierBanner({ result, onDismiss }: TierBannerProps) {
-  const meta = TIER_META[result.tier_selected] ?? {
+  const meta = TIER_META[result.tier_selected.toLowerCase()] ?? {
     label: result.tier_selected,
     color: '#6366f1',
     icon: '⚡',

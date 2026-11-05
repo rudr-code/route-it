@@ -27,6 +27,8 @@ class ConnectionManager:
 
     async def connect(self, problem_id: str, websocket: WebSocket) -> None:
         """Accept incoming connection and subscribe to problem updates."""
+        if self._loop is None or not self._loop.is_running():
+            self._loop = asyncio.get_running_loop()
         await websocket.accept()
         self._connections.setdefault(problem_id, []).append(websocket)
         logger.debug(f"[WS] Client connected to problem {problem_id} (active: {len(self._connections[problem_id])})")

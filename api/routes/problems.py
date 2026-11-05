@@ -7,7 +7,7 @@ from concurrent.futures import ThreadPoolExecutor
 import logging
 import time
 from uuid import uuid4
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, HTTPException, Query, Response, status
 
 from api.geojson import solution_to_geojson
 from api.models import (
@@ -246,8 +246,8 @@ def get_problem(problem_id: str, store: ProblemStore = Depends(get_store)) -> Pr
     return problem
 
 
-@router.delete("/{problem_id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Problem")
-def delete_problem(problem_id: str, store: ProblemStore = Depends(get_store)) -> None:
+@router.delete("/{problem_id}", status_code=status.HTTP_204_NO_CONTENT, response_class=Response, summary="Delete Problem")
+def delete_problem(problem_id: str, store: ProblemStore = Depends(get_store)) -> Response:
     """Delete a problem instance and all its associated solutions and jobs."""
     deleted = store.delete_problem(problem_id)
     if not deleted:
@@ -255,6 +255,7 @@ def delete_problem(problem_id: str, store: ProblemStore = Depends(get_store)) ->
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Problem '{problem_id}' not found",
         )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
 @router.post("/{problem_id}/solve", response_model=SolveJob, status_code=status.HTTP_202_ACCEPTED, summary="Launch Optimization Job")

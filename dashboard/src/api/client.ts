@@ -43,6 +43,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     try { data = JSON.parse(data as string); } catch {}
     throw new Error(formatApiError(res.status, data));
   }
+  if (res.status === 204) {
+    return undefined as T;
+  }
   return res.json() as Promise<T>;
 }
 

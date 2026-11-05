@@ -46,7 +46,7 @@ def line_problem() -> Problem:
         service_time=10.0,
     )
     vehicles = [Vehicle(id="v1", capacity=50.0)]
-    return Problem(id="line_prob", depot=depot, customers=[c1, c2], vehicles=vehicles)
+    return Problem(id="line_prob", depot=depot, customers=[c1, c2], vehicles=vehicles, coordinate_system="planar")
 
 
 @pytest.fixture
@@ -311,7 +311,7 @@ def test_simulator_multi_vehicle_fleet():
     c1 = Customer(id="c1", lat=10.0, lon=0.0, demand=5.0, ready_time=0.0, due_time=100.0, service_time=5.0)
     c2 = Customer(id="c2", lat=0.0, lon=10.0, demand=5.0, ready_time=0.0, due_time=100.0, service_time=5.0)
     vehicles = [Vehicle(id="v1", capacity=50.0), Vehicle(id="v2", capacity=50.0)]
-    prob = Problem(id="multi_prob", depot=depot, customers=[c1, c2], vehicles=vehicles)
+    prob = Problem(id="multi_prob", depot=depot, customers=[c1, c2], vehicles=vehicles, coordinate_system="planar")
 
     sol = Solution(
         routes=[

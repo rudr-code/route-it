@@ -100,50 +100,11 @@ ROUTE_COLORS = [
 
 
 def build_vadodara_problem(seed: int = 42) -> Problem:
-    """Build a reproducible 30-customer CVRPTW problem instance for Vadodara."""
-    depot = Depot(
-        id=VADODARA_DEPOT["id"],
-        lat=VADODARA_DEPOT["lat"],
-        lon=VADODARA_DEPOT["lon"],
-        ready_time=VADODARA_DEPOT["ready_time"],
-        due_time=VADODARA_DEPOT["due_time"],
-        service_time=VADODARA_DEPOT["service_time"],
-    )
-
-    customers = [
-        Customer(
-            id=s["id"],
-            lat=s["lat"],
-            lon=s["lon"],
-            demand=s["demand"],
-            ready_time=s["ready_time"],
-            due_time=s["due_time"],
-            service_time=300.0,  # 5 minutes handling time per stop
-            priority=1,
-        )
-        for s in VADODARA_STOPS
-    ]
-
-    # Fleet: 8 delivery vans with capacity 100 units each
-    vehicles = [
-        Vehicle(
-            id=f"VAN_{i+1:02d}",
-            capacity=100.0,
-            shift_start=0.0,
-            shift_end=28800.0,
-            fixed_cost=50.0,
-            cost_per_time=0.01,
-            cost_per_distance=0.001,
-        )
-        for i in range(8)
-    ]
-
-    return Problem(
-        id="vadodara_30",
-        depot=depot,
-        customers=customers,
-        vehicles=vehicles,
-    )
+    """Load the canonical 30-customer CVRPTW problem instance for Vadodara."""
+    json_path = Path(__file__).resolve().parent / "instances" / "vadodara_30.json"
+    if not json_path.is_file():
+        raise FileNotFoundError(f"Canonical Vadodara instance not found at {json_path}")
+    return load_problem_json(json_path)
 
 
 def check_valhalla_alive(base_url: str, timeout: float = 1.5) -> bool:
@@ -211,7 +172,7 @@ def create_geojson_feature_collection(
         },
         "properties": {
             "id": problem.depot.id,
-            "name": VADODARA_DEPOT["name"],
+            "name": problem.depot.name or "Vadodara Central Distribution Hub",
             "type": "depot",
             "ready_time": problem.depot.ready_time,
             "due_time": problem.depot.due_time,
@@ -246,7 +207,7 @@ def create_geojson_feature_collection(
             },
             "properties": {
                 "id": cust.id,
-                "name": next((s["name"] for s in VADODARA_STOPS if s["id"] == cust.id), f"Customer {cust.id}"),
+                "name": cust.name or f"Customer {cust.id}",
                 "type": "customer",
                 "demand": cust.demand,
                 "ready_time_min": round(cust.ready_time / 60.0, 1),

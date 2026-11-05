@@ -52,6 +52,7 @@ def run_single_solomon_instance(
             depot=raw_problem.depot,
             customers=truncated_customers,
             vehicles=raw_problem.vehicles,
+            coordinate_system=raw_problem.coordinate_system,
         )
         problem.compute_euclidean_matrices(speed=1.0)
     else:

@@ -60,6 +60,7 @@ def run_reoptimization_benchmarks(
             depot=raw_problem.depot,
             customers=raw_problem.customers[:num_customers],
             vehicles=raw_problem.vehicles,
+            coordinate_system=raw_problem.coordinate_system,
         )
         problem.compute_euclidean_matrices(speed=1.0)
     else:
