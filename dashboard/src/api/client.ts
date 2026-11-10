@@ -9,17 +9,12 @@ import type {
   SolveRequest,
 } from './types';
 
-const BASE = '/api';
+export const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
 
-/** Format FastAPI/Pydantic error responses into readable strings.
- *  Handles 422 detail arrays: e.g. "body.customers.0.priority: Input should be >= 1"
- *  instead of "[object Object],[object Object]"
- */
 function formatApiError(status: number, data: unknown): string {
   if (data && typeof data === 'object') {
     const d = data as Record<string, unknown>;
     if (Array.isArray(d.detail)) {
-      // Pydantic v2 validation error array
       const msgs = (d.detail as Array<{ loc?: unknown[]; msg?: string }>).map((e) => {
         const loc = Array.isArray(e.loc) ? e.loc.join('.') : 'request';
         return `${loc}: ${e.msg ?? JSON.stringify(e)}`;
@@ -34,9 +29,16 @@ function formatApiError(status: number, data: unknown): string {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
+  const token = localStorage.getItem('routeit_token');
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(options?.headers as Record<string, string> | undefined),
+  };
+
+  const res = await fetch(`${API_BASE}${path}`, {
     ...options,
+    headers,
   });
   if (!res.ok) {
     let data: unknown = await res.text();
@@ -50,25 +52,80 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 }
 
 export const api = {
+  // Original Solver & Problem Endpoints
   health: (): Promise<HealthResponse> => request('/health'),
-
   createProblem: (body: ProblemCreateRequest): Promise<ProblemResponse> =>
     request('/problems', { method: 'POST', body: JSON.stringify(body) }),
-
   listProblems: (): Promise<ProblemResponse[]> => request('/problems'),
-
   solveProblem: (problemId: string, body: SolveRequest): Promise<SolveJob> =>
     request(`/problems/${problemId}/solve`, { method: 'POST', body: JSON.stringify(body) }),
-
   getJob: (problemId: string, jobId: string): Promise<SolveJob> =>
     request(`/problems/${problemId}/jobs/${jobId}`),
-
   getSolution: (problemId: string): Promise<SolutionResponse> =>
     request(`/problems/${problemId}/solution`),
-
   injectEvent: (problemId: string, event: DynamicEventCreate): Promise<EventInjectResponse> =>
     request(`/problems/${problemId}/events`, { method: 'POST', body: JSON.stringify(event) }),
-
   deleteProblem: (problemId: string): Promise<void> =>
     request(`/problems/${problemId}`, { method: 'DELETE' }),
+
+  // New Intelligent Delivery Management Endpoints
+  login: (username: string, password: string): Promise<any> =>
+    request('/delivery/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
+  getOverview: (): Promise<any> => request('/delivery/admin/overview'),
+  listLocations: (): Promise<any[]> => request('/delivery/locations'),
+  createLocation: (body: any): Promise<any> =>
+    request('/delivery/locations', { method: 'POST', body: JSON.stringify(body) }),
+  deleteLocation: (id: string): Promise<void> =>
+    request(`/delivery/locations/${id}`, { method: 'DELETE' }),
+
+  listVehicles: (): Promise<any[]> => request('/delivery/vehicles'),
+  createVehicle: (body: any): Promise<any> =>
+    request('/delivery/vehicles', { method: 'POST', body: JSON.stringify(body) }),
+
+  listDrivers: (): Promise<any[]> => request('/delivery/drivers'),
+  createDriver: (body: any): Promise<any> =>
+    request('/delivery/drivers', { method: 'POST', body: JSON.stringify(body) }),
+
+  optimizeBatch: (body: any): Promise<any> =>
+    request('/delivery/batches/optimize', { method: 'POST', body: JSON.stringify(body) }),
+  listBatches: (): Promise<any[]> => request('/delivery/batches'),
+  getBatch: (batchId: string): Promise<any> => request(`/delivery/batches/${batchId}`),
+  injectBatchIncident: (batchId: string, body: any): Promise<any> =>
+    request(`/delivery/batches/${batchId}/incidents`, { method: 'POST', body: JSON.stringify(body) }),
+
+  listDispatchJobs: (driverId?: string): Promise<any[]> =>
+    request(`/delivery/dispatch/jobs${driverId ? `?driver_id=${driverId}` : ''}`),
+  assignDriver: (jobId: string, driverId: string): Promise<any> =>
+    request(`/delivery/dispatch/jobs/${jobId}/assign`, {
+      method: 'POST',
+      body: JSON.stringify({ driver_id: driverId }),
+    }),
+  cancelJob: (jobId: string): Promise<any> =>
+    request(`/delivery/dispatch/jobs/${jobId}/cancel`, { method: 'POST' }),
+  acceptJob: (jobId: string, driverId: string): Promise<any> =>
+    request(`/delivery/driver/jobs/${jobId}/accept?driver_id=${encodeURIComponent(driverId)}`, {
+      method: 'POST',
+    }),
+
+  updateDeliveryProgress: (deliveryId: string, status: 'IN_TRANSIT' | 'ARRIVED'): Promise<any> =>
+    request(`/delivery/deliveries/${deliveryId}/progress`, {
+      method: 'POST',
+      body: JSON.stringify({ status }),
+    }),
+  verifyOtp: (deliveryId: string, otpCode: string, driverId?: string): Promise<any> =>
+    request(`/delivery/deliveries/${deliveryId}/verify-otp`, {
+      method: 'POST',
+      body: JSON.stringify({ otp_code: otpCode, driver_id: driverId }),
+    }),
+  failDelivery: (deliveryId: string, reason: string, driverId?: string): Promise<any> =>
+    request(`/delivery/deliveries/${deliveryId}/fail`, {
+      method: 'POST',
+      body: JSON.stringify({ reason, driver_id: driverId }),
+    }),
+  verifyReturnToHub: (deliveryId: string): Promise<any> =>
+    request(`/delivery/deliveries/${deliveryId}/return-to-hub`, { method: 'POST' }),
+
+  trackDelivery: (token: string): Promise<any> =>
+    request(`/delivery/track/${encodeURIComponent(token)}`),
+  getHistory: (): Promise<any[]> => request('/delivery/history'),
 };

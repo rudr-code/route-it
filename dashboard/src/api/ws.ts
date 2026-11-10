@@ -3,6 +3,15 @@ import type { WsMessage } from './types';
 
 type WsHandler = (msg: WsMessage) => void;
 
+export function getWsBaseUrl(): string {
+  if (import.meta.env.VITE_WS_BASE_URL) {
+    return import.meta.env.VITE_WS_BASE_URL.replace(/\/$/, '');
+  }
+  const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
+  const host = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
+  return `${proto}://${host}`;
+}
+
 export function useWebSocket(problemId: string | null, onMessage: WsHandler) {
   const wsRef = useRef<WebSocket | null>(null);
   const handlerRef = useRef<WsHandler>(onMessage);
@@ -10,9 +19,7 @@ export function useWebSocket(problemId: string | null, onMessage: WsHandler) {
 
   const connect = useCallback(() => {
     if (!problemId) return;
-    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-    // When using Vite dev proxy, connect to backend directly on WS
-    const url = `${proto}://localhost:8000/ws/problems/${problemId}`;
+    const url = `${getWsBaseUrl()}/ws/problems/${problemId}`;
     const ws = new WebSocket(url);
     wsRef.current = ws;
 
