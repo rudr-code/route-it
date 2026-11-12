@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 *.so
 
-# C extensions
+# C extensions & build outputs
 build/
 develop-eggs/
 dist/
@@ -56,6 +56,13 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
+# SQLite Database & Data Directory
+*.db
+*.db-shm
+*.db-wal
+routeit_delivery.db*
+/data/
+
 # Valhalla & OSM Large Data
 *.osm.pbf
 *.valhalla_cache/
@@ -73,7 +80,15 @@ desktop.ini
 *.swp
 *.swo
 
-# Temporary logs & scratch
+# Temporary logs, tasks & scratch scripts
 *.log
+task-*.log
 result*.json
 scratch/
+test_output.txt
+delivery_test.txt
+apply_full_backend.py
+upgrade_backend.py
+make_db.py
+make_delivery.py
+project_code.txt

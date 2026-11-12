@@ -111,6 +111,44 @@ pre-commit install
 
 ---
 
+## ☁️ Deploy to Render (Free Tier Blueprint)
+
+Route.it is fully optimized for **Render's Free Tier** (512 MB RAM) using a unified single-port architecture (serving the compiled React SPA + FastAPI backend + WebSockets together).
+
+### Step-by-Step Deployment:
+
+1. **Push your code to GitHub**:
+   Ensure all changes are committed and pushed to your GitHub repository:
+   ```bash
+   git add .
+   git commit -m "Configure Route.it for Render free tier deployment"
+   git push origin main
+   ```
+
+2. **Open Render**:
+   - Go to [dashboard.render.com](https://dashboard.render.com/) and sign in.
+   - Click **New +** → **Blueprint**.
+
+3. **Connect Repository**:
+   - Select your GitHub repository.
+   - Render detects `render.yaml` automatically and configures the `routeit` web service using the multi-stage Docker build.
+
+4. **Deploy**:
+   - Click **Apply**.
+   - Render builds the frontend via Node 20, installs lean Python 3.11 wheels, and starts the server on `$PORT`.
+
+### Final URL Pattern:
+Once deployed, your service is available at:
+```
+https://<service-name>.onrender.com
+```
+- **Unified Web UI**: `https://<service-name>.onrender.com/` (SPA client routing)
+- **Health Check**: `https://<service-name>.onrender.com/health`
+- **REST APIs**: `https://<service-name>.onrender.com/api/*` and `/delivery/*`
+- **Telemetry WebSockets**: `wss://<service-name>.onrender.com/ws/problems/{id}`
+
+---
+
 ## ⚖️ Integrity Rules
 1. **Zero Fabrication**: Benchmark numbers and performance metrics are never simulated, estimated, or fabricated. Every reported result originates from experimental runs logged in `/benchmarks/results`.
 2. **Honest Baselines**: If OR-Tools or any baseline outperforms our algorithm on a given instance, it is explicitly and honestly reported.

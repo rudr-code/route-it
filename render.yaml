@@ -1,0 +1,25 @@
+# ===================================================================
+# Render Blueprint Specification for Route.it (Single Web Service)
+# Free Tier Deployment with Docker Runtime
+# ===================================================================
+
+services:
+  - type: web
+    name: routeit
+    runtime: docker
+    plan: free
+    region: oregon
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: PORT
+        value: 10000
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: DATA_DIR
+        value: /app/data
+      - key: ROUTEIT_SECRET_KEY
+        generateValue: true
+      - key: ROUTEIT_OTP_SECRET
+        generateValue: true

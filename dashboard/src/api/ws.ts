@@ -8,7 +8,8 @@ export function getWsBaseUrl(): string {
     return import.meta.env.VITE_WS_BASE_URL.replace(/\/$/, '');
   }
   const proto = window.location.protocol === 'https:' ? 'wss' : 'ws';
-  const host = window.location.hostname === 'localhost' ? 'localhost:8000' : window.location.host;
+  // Use window.location.host so it dynamically connects to whatever port or domain the app runs on
+  const host = window.location.host;
   return `${proto}://${host}`;
 }
 

@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api } from '../../api/client';
 import { RouteMap } from '../Map/RouteMap';
+import { LocationPickerMap, PRIORITY_COLORS } from '../Map/LocationPickerMap';
+import { vadodaraScenario } from '../../data/vadodara_scenario';
 import type { GeoJsonFeatureCollection } from '../../api/types';
 
 type AdminTab =
@@ -45,6 +47,15 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
 
   const [banner, setBanner] = useState<{ type: 'ok' | 'err'; msg: string } | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Delivery Location Picker States
+  const [activeCoords, setActiveCoords] = useState<{ lat: number; lon: number } | null>({
+    lat: 22.3125,
+    lon: 73.1785,
+  });
+  const [hoveredLocId, setHoveredLocId] = useState<string | null>(null);
+  const [selectedLocId, setSelectedLocId] = useState<string | null>(null);
+  const [editingLocId, setEditingLocId] = useState<string | null>(null);
 
   // Forms
   const [locForm, setLocForm] = useState({
@@ -144,13 +155,143 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
     }
   };
 
-  const handleAddLocation = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSelectCoords = useCallback((coords: { lat: number; lon: number }, address?: string) => {
+    setActiveCoords(coords);
+    setLocForm((prev) => ({
+      ...prev,
+      lat: coords.lat,
+      lon: coords.lon,
+      ...(address ? { address } : {}),
+    }));
+  }, []);
+
+  const handleQuickAddLocation = useCallback(async (locData: any) => {
     setBusy(true);
     try {
-      await api.createLocation(locForm);
-      setLocForm({ ...locForm, customer_name: '', address: '' });
-      setBanner({ type: 'ok', msg: 'Delivery location added successfully.' });
+      await api.createLocation(locData);
+      setBanner({ type: 'ok', msg: `⚡ Quick Add: Stop '${locData.customer_name}' added to fleet ledger!` });
+      await refreshAll();
+    } catch (err: any) {
+      setBanner({ type: 'err', msg: err.message });
+      throw err;
+    } finally {
+      setBusy(false);
+    }
+  }, [refreshAll]);
+
+  const handleEditLocation = useCallback((l: any) => {
+    setEditingLocId(l.id);
+    setLocForm({
+      customer_name: l.customer_name,
+      customer_phone: l.customer_phone,
+      address: l.address,
+      lat: l.lat,
+      lon: l.lon,
+      demand: l.demand,
+      priority: l.priority,
+      ready_time: l.ready_time,
+      due_time: l.due_time,
+      service_time: l.service_time,
+    });
+    setActiveCoords({ lat: l.lat, lon: l.lon });
+    setSelectedLocId(l.id);
+  }, []);
+
+  const handleCancelEdit = useCallback(() => {
+    setEditingLocId(null);
+    setLocForm({
+      customer_name: '',
+      customer_phone: '+91-9825099881',
+      address: '',
+      lat: 22.3125,
+      lon: 73.1785,
+      demand: 10,
+      priority: 1,
+      ready_time: 28800,
+      due_time: 50400,
+      service_time: 600,
+    });
+    setActiveCoords({ lat: 22.3125, lon: 73.1785 });
+    setSelectedLocId(null);
+  }, []);
+
+  const handleDeleteLocation = useCallback(async (id: string) => {
+    setBusy(true);
+    try {
+      await api.deleteLocation(id);
+      if (editingLocId === id) {
+        handleCancelEdit();
+      }
+      setBanner({ type: 'ok', msg: `Delivery stop ${id} deleted.` });
+      await refreshAll();
+    } catch (err: any) {
+      setBanner({ type: 'err', msg: err.message });
+    } finally {
+      setBusy(false);
+    }
+  }, [editingLocId, handleCancelEdit, refreshAll]);
+
+  const handleAddLocation = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (isNaN(locForm.lat) || isNaN(locForm.lon) || locForm.lat === 0 || locForm.lon === 0) {
+      setBanner({ type: 'err', msg: 'Please select a valid location on the map or enter valid coordinates.' });
+      return;
+    }
+    if (locForm.demand <= 0) {
+      setBanner({ type: 'err', msg: 'Demand must be greater than 0.' });
+      return;
+    }
+    if (locForm.priority < 1 || locForm.priority > 5) {
+      setBanner({ type: 'err', msg: 'Priority must be between 1 and 5.' });
+      return;
+    }
+
+    // Distance warning (> 100 km from warehouse)
+    const depotLat = vadodaraScenario.depot.lat || 22.3072;
+    const depotLon = vadodaraScenario.depot.lon || 73.1812;
+    const R = 6371;
+    const dLat = ((locForm.lat - depotLat) * Math.PI) / 180;
+    const dLon = ((locForm.lon - depotLon) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) ** 2 +
+      Math.cos((depotLat * Math.PI) / 180) *
+        Math.cos((locForm.lat * Math.PI) / 180) *
+        Math.sin(dLon / 2) ** 2;
+    const distKm = Math.round(R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 10) / 10;
+    if (distKm > 100) {
+      if (!window.confirm(`Notice: This delivery point is ${distKm} km away from the warehouse (> 100 km). Do you still wish to save it?`)) {
+        return;
+      }
+    }
+
+    // Duplicate check
+    const duplicate = locations.find(
+      (l) =>
+        (!editingLocId || l.id !== editingLocId) &&
+        Math.abs(l.lat - locForm.lat) < 0.0001 &&
+        Math.abs(l.lon - locForm.lon) < 0.0001
+    );
+    if (duplicate) {
+      setBanner({
+        type: 'err',
+        msg: `A delivery stop (${duplicate.customer_name}) already exists at these exact coordinates.`,
+      });
+      return;
+    }
+
+    setBusy(true);
+    try {
+      if (editingLocId) {
+        await api.updateLocation(editingLocId, locForm);
+        setBanner({ type: 'ok', msg: `Delivery location ${editingLocId} updated successfully.` });
+        setEditingLocId(null);
+      } else {
+        await api.createLocation(locForm);
+        setBanner({ type: 'ok', msg: 'Delivery location added and saved to fleet ledger.' });
+      }
+      setLocForm({ ...locForm, customer_name: '', address: '', demand: 10, priority: 1 });
+      setActiveCoords(null);
       await refreshAll();
     } catch (err: any) {
       setBanner({ type: 'err', msg: err.message });
@@ -507,43 +648,301 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
 
         {activeTab === 'locations' && (
           <div className="portal-section">
-            <h2>Delivery Location Management</h2>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+              <div>
+                <h2>Delivery Location Management</h2>
+                <p style={{ color: '#94a3b8', fontSize: 13, margin: 0 }}>
+                  Visually configure and manage customer drop-offs on the Vadodara GIS network. Click anywhere on the map or search to drop a stop.
+                </p>
+              </div>
+            </div>
+
             <div className="split-view-grid">
               <form className="card-box form-stack" onSubmit={handleAddLocation}>
-                <h3>Add Customer Delivery Stop</h3>
-                <input required placeholder="Customer / Business Name" className="setting-input full" value={locForm.customer_name} onChange={(e) => setLocForm({ ...locForm, customer_name: e.target.value })} />
-                <input required placeholder="Phone Number" className="setting-input full" value={locForm.customer_phone} onChange={(e) => setLocForm({ ...locForm, customer_phone: e.target.value })} />
-                <input required placeholder="Street Address, Vadodara" className="setting-input full" value={locForm.address} onChange={(e) => setLocForm({ ...locForm, address: e.target.value })} />
-                <div className="two-col">
-                  <label>Latitude <input type="number" step="0.0001" className="setting-input full" value={locForm.lat} onChange={(e) => setLocForm({ ...locForm, lat: Number(e.target.value) })} /></label>
-                  <label>Longitude <input type="number" step="0.0001" className="setting-input full" value={locForm.lon} onChange={(e) => setLocForm({ ...locForm, lon: Number(e.target.value) })} /></label>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                  <h3 style={{ margin: 0 }}>
+                    {editingLocId ? `✏️ Edit Customer Stop (${editingLocId})` : 'Add Customer Delivery Stop'}
+                  </h3>
+                  {editingLocId && (
+                    <button
+                      type="button"
+                      className="btn-xs"
+                      onClick={handleCancelEdit}
+                      style={{ background: 'rgba(255,255,255,0.1)', color: '#cbd5e1' }}
+                    >
+                      ✕ Cancel Edit
+                    </button>
+                  )}
                 </div>
+
+                <input
+                  required
+                  placeholder="Customer / Business Name"
+                  className="setting-input full"
+                  value={locForm.customer_name}
+                  onChange={(e) => setLocForm({ ...locForm, customer_name: e.target.value })}
+                />
+                <input
+                  required
+                  placeholder="Phone Number (+91-XXXXXXXXXX)"
+                  className="setting-input full"
+                  value={locForm.customer_phone}
+                  onChange={(e) => setLocForm({ ...locForm, customer_phone: e.target.value })}
+                />
+                <input
+                  required
+                  placeholder="Street Address, Vadodara (Auto-filled on map click)"
+                  className="setting-input full"
+                  value={locForm.address}
+                  onChange={(e) => setLocForm({ ...locForm, address: e.target.value })}
+                />
+
                 <div className="two-col">
-                  <label>Demand (units) <input type="number" className="setting-input full" value={locForm.demand} onChange={(e) => setLocForm({ ...locForm, demand: Number(e.target.value) })} /></label>
-                  <label>Priority (1-5) <input type="number" min={1} max={5} className="setting-input full" value={locForm.priority} onChange={(e) => setLocForm({ ...locForm, priority: Number(e.target.value) })} /></label>
+                  <label>
+                    Latitude
+                    <input
+                      type="number"
+                      step="0.000001"
+                      className="setting-input full"
+                      value={locForm.lat}
+                      onChange={(e) => {
+                        const lat = parseFloat(e.target.value);
+                        setLocForm((prev) => ({ ...prev, lat }));
+                        if (!isNaN(lat) && !isNaN(locForm.lon)) {
+                          setActiveCoords({ lat, lon: locForm.lon });
+                        }
+                      }}
+                    />
+                  </label>
+                  <label>
+                    Longitude
+                    <input
+                      type="number"
+                      step="0.000001"
+                      className="setting-input full"
+                      value={locForm.lon}
+                      onChange={(e) => {
+                        const lon = parseFloat(e.target.value);
+                        setLocForm((prev) => ({ ...prev, lon }));
+                        if (!isNaN(locForm.lat) && !isNaN(lon)) {
+                          setActiveCoords({ lat: locForm.lat, lon });
+                        }
+                      }}
+                    />
+                  </label>
                 </div>
-                <button type="submit" className="btn btn-solve" disabled={busy}>+ Save Location</button>
+
+                <div className="two-col">
+                  <label>
+                    Demand (units)
+                    <input
+                      type="number"
+                      min={1}
+                      className="setting-input full"
+                      value={locForm.demand}
+                      onChange={(e) => setLocForm({ ...locForm, demand: Number(e.target.value) })}
+                    />
+                  </label>
+                  <label>
+                    Priority (1=Standard to 5=Critical)
+                    <input
+                      type="number"
+                      min={1}
+                      max={5}
+                      className="setting-input full"
+                      value={locForm.priority}
+                      onChange={(e) => setLocForm({ ...locForm, priority: Number(e.target.value) })}
+                    />
+                  </label>
+                </div>
+
+                {/* Interactive Map Picker Embedded in Form */}
+                <div style={{ marginTop: 8, marginBottom: 8 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <label style={{ fontSize: 12, fontWeight: 600, color: '#c7d2fe', display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span>🗺️ Pick Delivery Stop on Map</span>
+                      <span style={{ fontSize: 11, color: '#94a3b8', fontWeight: 400 }}>
+                        (Click to set pin & geocode • Drag to adjust)
+                      </span>
+                    </label>
+                    {activeCoords && (
+                      <span style={{ fontSize: 11, fontFamily: 'monospace', color: '#a5b4fc', background: 'rgba(99, 102, 241, 0.15)', padding: '2px 8px', borderRadius: 4 }}>
+                        📍 {activeCoords.lat.toFixed(6)}, {activeCoords.lon.toFixed(6)}
+                      </span>
+                    )}
+                  </div>
+                  <LocationPickerMap
+                    warehouse={{
+                      lat: vadodaraScenario.depot.lat || 22.3072,
+                      lon: vadodaraScenario.depot.lon || 73.1812,
+                      name: vadodaraScenario.depot.name || 'Vadodara Central Depot (Sayajigunj)',
+                    }}
+                    savedLocations={locations}
+                    activeCoords={activeCoords}
+                    onSelectCoords={handleSelectCoords}
+                    onQuickAddLocation={handleQuickAddLocation}
+                    onEditLocation={handleEditLocation}
+                    onDeleteLocation={handleDeleteLocation}
+                    hoveredLocationId={hoveredLocId}
+                    onHoverLocation={setHoveredLocId}
+                    selectedLocationId={selectedLocId}
+                    onSelectLocation={setSelectedLocId}
+                    height={460}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                  <button type="submit" className="btn btn-solve" style={{ flex: 1 }} disabled={busy}>
+                    {editingLocId ? '💾 Update Location' : '+ Save Location'}
+                  </button>
+                  {editingLocId && (
+                    <button
+                      type="button"
+                      className="btn"
+                      style={{ background: 'rgba(255,255,255,0.1)', color: '#cbd5e1' }}
+                      onClick={handleCancelEdit}
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </form>
 
               <div className="card-box table-scroll">
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, flexWrap: 'wrap', gap: 8 }}>
+                  <h3 style={{ margin: 0 }}>Registered Delivery Stops ({locations.length})</h3>
+                  <div style={{ display: 'flex', gap: 8, fontSize: 11, alignItems: 'center' }}>
+                    <span style={{ color: '#94a3b8' }}>Priority:</span>
+                    {[1, 2, 3, 4, 5].map((p) => (
+                      <span key={p} style={{ display: 'inline-flex', alignItems: 'center', gap: 3, color: '#e2e8f0' }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', background: PRIORITY_COLORS[p] }} />
+                        P{p}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
                 <table className="data-table">
                   <thead>
-                    <tr><th>ID</th><th>Customer</th><th>Address</th><th>GPS</th><th>Demand</th><th>Window</th><th></th></tr>
+                    <tr>
+                      <th>ID</th>
+                      <th>Customer</th>
+                      <th>Address</th>
+                      <th>GPS</th>
+                      <th>Demand</th>
+                      <th>Window</th>
+                      <th style={{ textAlign: 'center' }}>Actions</th>
+                    </tr>
                   </thead>
                   <tbody>
-                    {locations.map((l) => (
-                      <tr key={l.id}>
-                        <td className="mono">{l.id}</td>
-                        <td>{l.customer_name}<br /><small>{l.customer_phone}</small></td>
-                        <td>{l.address}</td>
-                        <td className="mono">{l.lat.toFixed(4)}, {l.lon.toFixed(4)}</td>
-                        <td>{l.demand}</td>
-                        <td>{fmtClock(l.ready_time)}–{fmtClock(l.due_time)}</td>
-                        <td>
-                          <button className="btn-xs" onClick={async () => { await api.deleteLocation(l.id); refreshAll(); }}>🗑</button>
-                        </td>
-                      </tr>
-                    ))}
+                    {locations.map((l, idx) => {
+                      const code = `C${String(idx + 1).padStart(2, '0')}`;
+                      const isHovered = hoveredLocId === l.id;
+                      const isSelected = selectedLocId === l.id;
+                      const isEditing = editingLocId === l.id;
+                      const prioColor = PRIORITY_COLORS[l.priority] || '#6366f1';
+
+                      return (
+                        <tr
+                          key={l.id}
+                          style={{
+                            backgroundColor:
+                              isEditing
+                                ? 'rgba(168, 85, 247, 0.28)'
+                                : isSelected || isHovered
+                                ? 'rgba(99, 102, 241, 0.2)'
+                                : undefined,
+                            transition: 'background-color 0.15s ease',
+                            cursor: 'pointer',
+                          }}
+                          onMouseEnter={() => setHoveredLocId(l.id)}
+                          onMouseLeave={() => setHoveredLocId(null)}
+                          onClick={() => {
+                            setSelectedLocId(l.id);
+                            setActiveCoords({ lat: l.lat, lon: l.lon });
+                          }}
+                        >
+                          <td>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <span
+                                style={{
+                                  background: prioColor,
+                                  color: '#fff',
+                                  fontSize: 10,
+                                  fontWeight: 700,
+                                  padding: '1px 5px',
+                                  borderRadius: 4,
+                                  fontFamily: 'monospace',
+                                }}
+                              >
+                                {code}
+                              </span>
+                              <span className="mono" style={{ fontSize: 11, color: '#94a3b8' }}>
+                                {l.id}
+                              </span>
+                            </div>
+                          </td>
+                          <td>
+                            <strong>{l.customer_name}</strong>
+                            <br />
+                            <small style={{ color: '#94a3b8' }}>{l.customer_phone}</small>
+                          </td>
+                          <td style={{ maxWidth: 200, fontSize: 12 }}>
+                            {l.address}
+                          </td>
+                          <td className="mono" style={{ fontSize: 11 }}>
+                            {l.lat.toFixed(5)}, {l.lon.toFixed(5)}
+                          </td>
+                          <td>
+                            <span style={{ fontWeight: 600 }}>{l.demand}</span>
+                            <span
+                              style={{
+                                marginLeft: 6,
+                                background: prioColor,
+                                color: '#fff',
+                                fontSize: 10,
+                                padding: '1px 5px',
+                                borderRadius: 4,
+                                fontWeight: 700,
+                              }}
+                            >
+                              P{l.priority}
+                            </span>
+                          </td>
+                          <td style={{ fontSize: 11 }}>
+                            {fmtClock(l.ready_time)}–{fmtClock(l.due_time)}
+                          </td>
+                          <td>
+                            <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+                              <button
+                                type="button"
+                                className="btn-xs"
+                                title="Edit stop in form"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleEditLocation(l);
+                                }}
+                                style={{ background: '#4f46e5', color: '#fff' }}
+                              >
+                                ✏️
+                              </button>
+                              <button
+                                type="button"
+                                className="btn-xs"
+                                title="Delete stop"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteLocation(l.id);
+                                }}
+                                style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#f87171' }}
+                              >
+                                🗑️
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

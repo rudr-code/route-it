@@ -75,6 +75,8 @@ export const api = {
   listLocations: (): Promise<any[]> => request('/delivery/locations'),
   createLocation: (body: any): Promise<any> =>
     request('/delivery/locations', { method: 'POST', body: JSON.stringify(body) }),
+  updateLocation: (id: string, body: any): Promise<any> =>
+    request(`/delivery/locations/${id}`, { method: 'PUT', body: JSON.stringify(body) }),
   deleteLocation: (id: string): Promise<void> =>
     request(`/delivery/locations/${id}`, { method: 'DELETE' }),
 
@@ -128,4 +130,10 @@ export const api = {
   trackDelivery: (token: string): Promise<any> =>
     request(`/delivery/track/${encodeURIComponent(token)}`),
   getHistory: (): Promise<any[]> => request('/delivery/history'),
+
+  // Multi-Algorithm Benchmarking Endpoints
+  runBenchmark: (body?: any): Promise<any> =>
+    request('/benchmarks/run', { method: 'POST', body: JSON.stringify(body || {}) }),
+  getLatestBenchmark: (): Promise<any> => request('/benchmarks/latest'),
+  getScalability: (): Promise<any[]> => request('/benchmarks/scalability'),
 };

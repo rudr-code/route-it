@@ -12,10 +12,10 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "strict": true,
+    "types": ["vite/client"],
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noFallthroughCasesInSwitch": true
   },
-  "include": ["src", "../benchmarks/instances/vadodara_30.json"],
-  "references": [{ "path": "./tsconfig.node.json" }]
+  "include": ["src", "../benchmarks/instances/vadodara_30.json"]
 }
