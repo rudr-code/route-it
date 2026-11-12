@@ -134,6 +134,8 @@ export const api = {
   // Multi-Algorithm Benchmarking Endpoints
   runBenchmark: (body?: any): Promise<any> =>
     request('/benchmarks/run', { method: 'POST', body: JSON.stringify(body || {}) }),
+  getBenchmarkJob: (jobId: string): Promise<any> =>
+    request(`/benchmarks/jobs/${encodeURIComponent(jobId)}`),
   getLatestBenchmark: (): Promise<any> => request('/benchmarks/latest'),
   getScalability: (): Promise<any[]> => request('/benchmarks/scalability'),
 };

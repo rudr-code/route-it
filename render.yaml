@@ -25,3 +25,9 @@ services:
         generateValue: true
       - key: VALHALLA_URL
         value: https://valhalla1.openstreetmap.de
+      - key: BENCH_MAX_NODES
+        value: "50"
+      - key: BENCH_MAX_ITERS
+        value: "25"
+      - key: BENCH_MAX_POP
+        value: "20"

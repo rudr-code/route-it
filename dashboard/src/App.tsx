@@ -9,10 +9,11 @@ import { TierBanner } from './components/EventControls/TierBanner';
 import { AdminPortal } from './components/Portals/AdminPortal';
 import { DriverPortal } from './components/Portals/DriverPortal';
 import { CustomerPortal } from './components/Portals/CustomerPortal';
+import { BenchmarkPortal } from './components/Portals/BenchmarkPortal';
 import { vadodaraScenario } from './data/vadodara_scenario';
 import type { SolutionResponse } from './api/types';
 
-type ActivePortal = 'studio' | 'admin' | 'driver' | 'customer';
+type ActivePortal = 'studio' | 'admin' | 'driver' | 'customer' | 'benchmarks';
 
 export default function App() {
   const [activePortal, setActivePortal] = useState<ActivePortal>('studio');
@@ -91,6 +92,12 @@ export default function App() {
             onClick={() => setActivePortal('customer')}
           >
             📦 Customer Tracking
+          </button>
+          <button
+            className={`portal-tab-btn ${activePortal === 'benchmarks' ? 'active' : ''}`}
+            onClick={() => setActivePortal('benchmarks')}
+          >
+            📊 Benchmarking Studio (5 Solvers)
           </button>
         </nav>
       </header>
@@ -171,6 +178,9 @@ export default function App() {
 
       {/* Portal 4: Public Customer Tracking Portal */}
       {activePortal === 'customer' && <CustomerPortal initialToken={trackingToken} />}
+
+      {/* Portal 5: Algorithm Benchmarking & Analytics Studio */}
+      {activePortal === 'benchmarks' && <BenchmarkPortal />}
     </div>
   );
 }

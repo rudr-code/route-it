@@ -105,6 +105,7 @@ def run_algorithm_benchmark(
     num_particles_or_pop: int = 30,
     max_iters_or_gen: int = 40,
     seed: int = 42,
+    progress_callback: Callable[[int, str], None] | None = None,
 ) -> BenchmarkSuiteResult:
     """Run head-to-head comparison between specified optimization algorithms."""
     if algorithms is None:
@@ -115,10 +116,14 @@ def run_algorithm_benchmark(
         problem.compute_euclidean_matrices()
 
     results: list[AlgorithmBenchmarkResult] = []
+    total_algos = len(algorithms)
 
     # 1. QPSO
     if "qpso" in algorithms:
         try:
+            if progress_callback:
+                idx = len(results)
+                progress_callback(int((idx / total_algos) * 100), "Running Quantum-behaved PSO (QPSO)...")
             t0 = time.perf_counter()
             cfg_qpso = QPSOConfig(
                 num_particles=num_particles_or_pop,
@@ -156,6 +161,9 @@ def run_algorithm_benchmark(
     # 2. Classical PSO
     if "pso" in algorithms:
         try:
+            if progress_callback:
+                idx = len(results)
+                progress_callback(int((idx / total_algos) * 100), "Running Classical PSO...")
             t0 = time.perf_counter()
             cfg_pso = PSOConfig(
                 num_particles=num_particles_or_pop,
@@ -193,6 +201,9 @@ def run_algorithm_benchmark(
     # 3. Genetic Algorithm
     if "ga" in algorithms:
         try:
+            if progress_callback:
+                idx = len(results)
+                progress_callback(int((idx / total_algos) * 100), "Running Genetic Algorithm (GA)...")
             t0 = time.perf_counter()
             cfg_ga = GAConfig(
                 population_size=num_particles_or_pop,
@@ -230,6 +241,9 @@ def run_algorithm_benchmark(
     # 4. Dijkstra Network Heuristic
     if "dijkstra" in algorithms:
         try:
+            if progress_callback:
+                idx = len(results)
+                progress_callback(int((idx / total_algos) * 100), "Running Dijkstra Heuristic...")
             t0 = time.perf_counter()
             cfg_dijkstra = DijkstraConfig(seed=seed)
             sol_dijkstra, hist_dijkstra = solve_dijkstra(problem, cfg_dijkstra)
@@ -263,6 +277,9 @@ def run_algorithm_benchmark(
     # 5. Google OR-Tools Baseline
     if "ortools" in algorithms:
         try:
+            if progress_callback:
+                idx = len(results)
+                progress_callback(int((idx / total_algos) * 100), "Running Google OR-Tools (Guided Local Search)...")
             t0 = time.perf_counter()
             cfg_ortools = ORToolsConfig(time_limit_sec=2.0)
             sol_ortools = solve_ortools(problem, cfg_ortools)
@@ -293,6 +310,9 @@ def run_algorithm_benchmark(
             )
         except Exception as exc:
             logger.error(f"Error benchmarking OR-Tools: {exc}")
+
+    if progress_callback:
+        progress_callback(100, "All benchmark algorithms completed!")
 
     # Determine baseline algorithm (prefer classical PSO for comparison)
     pso_res = next((r for r in results if r.algorithm == "pso"), None)
@@ -332,8 +352,14 @@ def run_scalability_analysis(
     seed: int = 42,
 ) -> list[dict[str, Any]]:
     """Run scalability profiling across varying customer counts (e.g. 10, 25, 50, 100)."""
+    max_node_env = int(os.environ.get("BENCH_MAX_NODES", "50" if os.environ.get("RENDER") else "100"))
     if node_sizes is None:
         node_sizes = [10, 25, 50, 100]
+
+    # Filter node sizes based on environment cap to prevent cloud timeout
+    node_sizes = [s for s in node_sizes if s <= max_node_env]
+    if not node_sizes:
+        node_sizes = [10, 25]
 
     rng = np.random.default_rng(seed)
     scalability_points: list[dict[str, Any]] = []
@@ -405,7 +431,10 @@ def run_scalability_analysis(
         t0 = time.perf_counter()
         sol_o = solve_ortools(prob, ORToolsConfig(time_limit_sec=1.5))
         point_data["ortools_ms"] = round((time.perf_counter() - t0) * 1000.0, 1)
-        point_data["ortools_dist_km"] = round(sol_o.total_cost / 1000.0, 2)
+        if sol_o.total_cost == float("inf") or sol_o.total_cost >= 1e12:
+            point_data["ortools_dist_km"] = None
+        else:
+            point_data["ortools_dist_km"] = round(sol_o.total_cost / 1000.0, 2)
 
         scalability_points.append(point_data)
 

@@ -1,0 +1,668 @@
+{
+  "benchmark_20_stops": {
+    "execution_time_sec": 32.462810754776,
+    "best_algorithm": "ortools",
+    "results": [
+      {
+        "algorithm": "qpso",
+        "display_name": "Quantum-behaved PSO (QPSO)",
+        "is_feasible": false,
+        "num_vehicles_used": 6,
+        "total_cost": 83701.88,
+        "total_distance_km": 73.7,
+        "total_duration_min": 1866.2,
+        "traffic_delay_min": 335.9,
+        "operational_cost_inr": 2605.53,
+        "execution_time_ms": 30375.6,
+        "convergence_history": [
+          {
+            "iter": 1,
+            "cost": 101680.35
+          },
+          {
+            "iter": 2,
+            "cost": 92981.66
+          },
+          {
+            "iter": 3,
+            "cost": 92981.66
+          },
+          {
+            "iter": 4,
+            "cost": 92981.66
+          },
+          {
+            "iter": 5,
+            "cost": 92981.66
+          },
+          {
+            "iter": 6,
+            "cost": 92981.66
+          },
+          {
+            "iter": 7,
+            "cost": 92981.66
+          },
+          {
+            "iter": 8,
+            "cost": 92981.66
+          },
+          {
+            "iter": 9,
+            "cost": 92981.66
+          },
+          {
+            "iter": 10,
+            "cost": 92981.66
+          },
+          {
+            "iter": 11,
+            "cost": 92981.66
+          },
+          {
+            "iter": 12,
+            "cost": 92981.66
+          },
+          {
+            "iter": 13,
+            "cost": 92981.66
+          },
+          {
+            "iter": 14,
+            "cost": 92981.66
+          },
+          {
+            "iter": 15,
+            "cost": 92981.66
+          },
+          {
+            "iter": 16,
+            "cost": 92981.66
+          },
+          {
+            "iter": 17,
+            "cost": 92981.66
+          },
+          {
+            "iter": 18,
+            "cost": 92981.66
+          },
+          {
+            "iter": 19,
+            "cost": 92981.66
+          },
+          {
+            "iter": 20,
+            "cost": 92981.66
+          },
+          {
+            "iter": 21,
+            "cost": 92981.66
+          },
+          {
+            "iter": 22,
+            "cost": 92981.66
+          },
+          {
+            "iter": 23,
+            "cost": 83998.37
+          },
+          {
+            "iter": 24,
+            "cost": 83998.37
+          },
+          {
+            "iter": 25,
+            "cost": 83998.37
+          },
+          {
+            "iter": 26,
+            "cost": 83998.37
+          },
+          {
+            "iter": 27,
+            "cost": 83998.37
+          },
+          {
+            "iter": 28,
+            "cost": 83998.37
+          },
+          {
+            "iter": 29,
+            "cost": 83998.37
+          },
+          {
+            "iter": 30,
+            "cost": 83998.37
+          },
+          {
+            "iter": 31,
+            "cost": 83998.37
+          },
+          {
+            "iter": 32,
+            "cost": 83998.37
+          },
+          {
+            "iter": 33,
+            "cost": 83998.37
+          },
+          {
+            "iter": 34,
+            "cost": 83701.88
+          },
+          {
+            "iter": 35,
+            "cost": 83701.88
+          },
+          {
+            "iter": 36,
+            "cost": 83701.88
+          }
+        ],
+        "relative_distance_diff_pct": -5.25,
+        "relative_cost_diff_pct": 7.61
+      },
+      {
+        "algorithm": "pso",
+        "display_name": "Classical PSO",
+        "is_feasible": true,
+        "num_vehicles_used": 4,
+        "total_cost": 77781.63,
+        "total_distance_km": 77.78,
+        "total_duration_min": 1692.9,
+        "traffic_delay_min": 304.7,
+        "operational_cost_inr": 2166.72,
+        "execution_time_ms": 37.1,
+        "convergence_history": [
+          {
+            "iter": 1,
+            "cost": 101680.35
+          },
+          {
+            "iter": 2,
+            "cost": 101680.35
+          },
+          {
+            "iter": 3,
+            "cost": 101680.35
+          },
+          {
+            "iter": 4,
+            "cost": 92966.28
+          },
+          {
+            "iter": 5,
+            "cost": 92966.28
+          },
+          {
+            "iter": 6,
+            "cost": 92966.28
+          },
+          {
+            "iter": 7,
+            "cost": 92966.28
+          },
+          {
+            "iter": 8,
+            "cost": 92966.28
+          },
+          {
+            "iter": 9,
+            "cost": 92966.28
+          },
+          {
+            "iter": 10,
+            "cost": 92966.28
+          },
+          {
+            "iter": 11,
+            "cost": 92645.12
+          },
+          {
+            "iter": 12,
+            "cost": 92205.13
+          },
+          {
+            "iter": 13,
+            "cost": 90204.96
+          },
+          {
+            "iter": 14,
+            "cost": 90204.96
+          },
+          {
+            "iter": 15,
+            "cost": 90184.86
+          },
+          {
+            "iter": 16,
+            "cost": 88189.87
+          },
+          {
+            "iter": 17,
+            "cost": 88189.87
+          },
+          {
+            "iter": 18,
+            "cost": 88189.87
+          },
+          {
+            "iter": 19,
+            "cost": 88189.87
+          },
+          {
+            "iter": 20,
+            "cost": 88189.87
+          },
+          {
+            "iter": 21,
+            "cost": 88189.87
+          },
+          {
+            "iter": 22,
+            "cost": 88189.87
+          },
+          {
+            "iter": 23,
+            "cost": 85403.99
+          },
+          {
+            "iter": 24,
+            "cost": 84585.75
+          },
+          {
+            "iter": 25,
+            "cost": 84585.75
+          },
+          {
+            "iter": 26,
+            "cost": 84585.75
+          },
+          {
+            "iter": 27,
+            "cost": 84585.75
+          },
+          {
+            "iter": 28,
+            "cost": 84585.75
+          },
+          {
+            "iter": 29,
+            "cost": 84585.75
+          },
+          {
+            "iter": 30,
+            "cost": 84585.75
+          },
+          {
+            "iter": 31,
+            "cost": 78936.89
+          },
+          {
+            "iter": 32,
+            "cost": 78936.89
+          },
+          {
+            "iter": 33,
+            "cost": 78936.89
+          },
+          {
+            "iter": 34,
+            "cost": 78936.89
+          },
+          {
+            "iter": 35,
+            "cost": 77781.63
+          },
+          {
+            "iter": 36,
+            "cost": 77781.63
+          }
+        ],
+        "relative_distance_diff_pct": 0.0,
+        "relative_cost_diff_pct": 0.0
+      },
+      {
+        "algorithm": "ga",
+        "display_name": "Genetic Algorithm (GA)",
+        "is_feasible": false,
+        "num_vehicles_used": 5,
+        "total_cost": 89571.54,
+        "total_distance_km": 79.57,
+        "total_duration_min": 1702.9,
+        "traffic_delay_min": 306.5,
+        "operational_cost_inr": 2443.57,
+        "execution_time_ms": 26.7,
+        "convergence_history": [
+          {
+            "iter": 1,
+            "cost": 101680.35
+          },
+          {
+            "iter": 2,
+            "cost": 101680.35
+          },
+          {
+            "iter": 3,
+            "cost": 101680.35
+          },
+          {
+            "iter": 4,
+            "cost": 101680.35
+          },
+          {
+            "iter": 5,
+            "cost": 101680.35
+          },
+          {
+            "iter": 6,
+            "cost": 101680.35
+          },
+          {
+            "iter": 7,
+            "cost": 101680.35
+          },
+          {
+            "iter": 8,
+            "cost": 101680.35
+          },
+          {
+            "iter": 9,
+            "cost": 101680.35
+          },
+          {
+            "iter": 10,
+            "cost": 101680.35
+          },
+          {
+            "iter": 11,
+            "cost": 101680.35
+          },
+          {
+            "iter": 12,
+            "cost": 100491.7
+          },
+          {
+            "iter": 13,
+            "cost": 99592.65
+          },
+          {
+            "iter": 14,
+            "cost": 94595.74
+          },
+          {
+            "iter": 15,
+            "cost": 94595.74
+          },
+          {
+            "iter": 16,
+            "cost": 91642.17
+          },
+          {
+            "iter": 17,
+            "cost": 91642.17
+          },
+          {
+            "iter": 18,
+            "cost": 91642.17
+          },
+          {
+            "iter": 19,
+            "cost": 91642.17
+          },
+          {
+            "iter": 20,
+            "cost": 91642.17
+          },
+          {
+            "iter": 21,
+            "cost": 91642.17
+          },
+          {
+            "iter": 22,
+            "cost": 91642.17
+          },
+          {
+            "iter": 23,
+            "cost": 91642.17
+          },
+          {
+            "iter": 24,
+            "cost": 91642.17
+          },
+          {
+            "iter": 25,
+            "cost": 91520.6
+          },
+          {
+            "iter": 26,
+            "cost": 91520.6
+          },
+          {
+            "iter": 27,
+            "cost": 91383.22
+          },
+          {
+            "iter": 28,
+            "cost": 90889.32
+          },
+          {
+            "iter": 29,
+            "cost": 89571.54
+          },
+          {
+            "iter": 30,
+            "cost": 89571.54
+          },
+          {
+            "iter": 31,
+            "cost": 89571.54
+          },
+          {
+            "iter": 32,
+            "cost": 89571.54
+          },
+          {
+            "iter": 33,
+            "cost": 89571.54
+          },
+          {
+            "iter": 34,
+            "cost": 89571.54
+          },
+          {
+            "iter": 35,
+            "cost": 89571.54
+          },
+          {
+            "iter": 36,
+            "cost": 89571.54
+          }
+        ],
+        "relative_distance_diff_pct": 2.3,
+        "relative_cost_diff_pct": 15.16
+      },
+      {
+        "algorithm": "dijkstra",
+        "display_name": "Dijkstra Heuristic",
+        "is_feasible": false,
+        "num_vehicles_used": 5,
+        "total_cost": 81654.22,
+        "total_distance_km": 81.65,
+        "total_duration_min": 1959.7,
+        "traffic_delay_min": 352.8,
+        "operational_cost_inr": 2474.81,
+        "execution_time_ms": 3.6,
+        "convergence_history": [
+          {
+            "iter": 0,
+            "cost": 2.5
+          },
+          {
+            "iter": 1,
+            "cost": 5.0
+          },
+          {
+            "iter": 3,
+            "cost": 7.5
+          },
+          {
+            "iter": 5,
+            "cost": 10.0
+          },
+          {
+            "iter": 7,
+            "cost": 12.5
+          },
+          {
+            "iter": 9,
+            "cost": 15.0
+          },
+          {
+            "iter": 11,
+            "cost": 10526.08
+          },
+          {
+            "iter": 12,
+            "cost": 10528.58
+          },
+          {
+            "iter": 14,
+            "cost": 10531.08
+          },
+          {
+            "iter": 16,
+            "cost": 10533.58
+          },
+          {
+            "iter": 18,
+            "cost": 10536.08
+          },
+          {
+            "iter": 20,
+            "cost": 10538.58
+          },
+          {
+            "iter": 22,
+            "cost": 29982.13
+          },
+          {
+            "iter": 23,
+            "cost": 29984.63
+          },
+          {
+            "iter": 25,
+            "cost": 29987.13
+          },
+          {
+            "iter": 27,
+            "cost": 29989.63
+          },
+          {
+            "iter": 29,
+            "cost": 47415.52
+          },
+          {
+            "iter": 31,
+            "cost": 47418.02
+          },
+          {
+            "iter": 33,
+            "cost": 47420.52
+          }
+        ],
+        "relative_distance_diff_pct": 4.98,
+        "relative_cost_diff_pct": 4.98
+      },
+      {
+        "algorithm": "ortools",
+        "display_name": "Google OR-Tools (Guided Local Search)",
+        "is_feasible": true,
+        "num_vehicles_used": 4,
+        "total_cost": 62067.92,
+        "total_distance_km": 62.07,
+        "total_duration_min": 1034.5,
+        "traffic_delay_min": 186.2,
+        "operational_cost_inr": 1931.02,
+        "execution_time_ms": 2019.4,
+        "convergence_history": [
+          {
+            "iter": 1,
+            "cost": 71378.11
+          },
+          {
+            "iter": 17,
+            "cost": 65171.32
+          },
+          {
+            "iter": 35,
+            "cost": 62067.92
+          }
+        ],
+        "relative_distance_diff_pct": -20.2,
+        "relative_cost_diff_pct": -20.2
+      }
+    ]
+  },
+  "numba_jit_analysis": {
+    "cold_run_sec": 0.1223,
+    "warm_run_sec": 0.1169,
+    "speedup_ratio": 1.05,
+    "total_cost": 9161.39
+  },
+  "scalability_analysis": [
+    {
+      "num_nodes": 10,
+      "qpso_ms": 22.2,
+      "qpso_dist_km": 62.37,
+      "pso_ms": 17.8,
+      "pso_dist_km": 58.99,
+      "ga_ms": 12.2,
+      "ga_dist_km": 73.61,
+      "dijkstra_ms": 0.7,
+      "dijkstra_dist_km": 94.0,
+      "ortools_ms": 1500.9,
+      "ortools_dist_km": 57.25
+    },
+    {
+      "num_nodes": 25,
+      "qpso_ms": 32.0,
+      "qpso_dist_km": 186.73,
+      "pso_ms": 29.6,
+      "pso_dist_km": 198.91,
+      "ga_ms": 20.7,
+      "ga_dist_km": 164.03,
+      "dijkstra_ms": 4.5,
+      "dijkstra_dist_km": 201.71,
+      "ortools_ms": 1501.2,
+      "ortools_dist_km": Infinity
+    },
+    {
+      "num_nodes": 50,
+      "qpso_ms": 50.0,
+      "qpso_dist_km": 476.24,
+      "pso_ms": 50.4,
+      "pso_dist_km": 460.32,
+      "ga_ms": 19.6,
+      "ga_dist_km": 444.12,
+      "dijkstra_ms": 32.4,
+      "dijkstra_dist_km": 324.54,
+      "ortools_ms": 1501.7,
+      "ortools_dist_km": Infinity
+    },
+    {
+      "num_nodes": 100,
+      "qpso_ms": 90.0,
+      "qpso_dist_km": 934.53,
+      "pso_ms": 89.3,
+      "pso_dist_km": 922.71,
+      "ga_ms": 39.5,
+      "ga_dist_km": 849.91,
+      "dijkstra_ms": 250.9,
+      "dijkstra_dist_km": 568.96,
+      "ortools_ms": 1501.7,
+      "ortools_dist_km": Infinity
+    }
+  ]
+}
