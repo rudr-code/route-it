@@ -92,3 +92,6 @@ upgrade_backend.py
 make_db.py
 make_delivery.py
 project_code.txt
+
+.github/
+
