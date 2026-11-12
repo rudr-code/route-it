@@ -1,8 +1,8 @@
-import rawVadodaraJson from '../../../benchmarks/instances/vadodara_30.json';
+import rawVadodaraJson from './vadodara_30.json';
 import type { ProblemCreateRequest } from '../api/types';
 
 // Canonical Vadodara 30-stop delivery scenario
-// Sourced directly from benchmarks/instances/vadodara_30.json (single source of truth).
+// Sourced from dashboard/src/data/vadodara_30.json.
 // All distances are in metres, times in seconds (SI unit contract).
 export const vadodaraScenario: ProblemCreateRequest = {
   id: rawVadodaraJson.id,
@@ -16,7 +16,7 @@ export const vadodaraScenario: ProblemCreateRequest = {
     due_time: rawVadodaraJson.depot.due_time,
     service_time: rawVadodaraJson.depot.service_time,
   },
-  customers: rawVadodaraJson.customers.map((c) => ({
+  customers: (rawVadodaraJson.customers as any[]).map((c: any) => ({
     id: c.id,
     name: c.name,
     lat: c.lat,
@@ -27,7 +27,7 @@ export const vadodaraScenario: ProblemCreateRequest = {
     service_time: c.service_time,
     priority: c.priority ?? 1,
   })),
-  vehicles: rawVadodaraJson.vehicles.map((v) => ({
+  vehicles: (rawVadodaraJson.vehicles as any[]).map((v: any) => ({
     id: v.id,
     capacity: v.capacity,
     shift_start: v.shift_start,

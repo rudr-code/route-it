@@ -1,0 +1,403 @@
+{
+  "id": "vadodara_30",
+  "depot": {
+    "id": "depot",
+    "lat": 22.3072,
+    "lon": 73.1812,
+    "ready_time": 25200.0,
+    "due_time": 64800.0,
+    "service_time": 0.0,
+    "name": "Vadodara Central Distribution Hub"
+  },
+  "customers": [
+    {
+      "id": "C01",
+      "lat": 22.3105,
+      "lon": 73.1667,
+      "demand": 8.0,
+      "ready_time": 28800.0,
+      "due_time": 39600.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Alkapuri"
+    },
+    {
+      "id": "C02",
+      "lat": 22.3242,
+      "lon": 73.1816,
+      "demand": 5.0,
+      "ready_time": 32400.0,
+      "due_time": 43200.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Fatehgunj"
+    },
+    {
+      "id": "C03",
+      "lat": 22.3166,
+      "lon": 73.178,
+      "demand": 12.0,
+      "ready_time": 28800.0,
+      "due_time": 36000.0,
+      "service_time": 720.0,
+      "priority": 2,
+      "name": "Sayajiganj"
+    },
+    {
+      "id": "C04",
+      "lat": 22.2721,
+      "lon": 73.1823,
+      "demand": 7.0,
+      "ready_time": 36000.0,
+      "due_time": 50400.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Manjalpur"
+    },
+    {
+      "id": "C05",
+      "lat": 22.328,
+      "lon": 73.235,
+      "demand": 9.0,
+      "ready_time": 28800.0,
+      "due_time": 46800.0,
+      "service_time": 900.0,
+      "priority": 1,
+      "name": "Waghodia"
+    },
+    {
+      "id": "C06",
+      "lat": 22.2598,
+      "lon": 73.1756,
+      "demand": 6.0,
+      "ready_time": 36000.0,
+      "due_time": 54000.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Makarpura"
+    },
+    {
+      "id": "C07",
+      "lat": 22.3412,
+      "lon": 73.1554,
+      "demand": 4.0,
+      "ready_time": 32400.0,
+      "due_time": 43200.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Gorwa"
+    },
+    {
+      "id": "C08",
+      "lat": 22.3051,
+      "lon": 73.1901,
+      "demand": 10.0,
+      "ready_time": 28800.0,
+      "due_time": 39600.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Productivity Road"
+    },
+    {
+      "id": "C09",
+      "lat": 22.3438,
+      "lon": 73.1945,
+      "demand": 8.0,
+      "ready_time": 36000.0,
+      "due_time": 50400.0,
+      "service_time": 720.0,
+      "priority": 1,
+      "name": "Nizampura"
+    },
+    {
+      "id": "C10",
+      "lat": 22.3001,
+      "lon": 73.1729,
+      "demand": 11.0,
+      "ready_time": 28800.0,
+      "due_time": 43200.0,
+      "service_time": 600.0,
+      "priority": 2,
+      "name": "Akota"
+    },
+    {
+      "id": "C11",
+      "lat": 22.3213,
+      "lon": 73.2082,
+      "demand": 5.0,
+      "ready_time": 32400.0,
+      "due_time": 46800.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Harni"
+    },
+    {
+      "id": "C12",
+      "lat": 22.3613,
+      "lon": 73.1784,
+      "demand": 7.0,
+      "ready_time": 36000.0,
+      "due_time": 54000.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Chhani"
+    },
+    {
+      "id": "C13",
+      "lat": 22.3296,
+      "lon": 73.1883,
+      "demand": 9.0,
+      "ready_time": 28800.0,
+      "due_time": 39600.0,
+      "service_time": 720.0,
+      "priority": 1,
+      "name": "Karelibaug"
+    },
+    {
+      "id": "C14",
+      "lat": 22.3162,
+      "lon": 73.2002,
+      "demand": 6.0,
+      "ready_time": 32400.0,
+      "due_time": 50400.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Sama"
+    },
+    {
+      "id": "C15",
+      "lat": 22.2963,
+      "lon": 73.1693,
+      "demand": 8.0,
+      "ready_time": 28800.0,
+      "due_time": 43200.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Subhanpura"
+    },
+    {
+      "id": "C16",
+      "lat": 22.2892,
+      "lon": 73.1761,
+      "demand": 5.0,
+      "ready_time": 36000.0,
+      "due_time": 54000.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Ellora Park"
+    },
+    {
+      "id": "C17",
+      "lat": 22.299,
+      "lon": 73.203,
+      "demand": 12.0,
+      "ready_time": 28800.0,
+      "due_time": 36000.0,
+      "service_time": 900.0,
+      "priority": 1,
+      "name": "Panigate"
+    },
+    {
+      "id": "C18",
+      "lat": 22.2983,
+      "lon": 73.2107,
+      "demand": 7.0,
+      "ready_time": 32400.0,
+      "due_time": 43200.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Raopura"
+    },
+    {
+      "id": "C19",
+      "lat": 22.3069,
+      "lon": 73.2144,
+      "demand": 9.0,
+      "ready_time": 28800.0,
+      "due_time": 46800.0,
+      "service_time": 720.0,
+      "priority": 1,
+      "name": "Navapura"
+    },
+    {
+      "id": "C20",
+      "lat": 22.2852,
+      "lon": 73.1623,
+      "demand": 6.0,
+      "ready_time": 36000.0,
+      "due_time": 50400.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Gotri"
+    },
+    {
+      "id": "C21",
+      "lat": 22.3718,
+      "lon": 73.2102,
+      "demand": 10.0,
+      "ready_time": 28800.0,
+      "due_time": 43200.0,
+      "service_time": 900.0,
+      "priority": 1,
+      "name": "Vadsar"
+    },
+    {
+      "id": "C22",
+      "lat": 22.2701,
+      "lon": 73.1918,
+      "demand": 8.0,
+      "ready_time": 32400.0,
+      "due_time": 54000.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Atladra"
+    },
+    {
+      "id": "C23",
+      "lat": 22.2786,
+      "lon": 73.1557,
+      "demand": 5.0,
+      "ready_time": 28800.0,
+      "due_time": 39600.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Tandalja"
+    },
+    {
+      "id": "C24",
+      "lat": 22.2622,
+      "lon": 73.1638,
+      "demand": 7.0,
+      "ready_time": 36000.0,
+      "due_time": 46800.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Vasna"
+    },
+    {
+      "id": "C25",
+      "lat": 22.3395,
+      "lon": 73.2285,
+      "demand": 9.0,
+      "ready_time": 28800.0,
+      "due_time": 50400.0,
+      "service_time": 720.0,
+      "priority": 1,
+      "name": "Warasiya"
+    },
+    {
+      "id": "C26",
+      "lat": 22.255,
+      "lon": 73.1967,
+      "demand": 11.0,
+      "ready_time": 32400.0,
+      "due_time": 43200.0,
+      "service_time": 900.0,
+      "priority": 1,
+      "name": "Tarsali"
+    },
+    {
+      "id": "C27",
+      "lat": 22.2817,
+      "lon": 73.1463,
+      "demand": 6.0,
+      "ready_time": 28800.0,
+      "due_time": 54000.0,
+      "service_time": 480.0,
+      "priority": 1,
+      "name": "Sevasi"
+    },
+    {
+      "id": "C28",
+      "lat": 22.3128,
+      "lon": 73.1944,
+      "demand": 8.0,
+      "ready_time": 32400.0,
+      "due_time": 39600.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Navayard"
+    },
+    {
+      "id": "C29",
+      "lat": 22.2482,
+      "lon": 73.1779,
+      "demand": 10.0,
+      "ready_time": 28800.0,
+      "due_time": 46800.0,
+      "service_time": 720.0,
+      "priority": 1,
+      "name": "Jetalpur"
+    },
+    {
+      "id": "C30",
+      "lat": 22.3047,
+      "lon": 73.2236,
+      "demand": 7.0,
+      "ready_time": 36000.0,
+      "due_time": 50400.0,
+      "service_time": 600.0,
+      "priority": 1,
+      "name": "Pratap Nagar"
+    }
+  ],
+  "vehicles": [
+    {
+      "id": "V_1",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "V_2",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "V_3",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "V_4",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "V_5",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    },
+    {
+      "id": "V_6",
+      "capacity": 80.0,
+      "shift_start": 25200.0,
+      "shift_end": 64800.0,
+      "fixed_cost": 50.0,
+      "cost_per_time": 0.01,
+      "cost_per_distance": 0.001
+    }
+  ],
+  "coordinate_system": "geographic",
+  "travel_time_matrix": null,
+  "distance_matrix": null
+}
