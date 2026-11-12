@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 import time
 import urllib.request
 from fastapi import APIRouter, Depends
@@ -16,13 +17,32 @@ router = APIRouter(tags=["Health"])
 START_TIME = time.time()
 
 
-def _check_valhalla_connection(url: str = "http://localhost:8002/status") -> bool:
-    """Non-blocking check of Valhalla Docker container health."""
+_VALHALLA_HEALTH_CACHE: tuple[float, bool] = (0.0, False)
+
+
+def _check_valhalla_connection(url: str | None = None) -> bool:
+    """Non-blocking cached check of Valhalla health (cached for 25s for high throughput)."""
+    global _VALHALLA_HEALTH_CACHE
+    now = time.time()
+    last_time, last_status = _VALHALLA_HEALTH_CACHE
+    if now - last_time < 25.0:
+        return last_status
+
+    if not url:
+        base = os.environ.get("VALHALLA_URL", "http://127.0.0.1:8002").rstrip("/")
+        url = f"{base}/status"
+
     try:
-        req = urllib.request.Request(url, headers={"User-Agent": "RouteIt-HealthCheck"})
-        with urllib.request.urlopen(req, timeout=0.4) as resp:
-            return resp.status == 200
+        req = urllib.request.Request(
+            url,
+            headers={"User-Agent": "Route.it-SIH2026", "Accept": "application/json"},
+        )
+        with urllib.request.urlopen(req, timeout=2.0) as resp:
+            ok = resp.status == 200
+            _VALHALLA_HEALTH_CACHE = (now, ok)
+            return ok
     except Exception:
+        _VALHALLA_HEALTH_CACHE = (now, False)
         return False
 
 

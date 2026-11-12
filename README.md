@@ -137,6 +137,13 @@ Route.it is fully optimized for **Render's Free Tier** (512 MB RAM) using a unif
    - Click **Apply**.
    - Render builds the frontend via Node 20, installs lean Python 3.11 wheels, and starts the server on `$PORT`.
 
+### Routing Engines & Valhalla Integration
+Route.it supports two cost oracle engines:
+- **Euclidean (Haversine)**: Fast analytical distance calculation based on spherical Earth curvature.
+- **Valhalla**: Real road-network routing engine supporting turn-by-turn navigation geometries and distance matrices. By default in cloud deployments (`render.yaml`), Route.it connects to the public OpenStreetMap Valhalla server (`https://valhalla1.openstreetmap.de`) with rate-limiting, chunking, and in-memory caching.
+  > [!NOTE]
+  > Public OSM Valhalla provides authentic road network geometry and real static travel times; dynamic traffic congestion profiles and incidents remain simulated (via calibrated Ichoua et al. time-of-day models) because public OSM servers do not carry live enterprise traffic feeds. If the public routing service is unavailable, Route.it seamlessly falls back to Haversine mode without crashing.
+
 ### Final URL Pattern:
 Once deployed, your service is available at:
 ```

@@ -78,8 +78,9 @@ def _run_solve_worker(
         )
         oracle: CostOracle
         if req.cost_oracle_type == "valhalla":
+            val_endpoint = req.valhalla_url if (req.valhalla_url and req.valhalla_url.strip()) else None
             oracle = ValhallaOracle(
-                base_url=req.valhalla_url,
+                base_url=val_endpoint,
                 traffic_adapter=traffic_adapter,
             )
         else:

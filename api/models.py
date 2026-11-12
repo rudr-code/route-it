@@ -7,6 +7,7 @@ and dynamic traffic event injection.
 
 from __future__ import annotations
 
+import os
 import time
 from typing import Any, Literal
 from pydantic import BaseModel, Field
@@ -49,7 +50,10 @@ class SolveRequest(BaseModel):
     cost_oracle_type: Literal["euclidean", "valhalla"] = Field(
         "euclidean", description="Routing oracle engine"
     )
-    valhalla_url: str = Field("http://localhost:8002", description="Valhalla service URL")
+    valhalla_url: str = Field(
+        default_factory=lambda: os.environ.get("VALHALLA_URL", "http://127.0.0.1:8002"),
+        description="Valhalla service URL",
+    )
     coordinate_system: Literal["geographic", "planar"] | None = Field(
         None, description="Coordinate system override ('geographic' or 'planar')"
     )

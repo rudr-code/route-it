@@ -23,3 +23,5 @@ services:
         generateValue: true
       - key: ROUTEIT_OTP_SECRET
         generateValue: true
+      - key: VALHALLA_URL
+        value: https://valhalla1.openstreetmap.de

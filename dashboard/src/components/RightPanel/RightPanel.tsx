@@ -107,9 +107,9 @@ export function RightPanel({
 
   const isLiveValhalla = oracleType === 'valhalla' && valhallaConnected === true;
   const trafficLabel = isLiveValhalla
-    ? '🟢 Traffic: live [Valhalla]'
+    ? '🟢 Valhalla: connected (public server)'
     : oracleType === 'valhalla' && !valhallaConnected
-    ? '🟡 Traffic: simulated [Valhalla offline]'
+    ? '🟡 Valhalla unavailable, traffic simulated'
     : '🟡 Traffic: simulated';
 
   return (

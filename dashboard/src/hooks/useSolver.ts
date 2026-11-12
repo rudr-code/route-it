@@ -90,7 +90,7 @@ export function useSolver(): [SolverState, SolverActions] {
         num_particles: params.num_particles ?? 25,
         max_iters: params.max_iters ?? 60,
         cost_oracle_type: params.cost_oracle_type ?? 'euclidean',
-        valhalla_url: params.valhalla_url ?? 'http://localhost:8002',
+        valhalla_url: params.valhalla_url ?? '',
         seed: params.seed ?? 42,
         apply_tw_repair: params.apply_tw_repair ?? true,
         enforce_priority_early_service: params.enforce_priority_early_service ?? false,

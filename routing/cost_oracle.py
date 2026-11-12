@@ -17,7 +17,10 @@ from dataclasses import dataclass, field
 import json
 import logging
 import math
+import os
 import sqlite3
+import threading
+import time
 from typing import Any, Callable, Literal, Sequence
 import urllib.error
 import urllib.request
@@ -838,75 +841,197 @@ class EuclideanOracle(CostOracle):
 
 
 # ---------------------------------------------------------------------------
-# Valhalla Oracle (Dockerized Matrix Engine with Chunking)
+# Valhalla Oracle (Public OSM / Local Docker Routing Engine with Chunking & Fallback)
 # ---------------------------------------------------------------------------
 
+DEFAULT_VALHALLA_URL = os.environ.get("VALHALLA_URL", "http://127.0.0.1:8002")
+
+# Module-level thread-safe in-memory cache and polite rate limiter for Valhalla
+_VALHALLA_PAIR_CACHE: dict[tuple[float, float, float, float, str], tuple[float, float]] = {}
+_VALHALLA_ROUTE_CACHE: dict[tuple[tuple[float, float], ...], dict[str, Any]] = {}
+_LAST_VALHALLA_REQ_TIME: float = 0.0
+_VALHALLA_LOCK = threading.Lock()
+
+
+def _rate_limit_valhalla(min_interval: float = 0.5) -> None:
+    """Ensure at least min_interval seconds between outbound Valhalla requests."""
+    global _LAST_VALHALLA_REQ_TIME
+    with _VALHALLA_LOCK:
+        now = time.time()
+        elapsed = now - _LAST_VALHALLA_REQ_TIME
+        if elapsed < min_interval:
+            time.sleep(min_interval - elapsed)
+        _LAST_VALHALLA_REQ_TIME = time.time()
+
+
 class ValhallaOracle(CostOracle):
-    """Road network oracle backed by Dockerized Valhalla routing service."""
+    """Road network oracle backed by Valhalla (supports public OpenStreetMap server or local Docker)."""
 
     def __init__(
         self,
-        base_url: str = "http://localhost:8002",
+        base_url: str | None = None,
         costing: str = "auto",
-        chunk_size: int = 50,
-        timeout: float = 10.0,
+        chunk_size: int = 10,
+        timeout: float = 8.0,
         cache: CostCache | None = None,
         traffic_adapter: TrafficAdapter | None = None,
     ) -> None:
         """Initialize Valhalla cost oracle.
 
         Args:
-            base_url: Valhalla HTTP endpoint URL (default: http://localhost:8002).
+            base_url: Valhalla endpoint URL (default: VALHALLA_URL env or http://127.0.0.1:8002).
             costing: Routing costing model (default: "auto").
-            chunk_size: Maximum sources/targets per subquery to avoid server limit exhaustion.
-            timeout: HTTP socket timeout in seconds.
+            chunk_size: Maximum sources/targets per subquery (clamped to <=10 for public server compliance).
+            timeout: HTTP socket timeout in seconds (default: 8.0).
             cache: Optional CostCache backend.
             traffic_adapter: Optional traffic adapter.
         """
         super().__init__(cache=cache, traffic_adapter=traffic_adapter)
-        self.base_url = base_url.rstrip("/")
+        chosen_url = base_url if (base_url and base_url.strip()) else DEFAULT_VALHALLA_URL
+        self.base_url = chosen_url.rstrip("/")
         self.costing = costing
-        self.chunk_size = max(1, chunk_size)
+        # Public Valhalla enforces max 100 locations per sources_to_targets (10 x 10 = 100)
+        self.chunk_size = max(1, min(chunk_size, 10))
         self.timeout = timeout
+        self.fallback_active = False
+        self.fallback_reason: str | None = None
+
+    def _haversine(self, origin: Location, dest: Location) -> tuple[float, float]:
+        """Compute geographic Haversine distance (m) and urban duration (s)."""
+        r = 6371000.0
+        phi1, phi2 = math.radians(origin.lat), math.radians(dest.lat)
+        dphi = math.radians(dest.lat - origin.lat)
+        dlam = math.radians(dest.lon - origin.lon)
+        a = (
+            math.sin(dphi / 2.0) ** 2
+            + math.cos(phi1) * math.cos(phi2) * math.sin(dlam / 2.0) ** 2
+        )
+        dist_m = 2.0 * r * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
+        duration_sec = dist_m / 8.333  # ~30 km/h average urban speed
+        return duration_sec, dist_m
+
+    def _http_post(self, endpoint: str, payload: dict[str, Any], retries: int = 2) -> dict[str, Any]:
+        """Send POST request to Valhalla with polite rate limiting and backoff."""
+        url = f"{self.base_url}/{endpoint.lstrip('/')}"
+        data_bytes = json.dumps(payload).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=data_bytes,
+            headers={
+                "Content-Type": "application/json",
+                "User-Agent": "Route.it-SIH2026",
+                "Accept": "application/json",
+            },
+            method="POST",
+        )
+
+        last_err: Exception | None = None
+        for attempt in range(retries + 1):
+            _rate_limit_valhalla(0.5)
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as resp:
+                    if resp.status == 200:
+                        body = resp.read().decode("utf-8")
+                        return json.loads(body)
+                    raise RuntimeError(f"Valhalla returned HTTP status {resp.status}")
+            except urllib.error.HTTPError as exc:
+                last_err = exc
+                if exc.code == 429 and attempt < retries:
+                    time.sleep(1.0 * (attempt + 1))
+                    continue
+                raise
+            except (urllib.error.URLError, TimeoutError, OSError) as exc:
+                last_err = exc
+                if attempt < retries:
+                    time.sleep(1.0 * (attempt + 1))
+                    continue
+                raise
+
+        raise ConnectionError(f"Valhalla request to {url} failed: {last_err}") from last_err
 
     def _query_sources_to_targets(
         self, sources: list[Location], targets: list[Location]
     ) -> list[list[dict[str, Any]]]:
-        """Execute a single /sources_to_targets POST query against Valhalla."""
-        url = f"{self.base_url}/sources_to_targets"
+        """Execute /sources_to_targets with in-memory caching and graceful Haversine fallback."""
+        # 1. Check if all pairs are in in-memory cache
+        all_cached = True
+        cached_rows: list[list[dict[str, Any]]] = []
+        for s in sources:
+            row_items: list[dict[str, Any]] = []
+            for t in targets:
+                if s.lat == t.lat and s.lon == t.lon:
+                    row_items.append({"time": 0.0, "distance": 0.0})
+                    continue
+                key = (round(s.lat, 5), round(s.lon, 5), round(t.lat, 5), round(t.lon, 5), self.costing)
+                if key in _VALHALLA_PAIR_CACHE:
+                    time_s, dist_m = _VALHALLA_PAIR_CACHE[key]
+                    row_items.append({"time": time_s, "distance": dist_m / 1000.0})
+                else:
+                    all_cached = False
+                    break
+            if not all_cached:
+                break
+            cached_rows.append(row_items)
+
+        if all_cached:
+            return cached_rows
+
+        # 2. If fallback already active, avoid hammering unavailable server
+        if self.fallback_active:
+            fallback_rows: list[list[dict[str, Any]]] = []
+            for s in sources:
+                r_list: list[dict[str, Any]] = []
+                for t in targets:
+                    if s.lat == t.lat and s.lon == t.lon:
+                        r_list.append({"time": 0.0, "distance": 0.0})
+                    else:
+                        dur_s, dist_m = self._haversine(s, t)
+                        r_list.append({"time": dur_s, "distance": dist_m / 1000.0})
+                fallback_rows.append(r_list)
+            return fallback_rows
+
         payload = {
             "sources": [{"lat": s.lat, "lon": s.lon} for s in sources],
             "targets": [{"lat": t.lat, "lon": t.lon} for t in targets],
             "costing": self.costing,
             "units": "kilometers",
         }
-        data_bytes = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            url,
-            data=data_bytes,
-            headers={"Content-Type": "application/json", "User-Agent": "RouteIt-Oracle"},
-            method="POST",
-        )
 
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                if resp.status != 200:
-                    raise RuntimeError(f"Valhalla returned HTTP status {resp.status}")
-                body = resp.read().decode("utf-8")
-                res = json.loads(body)
-                return res.get("sources_to_targets", [])
-        except urllib.error.URLError as exc:
-            raise ConnectionError(
-                f"Failed to query Valhalla matrix endpoint at {url}: {exc}"
-            ) from exc
+            res = self._http_post("sources_to_targets", payload, retries=2)
+            raw = res.get("sources_to_targets", [])
+            for r_idx, row in enumerate(raw):
+                s = sources[r_idx]
+                for c_idx, col in enumerate(row):
+                    t = targets[c_idx]
+                    key = (round(s.lat, 5), round(s.lon, 5), round(t.lat, 5), round(t.lon, 5), self.costing)
+                    _VALHALLA_PAIR_CACHE[key] = (float(col.get("time", 0.0)), float(col.get("distance", 0.0)) * 1000.0)
+            return raw
+        except Exception as exc:
+            self.fallback_active = True
+            self.fallback_reason = f"Valhalla unavailable ({exc}). Using simulated Haversine road model."
+            logger.warning(
+                "Valhalla /sources_to_targets failed (%s); seamlessly falling back to simulated Haversine distance.",
+                exc,
+            )
+            fallback_rows = []
+            for s in sources:
+                r_list = []
+                for t in targets:
+                    if s.lat == t.lat and s.lon == t.lon:
+                        r_list.append({"time": 0.0, "distance": 0.0})
+                    else:
+                        dur_s, dist_m = self._haversine(s, t)
+                        r_list.append({"time": dur_s, "distance": dist_m / 1000.0})
+                fallback_rows.append(r_list)
+            return fallback_rows
 
     def _query_base_cost(self, origin: Location, dest: Location) -> tuple[float, float]:
-        """Fetch base time and distance for a single OD pair."""
+        """Fetch base time (s) and distance (m) for a single OD pair."""
         res = self._query_sources_to_targets([origin], [dest])
         if not res or not res[0]:
-            raise RuntimeError(f"Valhalla returned empty matrix for {origin.id} -> {dest.id}")
+            return self._haversine(origin, dest)
         entry = res[0][0]
-        # Valhalla returns time in seconds, distance in km (when units="kilometers")
         dur_sec = float(entry.get("time", 0.0))
         dist_m = float(entry.get("distance", 0.0)) * 1000.0
         return dur_sec, dist_m
@@ -931,7 +1056,7 @@ class ValhallaOracle(CostOracle):
             for j in range(0, n, self.chunk_size):
                 tgt_chunk = norm_points[j : j + self.chunk_size]
 
-                # Check if all pairs in this chunk are already cached
+                # Check if all pairs in this chunk are already cached in self.cache
                 all_cached = True
                 chunk_durs: list[list[float]] = []
                 chunk_dists: list[list[float]] = []
@@ -1005,60 +1130,112 @@ class ValhallaOracle(CostOracle):
     ) -> dict[str, Any]:
         """Compute full turn-by-turn route with decoded geometry for a sequence of stops.
 
-        Args:
-            locations: Sequence of stops to visit in order.
-            costing: Optional costing model override (default: self.costing).
-            directions_options: Optional Valhalla directions options (default: units=kilometers).
-
-        Returns:
-            Dict containing:
-            - "trip": Trip dictionary from Valhalla.
-            - "coordinates": Decoded list of [lon, lat] coordinates (GeoJSON format).
-            - "distance_km": Total route distance in km.
-            - "time_sec": Total duration in seconds.
+        Respects the public Valhalla limit of at most 10 waypoints per request by chunking
+        overlapping subsegments of 8 waypoints and stitching the polyline coordinates.
+        Falls back seamlessly to straight-line Haversine coordinates if unavailable.
         """
         norm_locs = [to_location(loc) for loc in locations]
-        url = f"{self.base_url}/route"
-        payload = {
-            "locations": [{"lat": loc.lat, "lon": loc.lon, "type": "break"} for loc in norm_locs],
-            "costing": costing or self.costing,
-            "directions_options": directions_options or {"units": "kilometers"},
-        }
-        data_bytes = json.dumps(payload).encode("utf-8")
-        req = urllib.request.Request(
-            url,
-            data=data_bytes,
-            headers={"Content-Type": "application/json", "User-Agent": "RouteIt-Oracle"},
-            method="POST",
-        )
+        if not norm_locs:
+            return {"trip": {}, "coordinates": [], "distance_km": 0.0, "time_sec": 0.0}
+
+        if len(norm_locs) == 1:
+            return {
+                "trip": {},
+                "coordinates": [[round(norm_locs[0].lon, 6), round(norm_locs[0].lat, 6)]],
+                "distance_km": 0.0,
+                "time_sec": 0.0,
+            }
+
+        # Check in-memory route cache
+        route_key = tuple((round(l.lat, 5), round(l.lon, 5)) for l in norm_locs)
+        if route_key in _VALHALLA_ROUTE_CACHE:
+            return _VALHALLA_ROUTE_CACHE[route_key]
+
+        # If fallback active, return straight-line coordinates
+        if self.fallback_active:
+            return self._fallback_route(norm_locs)
+
+        # Chunk into overlapping windows of at most 8 stops (public Valhalla limit is 10)
+        sub_windows: list[list[Location]] = []
+        idx = 0
+        while idx < len(norm_locs):
+            end = min(idx + 8, len(norm_locs))
+            sub_windows.append(norm_locs[idx:end])
+            if end >= len(norm_locs):
+                break
+            idx = end - 1  # 1-stop overlap for seamless polyline connection
+
+        stitched_coords: list[list[float]] = []
+        total_dist_km = 0.0
+        total_time_sec = 0.0
+        last_trip: dict[str, Any] = {}
 
         try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as resp:
-                if resp.status != 200:
-                    raise RuntimeError(f"Valhalla /route returned HTTP {resp.status}")
-                body = resp.read().decode("utf-8")
-                res = json.loads(body)
-        except urllib.error.URLError as exc:
-            raise ConnectionError(f"Failed to query Valhalla /route endpoint at {url}: {exc}") from exc
+            for w_idx, win in enumerate(sub_windows):
+                payload = {
+                    "locations": [{"lat": loc.lat, "lon": loc.lon, "type": "break"} for loc in win],
+                    "costing": costing or self.costing,
+                    "directions_options": directions_options or {"units": "kilometers"},
+                }
+                res = self._http_post("route", payload, retries=2)
+                trip = res.get("trip", {})
+                last_trip = trip
+                summary = trip.get("summary", {})
+                total_dist_km += float(summary.get("length", 0.0))
+                total_time_sec += float(summary.get("time", 0.0))
 
-        trip = res.get("trip", {})
-        summary = trip.get("summary", {})
-        legs = trip.get("legs", [])
+                legs = trip.get("legs", [])
+                sub_coords: list[list[float]] = []
+                for leg in legs:
+                    shape = leg.get("shape", "")
+                    if shape:
+                        decoded = decode_polyline(shape, precision=1e6)
+                        for lat, lon in decoded:
+                            sub_coords.append([round(lon, 6), round(lat, 6)])
 
-        # Decode all leg polylines into [lon, lat] points for GeoJSON
-        geojson_coords: list[list[float]] = []
-        for leg in legs:
-            shape = leg.get("shape", "")
-            if shape:
-                decoded_lat_lon = decode_polyline(shape, precision=1e6)
-                for lat, lon in decoded_lat_lon:
-                    # In GeoJSON: [longitude, latitude]
-                    geojson_coords.append([round(lon, 6), round(lat, 6)])
+                if not sub_coords:
+                    # Fallback to win coords if shapes empty
+                    sub_coords = [[round(loc.lon, 6), round(loc.lat, 6)] for loc in win]
 
+                if w_idx == 0:
+                    stitched_coords.extend(sub_coords)
+                else:
+                    # Omit first coordinate to avoid duplicate point at stitch seam
+                    stitched_coords.extend(sub_coords[1:])
+
+            result = {
+                "trip": last_trip,
+                "coordinates": stitched_coords,
+                "distance_km": round(total_dist_km, 3),
+                "time_sec": round(total_time_sec, 1),
+            }
+            _VALHALLA_ROUTE_CACHE[route_key] = result
+            return result
+        except Exception as exc:
+            self.fallback_active = True
+            self.fallback_reason = f"Valhalla /route failed ({exc}). Using simulated road geometries."
+            logger.warning(
+                "Valhalla /route failed (%s); seamlessly falling back to straight-line geometries.", exc
+            )
+            return self._fallback_route(norm_locs)
+
+    def _fallback_route(self, norm_locs: list[Location]) -> dict[str, Any]:
+        """Generate straight-line GeoJSON geometry and Haversine times as fallback."""
+        coords: list[list[float]] = []
+        total_dist_km = 0.0
+        total_time_sec = 0.0
+        for i, loc in enumerate(norm_locs):
+            coords.append([round(loc.lon, 6), round(loc.lat, 6)])
+            if i > 0:
+                dur_s, dist_m = self._haversine(norm_locs[i - 1], loc)
+                total_dist_km += dist_m / 1000.0
+                total_time_sec += dur_s
         return {
-            "trip": trip,
-            "coordinates": geojson_coords,
-            "distance_km": float(summary.get("length", 0.0)),
-            "time_sec": float(summary.get("time", 0.0)),
+            "trip": {"summary": {"length": round(total_dist_km, 3), "time": round(total_time_sec, 1)}},
+            "coordinates": coords,
+            "distance_km": round(total_dist_km, 3),
+            "time_sec": round(total_time_sec, 1),
+            "fallback": True,
         }
+
 

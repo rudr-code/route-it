@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ConvergenceChart } from './ConvergenceChart';
 import type { ConvergencePoint, SolverState } from '../../hooks/useSolver';
 import type { SolveRequest } from '../../api/types';
@@ -16,6 +16,13 @@ export function LeftPanel({ solverState, convergence, onLoadScenario, onSolve }:
   const [iters, setIters] = useState(60);
   const [seed, setSeed] = useState(42);
   const [oracle, setOracle] = useState<'euclidean' | 'valhalla'>('euclidean');
+
+  // Auto-select Valhalla when connected to public server / local instance
+  useEffect(() => {
+    if (solverState.valhallaConnected) {
+      setOracle('valhalla');
+    }
+  }, [solverState.valhallaConnected]);
 
   const isRunning = solverState.isLoading && !!solverState.job;
   const hasProblem = !!solverState.problemId;
@@ -105,15 +112,20 @@ export function LeftPanel({ solverState, convergence, onLoadScenario, onSolve }:
               className="setting-input setting-select"
               disabled={isRunning}
             >
-              <option value="euclidean">Euclidean (Simulated)</option>
+              <option value="euclidean">Euclidean (Simulated Haversine)</option>
               <option value="valhalla">
-                Valhalla {solverState.valhallaConnected ? '(Live)' : '(Offline - Simulated)'}
+                Valhalla {solverState.valhallaConnected ? '(Public Road Router • Live)' : '(Offline - Simulated)'}
               </option>
             </select>
           </label>
+          {oracle === 'valhalla' && solverState.valhallaConnected && (
+            <div style={{ fontSize: '11px', color: '#34d399', marginTop: '4px', gridColumn: 'span 2' }}>
+              ✓ Valhalla: connected (public server) • Real road travel times & geometry
+            </div>
+          )}
           {oracle === 'valhalla' && !solverState.valhallaConnected && (
             <div style={{ fontSize: '11px', color: '#f59e0b', marginTop: '4px', gridColumn: 'span 2' }}>
-              ⚠ Valhalla offline (port 8002); traffic is simulated
+              ⚠ Valhalla unavailable, traffic simulated
             </div>
           )}
         </div>
