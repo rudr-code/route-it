@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import copy
 import logging
+import os
 import time
 from typing import Any
 import numpy as np
@@ -49,6 +50,7 @@ class AlgorithmBenchmarkResult(BaseModel):
     operational_cost_inr: float
     execution_time_ms: float
     convergence_history: list[dict[str, Any]] = Field(default_factory=list)
+    violations: dict[str, list[str]] = Field(default_factory=dict)
     relative_distance_diff_pct: float = 0.0
     relative_cost_diff_pct: float = 0.0
 
@@ -153,6 +155,7 @@ def run_algorithm_benchmark(
                     operational_cost_inr=metrics["operational_inr"],
                     execution_time_ms=round(latency_ms, 1),
                     convergence_history=downsampled_hist,
+                    violations=sol_qpso.violations or {},
                 )
             )
         except Exception as exc:
@@ -193,6 +196,7 @@ def run_algorithm_benchmark(
                     operational_cost_inr=metrics["operational_inr"],
                     execution_time_ms=round(latency_ms, 1),
                     convergence_history=downsampled_hist,
+                    violations=sol_pso.violations or {},
                 )
             )
         except Exception as exc:
@@ -233,6 +237,7 @@ def run_algorithm_benchmark(
                     operational_cost_inr=metrics["operational_inr"],
                     execution_time_ms=round(latency_ms, 1),
                     convergence_history=downsampled_hist,
+                    violations=sol_ga.violations or {},
                 )
             )
         except Exception as exc:
@@ -269,6 +274,7 @@ def run_algorithm_benchmark(
                     operational_cost_inr=metrics["operational_inr"],
                     execution_time_ms=round(latency_ms, 1),
                     convergence_history=dijkstra_hist,
+                    violations=sol_dijkstra.violations or {},
                 )
             )
         except Exception as exc:
@@ -306,6 +312,7 @@ def run_algorithm_benchmark(
                     operational_cost_inr=metrics["operational_inr"],
                     execution_time_ms=round(latency_ms, 1),
                     convergence_history=ortools_hist,
+                    violations=sol_ortools.violations or {},
                 )
             )
         except Exception as exc:

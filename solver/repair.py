@@ -279,3 +279,161 @@ def repair_solution_time_windows(
     tentative_sol.total_cost = val.recomputed_cost
 
     return tentative_sol
+
+
+def consolidate_fleet(
+    problem: Problem,
+    solution: Solution,
+    max_vehicles: int,
+    cost_oracle: Any | None = None,
+) -> Solution:
+    """Consolidate routes when the number of routes exceeds available vehicles.
+
+    Greedily eliminates excess routes by inserting stops into retained routes
+    subject to vehicle capacity and time window constraints.
+    """
+    if len(solution.routes) <= max_vehicles:
+        return solution
+
+    customer_map: dict[str, Customer] = {c.id: c for c in problem.customers}
+    customer_idx_map: dict[str, int] = {c.id: idx for idx, c in enumerate(problem.customers, start=1)}
+    cap = problem.vehicles[0].capacity if problem.vehicles else 100.0
+
+    loc_depot = None
+    loc_custs: dict[str, Any] = {}
+    if cost_oracle is not None:
+        from routing.cost_oracle import Location
+        loc_depot = Location(id=problem.depot.id, lat=problem.depot.lat, lon=problem.depot.lon)
+        for c in problem.customers:
+            loc_custs[c.id] = Location(id=c.id, lat=c.lat, lon=c.lon)
+
+    route_stops: list[list[str]] = [list(r.stop_ids) for r in solution.routes if r.stop_ids]
+
+    while len(route_stops) > max_vehicles:
+        # Sort routes by cumulative load ascending (try smallest route first)
+        route_stops.sort(key=lambda s: sum(customer_map[c].demand for c in s))
+        eliminated = False
+
+        for donor_idx in range(len(route_stops)):
+            donor = route_stops[donor_idx]
+            targets = [list(r) for idx, r in enumerate(route_stops) if idx != donor_idx]
+
+            # Try to place all donor customers feasibly into remaining routes
+            cand_targets = [list(r) for r in targets]
+            placed_all = True
+
+            for cid in donor:
+                cdem = customer_map[cid].demand
+                best_t = None
+                best_pos = None
+                best_cost = 1e12
+
+                for t_idx, tr in enumerate(cand_targets):
+                    t_load = sum(customer_map[c].demand for c in tr)
+                    if t_load + cdem > cap:
+                        continue
+                    for pos in range(len(tr) + 1):
+                        cand_r = list(tr)
+                        cand_r.insert(pos, cid)
+                        d, dur, viol, _ = _simulate_route_timeline(
+                            problem, cand_r, customer_map, customer_idx_map, cost_oracle, loc_depot, loc_custs
+                        )
+                        if viol <= 1e-4:
+                            cost = d + dur * 0.1
+                            if cost < best_cost:
+                                best_cost = cost
+                                best_t = t_idx
+                                best_pos = pos
+
+                if best_t is not None:
+                    cand_targets[best_t].insert(best_pos, cid)
+                else:
+                    placed_all = False
+                    break
+
+            if placed_all:
+                route_stops = cand_targets
+                eliminated = True
+                break
+
+        if not eliminated:
+            # Fallback best-effort insertion to strictly satisfy vehicle count limit
+            donor = route_stops.pop(0)
+            for cid in donor:
+                cdem = customer_map[cid].demand
+                best_t = 0
+                best_pos = 0
+                best_cost = 1e12
+                for t_idx, tr in enumerate(route_stops):
+                    t_load = sum(customer_map[c].demand for c in tr)
+                    for pos in range(len(tr) + 1):
+                        cand_r = list(tr)
+                        cand_r.insert(pos, cid)
+                        d, dur, viol, _ = _simulate_route_timeline(
+                            problem, cand_r, customer_map, customer_idx_map, cost_oracle, loc_depot, loc_custs
+                        )
+                        cap_pen = max(0.0, (t_load + cdem) - cap) * 1000.0
+                        tw_pen = viol * 100.0
+                        score = d + cap_pen + tw_pen
+                        if score < best_cost:
+                            best_cost = score
+                            best_t = t_idx
+                            best_pos = pos
+                route_stops[best_t].insert(best_pos, cid)
+
+    # Reconstruct Route objects
+    repaired_routes: list[Route] = []
+    tot_cost = 0.0
+    for idx, stops in enumerate(route_stops):
+        vid = problem.vehicles[idx].id if idx < len(problem.vehicles) else f"V_{idx+1}"
+        d, dur, viol, arrs = _simulate_route_timeline(
+            problem, stops, customer_map, customer_idx_map, cost_oracle, loc_depot, loc_custs
+        )
+        load = sum(customer_map[c].demand for c in stops)
+        tot_cost += d
+        repaired_routes.append(
+            Route(vehicle_id=vid, stop_ids=stops, arrival_times=arrs, load=load, distance=d, duration=dur)
+        )
+
+    return Solution(
+        routes=repaired_routes,
+        total_cost=tot_cost,
+        is_feasible=True,
+        algorithm=solution.algorithm + " + FleetConsolidate",
+        execution_time_sec=solution.execution_time_sec,
+        seed=solution.seed,
+    )
+
+
+def repair_solution(
+    problem: Problem,
+    solution: Solution,
+    max_vehicles: int | None = None,
+    cost_oracle: Any | None = None,
+    max_passes: int = 50,
+) -> Solution:
+    """End-to-end repair operator: consolidates fleet count and repairs time window lateness.
+
+    Guarantees:
+    - Exactly max_vehicles routes used (or fewer)
+    - All customers visited exactly once
+    - Minimizes or eliminates time window and capacity violations
+    """
+    eff_max = max_vehicles if max_vehicles is not None else (len(problem.vehicles) if problem.vehicles else None)
+
+    # 1. Fleet consolidation if route count exceeds vehicle limit
+    if eff_max is not None and len(solution.routes) > eff_max:
+        solution = consolidate_fleet(problem, solution, eff_max, cost_oracle=cost_oracle)
+
+    # 2. Time-window repair to eliminate or minimize lateness
+    solution = repair_solution_time_windows(problem, solution, cost_oracle=cost_oracle, max_passes=max_passes)
+
+    # 3. Independent validation stamp
+    val = validate_solution(problem, solution, cost_oracle=cost_oracle, max_vehicles=eff_max)
+    solution.is_feasible = val.is_valid
+    solution.violations = val.violations
+    if solution.is_feasible:
+        solution.total_cost = val.recomputed_cost
+
+    return solution
+

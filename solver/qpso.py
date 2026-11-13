@@ -15,6 +15,7 @@ from typing import Any, Callable
 import numpy as np
 from pydantic import BaseModel, Field
 
+from solver.heuristics import generate_heuristic_tours, tour_to_keys
 from solver.local_search import (
     build_neighbour_list,
     flatten_routes,
@@ -22,7 +23,7 @@ from solver.local_search import (
     run_local_search,
 )
 from solver.models import Problem, Solution
-from solver.repair import repair_solution_time_windows
+from solver.repair import repair_solution, repair_solution_time_windows
 from solver.split import _split_cost_numba, prins_split
 from solver.tensor import CostTensor, precompute_cost_tensor
 from solver.validate import validate_solution
@@ -171,14 +172,32 @@ def solve_qpso(
         else None
     )
 
-    # 1. Initialize particle positions uniformly in [0, 1]^n
-    X = rng.uniform(0.0, 1.0, size=(M, n))
+    # 1. Constructive Swarm Initialization
+    # Seed initial particles with domain heuristics (Clarke-Wright, Sweep, Nearest-Neighbor, EDF)
+    # so the quantum swarm starts in feasible, high-packing 4-vehicle territory rather than random noise.
+    heur_tours = generate_heuristic_tours(problem)
+    X = np.empty((M, n), dtype=np.float64)
+
+    # Place clean heuristic permutations into initial particles
+    num_heur = min(M, len(heur_tours))
+    for h_idx in range(num_heur):
+        X[h_idx] = tour_to_keys(heur_tours[h_idx], n)
+
+    # Seed perturbed variants around top heuristic tours (Clarke-Wright & Sweep)
+    num_seeded = min(M, max(num_heur, int(M * seed_fraction)))
+    for i in range(num_heur, num_seeded):
+        base_h = heur_tours[(i - num_heur) % num_heur]
+        base_keys = tour_to_keys(base_h, n)
+        noise = rng.normal(0.0, 0.03, size=n)
+        X[i] = np.clip(base_keys + noise, 0.001, 0.999)
+
+    # If caller provided explicit seed_keys, honour on first particle
     if seed_keys is not None and len(seed_keys) == n:
-        num_seeded = max(1, min(M, int(M * seed_fraction)))
-        X[0] = np.clip(seed_keys, 0.0, 1.0)
-        for i in range(1, num_seeded):
-            noise = rng.normal(0.0, 0.05, size=n)
-            X[i] = np.clip(seed_keys + noise, 0.0, 1.0)
+        X[0] = np.clip(seed_keys, 0.001, 0.999)
+
+    # Fill remaining particles with uniform random keys for global exploration
+    for i in range(num_seeded, M):
+        X[i] = rng.uniform(0.001, 0.999, size=n)
 
     # Personal best positions and costs
     P = np.copy(X)
@@ -219,28 +238,34 @@ def solve_qpso(
             gbest_x = np.copy(X[i])
 
     cost_history: list[float] = [float(gbest_cost)]
+    stagnation_counter = 0
+    prev_gbest_cost = float(gbest_cost)
 
     # 2. Main QPSO iteration loop
+    # In quantum-behaved PSO (Sun et al., 2004), each particle is bound to a delta potential well
+    # centered at the stochastic local attractor p. The wave function obeys Schrödinger's equation,
+    # yielding double-exponential probability distribution for coordinates, enabling quantum tunneling
+    # through local sub-optimal barriers without classical velocity divergence.
     for t in range(T):
-        # Linearly anneal alpha coefficient from alpha_max down to alpha_min
+        # Linearly anneal contraction-expansion parameter alpha (beta) from alpha_max down to alpha_min
         ce_alpha = config.alpha_max - (t / T) * (config.alpha_max - config.alpha_min)
 
-        # Center of gravity: mean best position across all particles
+        # Center of gravity: mean best position across all particles (mbest)
         mbest = np.mean(P, axis=0)
 
         for i in range(M):
-            # Stochastic local attractor
+            # Stochastic local attractor between personal best and global best
             phi = rng.uniform(0.0, 1.0, size=n)
             p = phi * P[i] + (1.0 - phi) * gbest_x
 
-            # Quantum delta-potential well wave function update
-            u = rng.uniform(1e-10, 1.0, size=n)
+            # Quantum delta-potential well wave function collapse: step = alpha * |mbest - X| * ln(1/u)
+            u = rng.uniform(1e-8, 1.0, size=n)
             sign = np.where(rng.random(size=n) < 0.5, 1.0, -1.0)
             step = ce_alpha * np.abs(mbest - X[i]) * np.log(1.0 / u)
             X[i] = p + sign * step
 
-            # Clamp keys to [0, 1]
-            X[i] = np.clip(X[i], 0.0, 1.0)
+            # Clamp continuous keys safely inside (0, 1)
+            X[i] = np.clip(X[i], 0.001, 0.999)
 
             cost = evaluate_particle_cost(X[i])
 
@@ -252,86 +277,98 @@ def solve_qpso(
                     gbest_cost = cost
                     gbest_x = np.copy(X[i])
 
-        # Adaptive Penalty Update based on Swarm Feasibility Ratio
+        # Stagnation detection & diverse re-seeding: if gbest stalled for 8 iterations, revitalize swarm
+        if gbest_cost < prev_gbest_cost - 1e-4:
+            stagnation_counter = 0
+            prev_gbest_cost = float(gbest_cost)
+        else:
+            stagnation_counter += 1
+            if stagnation_counter >= 8:
+                # Re-seed the bottom 60% particles
+                worst_indices = np.argsort(pbest_costs)[int(M * 0.4):]
+                for idx in worst_indices:
+                    if rng.random() < 0.5:
+                        noise = rng.normal(0.0, 0.05, size=n)
+                        X[idx] = np.clip(gbest_x + noise, 0.001, 0.999)
+                    else:
+                        rand_h = heur_tours[rng.integers(0, len(heur_tours))]
+                        rand_k = tour_to_keys(rand_h, n)
+                        noise = rng.normal(0.0, 0.06, size=n)
+                        X[idx] = np.clip(rand_k + noise, 0.001, 0.999)
+                    pbest_costs[idx] = evaluate_particle_cost(X[idx])
+                    P[idx] = np.copy(X[idx])
+                stagnation_counter = 0
+
+        # Fast Adaptive Penalty Update based on Swarm Feasibility Ratio (evaluated in microseconds via numba)
         if config.adaptive_penalty and (t + 1) % config.adapt_freq == 0:
-            # Sample swarm particles for feasibility
-            sample_size = min(15, M)
+            sample_size = min(5, M)
             feas_count = 0
             for s_idx in range(sample_size):
                 p_tour = np.argsort(X[s_idx]) + 1
-                _, _, is_f, _ = prins_split(
-                    problem,
+                c_test = _split_cost_numba(
                     p_tour,
-                    max_vehicles=config.max_vehicles,
-                    cost_oracle=cost_oracle,
-                    cost_tensor=cost_tensor,
-                    max_duty_duration=config.max_duty_duration,
-                    hard_time_windows=config.hard_time_windows,
-                    hard_duty_limit=config.hard_duty_limit,
-                    enforce_priority_early_service=config.enforce_priority_early_service,
-                    priority_early_ratio=config.priority_early_ratio,
+                    cost_data,
+                    demands,
+                    capacity,
+                    limit_v,
+                    t_start=cost_tensor.t_start,
+                    bucket_size=cost_tensor.bucket_size,
+                    service_times=services,
+                    ready_times=ready_times,
+                    due_times=due_times,
+                    depot_due_time=problem.depot.due_time,
+                    priority_factors=priority_factors,
+                    max_duty=max_duty,
                     alpha=cur_alpha,
                     beta=cur_beta,
                     gamma=cur_gamma,
+                    hard_time_windows=config.hard_time_windows,
+                    hard_duty_limit=config.hard_duty_limit,
                 )
-                if is_f:
+                if c_test < 1e11:
                     feas_count += 1
 
             feas_ratio = feas_count / sample_size
             if feas_ratio < 0.20:
-                # Mostly infeasible: drive harder towards feasibility
                 cur_alpha = min(10000.0, cur_alpha * 1.25)
                 cur_beta = min(10000.0, cur_beta * 1.25)
                 cur_gamma = min(10000.0, cur_gamma * 1.25)
             elif feas_ratio > 0.45:
-                # Mostly feasible: allow relaxed exploration
                 cur_alpha = max(1.0, cur_alpha / 1.25)
                 cur_beta = max(1.0, cur_beta / 1.25)
                 cur_gamma = max(1.0, cur_gamma / 1.25)
 
-        # 3. Memetic Step: Local Search on top k particles every m iterations
+        # 3. Memetic Step: Local Search on global best every m iterations
         if config.local_search_freq > 0 and (t + 1) % config.local_search_freq == 0:
-            top_k_indices = np.argsort(pbest_costs)[: config.local_search_top_k]
-
-            for idx in top_k_indices:
-                p_tour = np.argsort(P[idx]) + 1
-                _, current_routes, is_feas, _ = prins_split(
-                    problem,
-                    p_tour,
-                    max_vehicles=config.max_vehicles,
-                    cost_oracle=cost_oracle,
-                    cost_tensor=cost_tensor,
-                    max_duty_duration=config.max_duty_duration,
-                    hard_time_windows=config.hard_time_windows,
-                    hard_duty_limit=config.hard_duty_limit,
-                    enforce_priority_early_service=config.enforce_priority_early_service,
-                    priority_early_ratio=config.priority_early_ratio,
-                    alpha=cur_alpha,
-                    beta=cur_beta,
-                    gamma=cur_gamma,
-                )
-                if not is_feas:
-                    continue
-
+            p_tour = np.argsort(gbest_x) + 1
+            _, current_routes, is_feas, _ = prins_split(
+                problem,
+                p_tour,
+                max_vehicles=limit_v,
+                cost_oracle=cost_oracle,
+                cost_tensor=cost_tensor,
+                max_duty_duration=config.max_duty_duration,
+                hard_time_windows=config.hard_time_windows,
+                hard_duty_limit=config.hard_duty_limit,
+                enforce_priority_early_service=config.enforce_priority_early_service,
+                priority_early_ratio=config.priority_early_ratio,
+                alpha=cur_alpha,
+                beta=cur_beta,
+                gamma=cur_gamma,
+            )
+            if is_feas and len(current_routes) <= (limit_v if limit_v > 0 else 999):
                 route_indices = [
                     [problem.get_customer_index(sid) for sid in r.stop_ids]
                     for r in current_routes
                 ]
-
                 improved_routes, ls_cost = run_local_search(
                     route_indices, dist_mat, demands, capacity, neighbour_mat
                 )
-
-                if ls_cost < pbest_costs[idx] - 1e-7:
+                if ls_cost < gbest_cost - 1e-4:
                     improved_tour = flatten_routes(improved_routes)
-                    new_keys = project_tour_to_keys(P[idx], improved_tour)
-                    P[idx] = new_keys
-                    X[idx] = np.copy(new_keys)
-                    pbest_costs[idx] = ls_cost
-
-                    if ls_cost < gbest_cost:
-                        gbest_cost = ls_cost
-                        gbest_x = np.copy(new_keys)
+                    new_keys = project_tour_to_keys(gbest_x, improved_tour)
+                    gbest_x = new_keys
+                    gbest_cost = ls_cost
 
         cost_history.append(float(gbest_cost))
         if callback is not None:
@@ -342,7 +379,7 @@ def solve_qpso(
     total_cost, routes, is_feasible, violations = prins_split(
         problem,
         best_tour,
-        max_vehicles=config.max_vehicles,
+        max_vehicles=limit_v,
         allow_extra_vehicles=config.allow_extra_vehicles,
         cost_oracle=cost_oracle,
         cost_tensor=cost_tensor,
@@ -357,7 +394,7 @@ def solve_qpso(
     )
 
     # 5. Local Search refinement if feasible
-    if config.local_search_freq > 0 and is_feasible:
+    if config.local_search_freq > 0 and is_feasible and len(routes) <= (limit_v if limit_v > 0 else 999):
         route_indices = [
             [problem.get_customer_index(sid) for sid in r.stop_ids]
             for r in routes
@@ -365,12 +402,12 @@ def solve_qpso(
         improved_routes, final_ls_cost = run_local_search(
             route_indices, dist_mat, demands, capacity, neighbour_mat
         )
-        if final_ls_cost < total_cost - 1e-7:
+        if final_ls_cost < total_cost - 1e-4:
             improved_tour = flatten_routes(improved_routes)
             total_cost, routes, is_feasible, violations = prins_split(
                 problem,
                 improved_tour,
-                max_vehicles=config.max_vehicles,
+                max_vehicles=limit_v,
                 allow_extra_vehicles=config.allow_extra_vehicles,
                 cost_oracle=cost_oracle,
                 cost_tensor=cost_tensor,
@@ -396,10 +433,14 @@ def solve_qpso(
         seed=config.seed,
     )
 
-    # 6. Apply Time-Window Repair Operator if solution has residual time-window violations
-    if config.apply_tw_repair and (not is_feasible or "time_window" in violations):
-        solution = repair_solution_time_windows(
-            problem, solution, cost_oracle=cost_oracle, max_passes=50
+    # 6. Apply End-to-End Fleet Consolidation & Time-Window Repair Operator
+    if config.apply_tw_repair:
+        solution = repair_solution(
+            problem,
+            solution,
+            max_vehicles=limit_v if limit_v > 0 else None,
+            cost_oracle=cost_oracle,
+            max_passes=50,
         )
 
     # 7. Independent validation stamp
@@ -407,7 +448,7 @@ def solve_qpso(
         problem,
         solution,
         cost_oracle=cost_oracle,
-        max_vehicles=config.max_vehicles,
+        max_vehicles=limit_v if limit_v > 0 else None,
         max_duty_duration=config.max_duty_duration,
         hard_duty_limit=config.hard_duty_limit,
         enforce_priority_early_service=config.enforce_priority_early_service,
@@ -419,3 +460,19 @@ def solve_qpso(
         solution.total_cost = val_report.recomputed_cost
 
     return solution, cost_history
+
+
+def warmup_qpso() -> None:
+    """Pre-warm JIT kernels on server initialization so the first solve runs in milliseconds."""
+    from solver.models import Customer, Depot, Problem, Vehicle
+    depot = Depot(id="depot", lat=22.30, lon=73.18, ready_time=0.0, due_time=100000.0, service_time=0.0)
+    customers = [
+        Customer(id="c1", lat=22.31, lon=73.18, demand=10.0, ready_time=0.0, due_time=100000.0, service_time=10.0),
+        Customer(id="c2", lat=22.32, lon=73.19, demand=10.0, ready_time=0.0, due_time=100000.0, service_time=10.0),
+        Customer(id="c3", lat=22.30, lon=73.20, demand=10.0, ready_time=0.0, due_time=100000.0, service_time=10.0),
+    ]
+    vehicles = [Vehicle(id="v1", capacity=50.0, shift_start=0.0, shift_end=100000.0)]
+    prob = Problem(id="warmup", depot=depot, customers=customers, vehicles=vehicles)
+    prob.compute_euclidean_matrices()
+    solve_qpso(prob, QPSOConfig(num_particles=2, max_iters=2, seed=42))
+

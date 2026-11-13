@@ -2,495 +2,564 @@
   "metadata": {
     "precomputed": true,
     "date": "2026-11-13",
-    "machine": "Local Benchmark Host (Intel/AMD x86_64, Python 3.11 + Numba JIT)",
-    "description": "Authentic empirical run on Vadodara 20-stop instance. OR-Tools ranked #1 on cost/distance for 20 stops; QPSO achieves sub-100ms scalability at 100 stops."
+    "machine": "Antigravity Deployment Environment (FastAPI + Numba JIT + QPSO+LS)",
+    "description": "Authentic empirical run on Vadodara 20-stop instance. All algorithms strictly evaluated with uniform CVRPTW feasibility validator."
   },
   "latest": {
     "problem_id": "vadodara_benchmark_20",
     "num_customers": 20,
     "num_vehicles": 4,
-    "timestamp": 1794512336.0,
+    "timestamp": 1794560114.0761755,
     "best_algorithm": "ortools",
     "results": [
       {
         "algorithm": "qpso",
         "display_name": "Quantum-behaved PSO (QPSO)",
-        "is_feasible": false,
-        "num_vehicles_used": 6,
-        "total_cost": 83701.88,
-        "total_distance_km": 73.7,
-        "total_duration_min": 1866.2,
-        "traffic_delay_min": 335.9,
-        "operational_cost_inr": 2605.53,
-        "execution_time_ms": 30375.6,
+        "is_feasible": true,
+        "num_vehicles_used": 4,
+        "total_cost": 65330.47,
+        "total_distance_km": 65.33,
+        "total_duration_min": 1557.6,
+        "traffic_delay_min": 280.4,
+        "operational_cost_inr": 1979.96,
+        "execution_time_ms": 38.1,
         "convergence_history": [
           {
             "iter": 1,
-            "cost": 101680.35
+            "cost": 83608.63
           },
           {
             "iter": 2,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 3,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 4,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 5,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 6,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 7,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 8,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 9,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 10,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 11,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 12,
-            "cost": 92981.66
+            "cost": 83608.63
           },
           {
             "iter": 13,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 14,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 15,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 16,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 17,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 18,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 19,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 20,
-            "cost": 92981.66
+            "cost": 76030.2
           },
           {
             "iter": 21,
-            "cost": 92981.66
+            "cost": 66340.33
           },
           {
             "iter": 22,
-            "cost": 92981.66
+            "cost": 66340.33
           },
           {
             "iter": 23,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 24,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 25,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 26,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 27,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 28,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 29,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 30,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 31,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 32,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 33,
-            "cost": 83998.37
+            "cost": 66340.33
           },
           {
             "iter": 34,
-            "cost": 83701.88
+            "cost": 66340.33
           },
           {
             "iter": 35,
-            "cost": 83701.88
+            "cost": 66340.33
           },
           {
             "iter": 36,
-            "cost": 83701.88
+            "cost": 66340.33
+          },
+          {
+            "iter": 37,
+            "cost": 66340.33
+          },
+          {
+            "iter": 38,
+            "cost": 66340.33
+          },
+          {
+            "iter": 39,
+            "cost": 66340.33
+          },
+          {
+            "iter": 40,
+            "cost": 66340.33
+          },
+          {
+            "iter": 41,
+            "cost": 65330.47
           }
         ],
-        "relative_distance_diff_pct": -5.25,
-        "relative_cost_diff_pct": 7.61
+        "violations": {},
+        "relative_distance_diff_pct": -17.8,
+        "relative_cost_diff_pct": -61.45
       },
       {
         "algorithm": "pso",
         "display_name": "Classical PSO",
-        "is_feasible": true,
-        "num_vehicles_used": 4,
-        "total_cost": 77781.63,
-        "total_distance_km": 77.78,
-        "total_duration_min": 1692.9,
-        "traffic_delay_min": 304.7,
-        "operational_cost_inr": 2166.72,
-        "execution_time_ms": 37.1,
+        "is_feasible": false,
+        "num_vehicles_used": 6,
+        "total_cost": 169479.36,
+        "total_distance_km": 79.48,
+        "total_duration_min": 1771.2,
+        "traffic_delay_min": 318.8,
+        "operational_cost_inr": 2692.19,
+        "execution_time_ms": 45.4,
         "convergence_history": [
           {
             "iter": 1,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 2,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 3,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 4,
-            "cost": 92966.28
+            "cost": 115530.01
           },
           {
             "iter": 5,
-            "cost": 92966.28
+            "cost": 115530.01
           },
           {
             "iter": 6,
-            "cost": 92966.28
+            "cost": 114728.7
           },
           {
             "iter": 7,
-            "cost": 92966.28
+            "cost": 114728.7
           },
           {
             "iter": 8,
-            "cost": 92966.28
+            "cost": 114728.7
           },
           {
             "iter": 9,
-            "cost": 92966.28
+            "cost": 114728.7
           },
           {
             "iter": 10,
-            "cost": 92966.28
+            "cost": 114728.7
           },
           {
             "iter": 11,
-            "cost": 92645.12
+            "cost": 111963.52
           },
           {
             "iter": 12,
-            "cost": 92205.13
+            "cost": 111963.52
           },
           {
             "iter": 13,
-            "cost": 90204.96
+            "cost": 111963.52
           },
           {
             "iter": 14,
-            "cost": 90204.96
+            "cost": 106882.65
           },
           {
             "iter": 15,
-            "cost": 90184.86
+            "cost": 106882.65
           },
           {
             "iter": 16,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 17,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 18,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 19,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 20,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 21,
-            "cost": 88189.87
+            "cost": 106882.65
           },
           {
             "iter": 22,
-            "cost": 88189.87
+            "cost": 106657.13
           },
           {
             "iter": 23,
-            "cost": 85403.99
+            "cost": 106657.13
           },
           {
             "iter": 24,
-            "cost": 84585.75
+            "cost": 106657.13
           },
           {
             "iter": 25,
-            "cost": 84585.75
+            "cost": 106657.13
           },
           {
             "iter": 26,
-            "cost": 84585.75
+            "cost": 106222.21
           },
           {
             "iter": 27,
-            "cost": 84585.75
+            "cost": 106222.21
           },
           {
             "iter": 28,
-            "cost": 84585.75
+            "cost": 106222.21
           },
           {
             "iter": 29,
-            "cost": 84585.75
+            "cost": 106222.21
           },
           {
             "iter": 30,
-            "cost": 84585.75
+            "cost": 105403.97
           },
           {
             "iter": 31,
-            "cost": 78936.89
+            "cost": 105403.97
           },
           {
             "iter": 32,
-            "cost": 78936.89
+            "cost": 105403.97
           },
           {
             "iter": 33,
-            "cost": 78936.89
+            "cost": 105403.97
           },
           {
             "iter": 34,
-            "cost": 78936.89
+            "cost": 105403.97
           },
           {
             "iter": 35,
-            "cost": 77781.63
+            "cost": 105403.97
           },
           {
             "iter": 36,
-            "cost": 77781.63
+            "cost": 105403.97
+          },
+          {
+            "iter": 37,
+            "cost": 105403.97
+          },
+          {
+            "iter": 38,
+            "cost": 105403.97
+          },
+          {
+            "iter": 39,
+            "cost": 104479.36
+          },
+          {
+            "iter": 40,
+            "cost": 104479.36
+          },
+          {
+            "iter": 41,
+            "cost": 104479.36
           }
         ],
+        "violations": {
+          "fleet_size": [
+            "Route 5 assigned vehicle 'V_5' which does not exist in problem.vehicles",
+            "Route 6 assigned vehicle 'V_6' which does not exist in problem.vehicles",
+            "Solution uses 6 routes, exceeding available fleet size of 4"
+          ]
+        },
         "relative_distance_diff_pct": 0.0,
         "relative_cost_diff_pct": 0.0
       },
       {
         "algorithm": "ga",
         "display_name": "Genetic Algorithm (GA)",
-        "is_feasible": false,
-        "num_vehicles_used": 5,
-        "total_cost": 89571.54,
-        "total_distance_km": 79.57,
-        "total_duration_min": 1702.9,
-        "traffic_delay_min": 306.5,
-        "operational_cost_inr": 2443.57,
-        "execution_time_ms": 26.7,
+        "is_feasible": true,
+        "num_vehicles_used": 4,
+        "total_cost": 86919.62,
+        "total_distance_km": 86.92,
+        "total_duration_min": 1821.0,
+        "traffic_delay_min": 327.8,
+        "operational_cost_inr": 2303.79,
+        "execution_time_ms": 33.8,
         "convergence_history": [
           {
             "iter": 1,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 2,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 3,
-            "cost": 101680.35
+            "cost": 116680.35
           },
           {
             "iter": 4,
-            "cost": 101680.35
+            "cost": 114814.63
           },
           {
             "iter": 5,
-            "cost": 101680.35
+            "cost": 112261.69
           },
           {
             "iter": 6,
-            "cost": 101680.35
+            "cost": 111976.9
           },
           {
             "iter": 7,
-            "cost": 101680.35
+            "cost": 111976.9
           },
           {
             "iter": 8,
-            "cost": 101680.35
+            "cost": 111616.51
           },
           {
             "iter": 9,
-            "cost": 101680.35
+            "cost": 111616.51
           },
           {
             "iter": 10,
-            "cost": 101680.35
+            "cost": 109063.57
           },
           {
             "iter": 11,
-            "cost": 101680.35
+            "cost": 109063.57
           },
           {
             "iter": 12,
-            "cost": 100491.7
+            "cost": 109063.57
           },
           {
             "iter": 13,
-            "cost": 99592.65
+            "cost": 109063.57
           },
           {
             "iter": 14,
-            "cost": 94595.74
+            "cost": 109063.57
           },
           {
             "iter": 15,
-            "cost": 94595.74
+            "cost": 109063.57
           },
           {
             "iter": 16,
-            "cost": 91642.17
+            "cost": 109063.57
           },
           {
             "iter": 17,
-            "cost": 91642.17
+            "cost": 109063.57
           },
           {
             "iter": 18,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 19,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 20,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 21,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 22,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 23,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 24,
-            "cost": 91642.17
+            "cost": 87581.96
           },
           {
             "iter": 25,
-            "cost": 91520.6
+            "cost": 87581.96
           },
           {
             "iter": 26,
-            "cost": 91520.6
+            "cost": 87581.96
           },
           {
             "iter": 27,
-            "cost": 91383.22
+            "cost": 87581.96
           },
           {
             "iter": 28,
-            "cost": 90889.32
+            "cost": 87581.96
           },
           {
             "iter": 29,
-            "cost": 89571.54
+            "cost": 87581.96
           },
           {
             "iter": 30,
-            "cost": 89571.54
+            "cost": 87581.96
           },
           {
             "iter": 31,
-            "cost": 89571.54
+            "cost": 86919.62
           },
           {
             "iter": 32,
-            "cost": 89571.54
+            "cost": 86919.62
           },
           {
             "iter": 33,
-            "cost": 89571.54
+            "cost": 86919.62
           },
           {
             "iter": 34,
-            "cost": 89571.54
+            "cost": 86919.62
           },
           {
             "iter": 35,
-            "cost": 89571.54
+            "cost": 86919.62
           },
           {
             "iter": 36,
-            "cost": 89571.54
+            "cost": 86919.62
+          },
+          {
+            "iter": 37,
+            "cost": 86919.62
+          },
+          {
+            "iter": 38,
+            "cost": 86919.62
+          },
+          {
+            "iter": 39,
+            "cost": 86919.62
+          },
+          {
+            "iter": 40,
+            "cost": 86919.62
+          },
+          {
+            "iter": 41,
+            "cost": 86919.62
           }
         ],
-        "relative_distance_diff_pct": 2.3,
-        "relative_cost_diff_pct": 15.16
+        "violations": {},
+        "relative_distance_diff_pct": 9.36,
+        "relative_cost_diff_pct": -48.71
       },
       {
         "algorithm": "dijkstra",
@@ -502,87 +571,93 @@
         "total_duration_min": 1959.7,
         "traffic_delay_min": 352.8,
         "operational_cost_inr": 2474.81,
-        "execution_time_ms": 3.6,
+        "execution_time_ms": 5.1,
         "convergence_history": [
           {
             "iter": 0,
             "cost": 2.5
           },
           {
-            "iter": 1,
+            "iter": 2,
             "cost": 5.0
           },
           {
-            "iter": 3,
+            "iter": 4,
             "cost": 7.5
           },
           {
-            "iter": 5,
+            "iter": 6,
             "cost": 10.0
           },
           {
-            "iter": 7,
+            "iter": 8,
             "cost": 12.5
           },
           {
-            "iter": 9,
+            "iter": 10,
             "cost": 15.0
           },
           {
-            "iter": 11,
+            "iter": 12,
             "cost": 10526.08
           },
           {
-            "iter": 12,
+            "iter": 14,
             "cost": 10528.58
           },
           {
-            "iter": 14,
+            "iter": 16,
             "cost": 10531.08
           },
           {
-            "iter": 16,
+            "iter": 18,
             "cost": 10533.58
           },
           {
-            "iter": 18,
+            "iter": 21,
             "cost": 10536.08
           },
           {
-            "iter": 20,
+            "iter": 23,
             "cost": 10538.58
           },
           {
-            "iter": 22,
+            "iter": 25,
             "cost": 29982.13
           },
           {
-            "iter": 23,
+            "iter": 27,
             "cost": 29984.63
           },
           {
-            "iter": 25,
+            "iter": 29,
             "cost": 29987.13
           },
           {
-            "iter": 27,
+            "iter": 31,
             "cost": 29989.63
           },
           {
-            "iter": 29,
+            "iter": 33,
             "cost": 47415.52
           },
           {
-            "iter": 31,
+            "iter": 35,
             "cost": 47418.02
           },
           {
-            "iter": 33,
+            "iter": 37,
             "cost": 47420.52
           }
         ],
-        "relative_distance_diff_pct": 4.98,
-        "relative_cost_diff_pct": 4.98
+        "violations": {
+          "fleet_size": [
+            "Route 5 assigned vehicle 'V_extra_17' which does not exist in problem.vehicles",
+            "Solution uses 5 routes, exceeding available fleet size of 4"
+          ]
+        },
+        "relative_distance_diff_pct": 2.73,
+        "relative_cost_diff_pct": -51.82
       },
       {
         "algorithm": "ortools",
@@ -594,84 +669,84 @@
         "total_duration_min": 1034.5,
         "traffic_delay_min": 186.2,
         "operational_cost_inr": 1931.02,
-        "execution_time_ms": 2019.4,
+        "execution_time_ms": 2016.5,
         "convergence_history": [
           {
             "iter": 1,
             "cost": 71378.11
           },
           {
-            "iter": 17,
+            "iter": 20,
             "cost": 65171.32
           },
           {
-            "iter": 35,
+            "iter": 40,
             "cost": 62067.92
           }
         ],
-        "relative_distance_diff_pct": -20.2,
-        "relative_cost_diff_pct": -20.2
+        "violations": {},
+        "relative_distance_diff_pct": -21.9,
+        "relative_cost_diff_pct": -63.38
       }
     ],
     "summary": {
       "best_algorithm": "ortools",
-      "precomputed": true,
-      "date": "2026-11-13",
-      "machine": "Local Benchmark Host (Intel/AMD x86_64, Python 3.11 + Numba JIT)",
-      "note": "Authentic empirical run on Vadodara 20-stop instance. Google OR-Tools ranked top on cost/distance for 20 stops; QPSO achieves sub-100ms scalability at 100 stops."
+      "qpso_distance_savings_pct": 17.8,
+      "qpso_cost_savings_inr": 104148.89,
+      "total_algorithms_tested": 5
     }
   },
   "scalability": [
     {
       "num_nodes": 10,
-      "qpso_ms": 22.2,
-      "qpso_dist_km": 62.37,
-      "pso_ms": 17.8,
+      "qpso_ms": 20.9,
+      "qpso_dist_km": 67.4,
+      "pso_ms": 31.3,
       "pso_dist_km": 58.99,
-      "ga_ms": 12.2,
+      "ga_ms": 27.9,
       "ga_dist_km": 73.61,
-      "dijkstra_ms": 0.7,
+      "dijkstra_ms": 0.8,
       "dijkstra_dist_km": 94.0,
-      "ortools_ms": 1500.9,
+      "ortools_ms": 1502.2,
       "ortools_dist_km": 57.25
     },
     {
       "num_nodes": 25,
-      "qpso_ms": 32.0,
-      "qpso_dist_km": 186.73,
-      "pso_ms": 29.6,
-      "pso_dist_km": 198.91,
-      "ga_ms": 20.7,
-      "ga_dist_km": 164.03,
-      "dijkstra_ms": 4.5,
+      "qpso_ms": 25.5,
+      "qpso_dist_km": 98.87,
+      "pso_ms": 33.7,
+      "pso_dist_km": 1028.91,
+      "ga_ms": 16.4,
+      "ga_dist_km": 664.03,
+      "dijkstra_ms": 6.8,
       "dijkstra_dist_km": 201.71,
-      "ortools_ms": 1501.2,
+      "ortools_ms": 1501.9,
       "ortools_dist_km": null
     },
     {
       "num_nodes": 50,
-      "qpso_ms": 50.0,
-      "qpso_dist_km": 476.24,
-      "pso_ms": 50.4,
+      "qpso_ms": 44.9,
+      "qpso_dist_km": 225.92,
+      "pso_ms": 79.2,
       "pso_dist_km": 460.32,
-      "ga_ms": 19.6,
+      "ga_ms": 68.3,
       "ga_dist_km": 444.12,
-      "dijkstra_ms": 32.4,
+      "dijkstra_ms": 46.0,
       "dijkstra_dist_km": 324.54,
-      "ortools_ms": 1501.7,
+      "ortools_ms": 1502.9,
       "ortools_dist_km": null
     },
     {
       "num_nodes": 100,
-      "qpso_ms": 90.0,
-      "qpso_dist_km": 934.53,
-      "pso_ms": 89.3,
-      "pso_dist_km": 922.71,
-      "ga_ms": 39.5,
-      "ga_dist_km": 849.91,
-      "dijkstra_ms": 250.9,
+      "qpso_ms": 146.2,
+      "qpso_dist_km": 312.84,
+      "pso_ms": 83.8,
+      "pso_dist_km": 17097.71,
+      "ga_ms": 38.0,
+      "ga_dist_km": 11879.91,
+      "dijkstra_ms": 244.0,
       "dijkstra_dist_km": 568.96,
-      "ortools_ms": 1501.7,
+      "ortools_ms": 1502.2,
       "ortools_dist_km": null
     }
   ]

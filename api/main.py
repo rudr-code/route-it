@@ -11,7 +11,8 @@ from api.routes.health import router as health_router
 from api.routes.problems import router as problems_router
 from api.routes.ws import router as ws_router
 from contextlib import asynccontextmanager
-import asyncio, logging, os
+import asyncio, logging, os, threading
+from solver.qpso import warmup_qpso
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("route_it_api")
@@ -20,7 +21,9 @@ logger = logging.getLogger("route_it_api")
 async def lifespan(app: FastAPI):
     loop = asyncio.get_running_loop()
     get_db()
-    logger.info(f"[API] Route.it Service v{__version__} initialized.")
+    # Asynchronously warm up JIT solver kernels so live benchmarks execute in milliseconds
+    threading.Thread(target=warmup_qpso, daemon=True, name="qpso-warmup").start()
+    logger.info(f"[API] Route.it Service v{__version__} initialized with solver warmup.")
     yield
     logger.info("[API] Route.it Service shutting down.")
 

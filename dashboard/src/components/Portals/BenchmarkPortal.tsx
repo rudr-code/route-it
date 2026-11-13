@@ -40,6 +40,7 @@ interface AlgorithmResult {
   convergence_history: Array<{ iter: number; cost: number }>;
   relative_distance_diff_pct: number;
   relative_cost_diff_pct: number;
+  violations?: Record<string, string[]>;
 }
 
 const ALGO_COLORS: Record<string, string> = {
@@ -518,16 +519,44 @@ export function BenchmarkPortal() {
                         {r.display_name}
                       </td>
                       <td style={{ padding: '12px 12px' }}>
-                        <span style={{
-                          padding: '2px 8px',
-                          borderRadius: 4,
-                          fontSize: 11,
-                          fontWeight: 600,
-                          backgroundColor: r.is_feasible ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
-                          color: r.is_feasible ? '#10b981' : '#ef4444',
-                        }}>
+                        <span
+                          title={
+                            r.violations && Object.keys(r.violations).length > 0
+                              ? Object.entries(r.violations)
+                                  .map(([k, v]) => `${k.replace('_', ' ').toUpperCase()}: ${v.join('; ')}`)
+                                  .join('\n')
+                              : (r.is_feasible ? 'All constraints satisfied (Capacity, Time Windows, Fleet Limit)' : 'Constraint violation detected')
+                          }
+                          style={{
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            fontSize: 11,
+                            fontWeight: 600,
+                            cursor: r.violations && Object.keys(r.violations).length > 0 ? 'help' : 'default',
+                            backgroundColor: r.is_feasible ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                            color: r.is_feasible ? '#10b981' : '#ef4444',
+                          }}>
                           {r.is_feasible ? 'FEASIBLE' : 'VIOLATION'}
                         </span>
+                        {!r.is_feasible && r.violations && Object.keys(r.violations).length > 0 && (
+                          <div
+                            style={{
+                              fontSize: 10,
+                              color: '#f87171',
+                              marginTop: 4,
+                              maxWidth: 180,
+                              whiteSpace: 'nowrap',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                            }}
+                            title={Object.entries(r.violations)
+                              .map(([k, v]) => `${k}: ${v.join('; ')}`)
+                              .join('\n')}>
+                            {Object.entries(r.violations)
+                              .map(([k, v]) => `${k}: ${v[0]}`)
+                              .join(', ')}
+                          </div>
+                        )}
                       </td>
                       <td style={{ padding: '12px 12px', color: '#cbd5e1' }}>{r.num_vehicles_used}</td>
                       <td style={{ padding: '12px 12px', color: '#cbd5e1', fontWeight: 600 }}>{r.total_distance_km}</td>

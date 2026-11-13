@@ -37,7 +37,7 @@ def _split_cost_numba(
     demands: np.ndarray,
     capacity: float,
     max_vehicles: int = -1,
-    overflow_penalty: float = 10000.0,
+    overflow_penalty: float = 25000.0,
     t_start: float = 0.0,
     bucket_size: float = 900.0,
     service_times: np.ndarray | None = None,
@@ -474,7 +474,7 @@ def _split_cost_numba(
     return unc_cost + overflow_penalty
 
 
-@njit
+@njit(fastmath=True)
 def _split_dag_with_pred(
     tour: np.ndarray,
     cost_data: np.ndarray,
@@ -1229,6 +1229,11 @@ def prins_split(
             )
         )
 
-    # For feasible solution: true distance. For infeasible: penalized cost
-    solution_cost = total_dist if is_feasible else max(cost, total_dist + 10000.0)
+    # For feasible solution: true distance. For infeasible: steeply penalized cost scaling with excess vehicles
+    if is_feasible:
+        solution_cost = total_dist
+    else:
+        extra_v = max(0, len(routes) - eff_max_v) if eff_max_v is not None else 0
+        fleet_pen = (25000.0 * extra_v + 10000.0 * (extra_v ** 2)) if extra_v > 0 else 10000.0
+        solution_cost = max(cost, total_dist + fleet_pen)
     return solution_cost, routes, is_feasible, violations
