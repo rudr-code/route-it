@@ -69,7 +69,28 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
     ready_time: 28800,
     due_time: 50400,
     service_time: 600,
+    delivery_instructions: '',
+    time_window_type: 'hard' as 'hard' | 'soft',
   });
+  const [locationConfirmed, setLocationConfirmed] = useState(false);
+
+  // Enterprise Financial Cost Configuration (R9, R21, AC-10)
+  const [costConfig, setCostConfig] = useState({
+    cost_per_km: 8.0,
+    cost_per_hour: 100.0,
+    vehicle_activation_cost: 300.0,
+    critical_sla_rate: 10.0,
+    standard_sla_rate: 5.0,
+    flexible_sla_rate: 2.0,
+  });
+
+  // Advanced Planning & Profiles (R16, R18, R19, R24)
+  const [planningMode, setPlanningMode] = useState<'complete' | 'partial'>('complete');
+  const [optimizationProfile, setOptimizationProfile] = useState<'cost_focused' | 'balanced' | 'driver_productivity'>('cost_focused');
+  const [fleetMode, setFleetMode] = useState<'auto' | 'target'>('auto');
+  const [targetFleetSize, setTargetFleetSize] = useState<number>(4);
+  const [depotReturn, setDepotReturn] = useState<boolean>(true);
+  const [lastBatchResult, setLastBatchResult] = useState<any>(null);
 
   const [vehForm, setVehForm] = useState({
     registration_number: 'GJ-06-BZ-4040',
@@ -125,6 +146,53 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
     refreshAll();
   }, []);
 
+  const handleExportCsv = (batch: any, jobs: any[]) => {
+    if (!batch) return;
+    const rows = [
+      ['Route ID', 'Vehicle ID', 'Driver ID', 'Stop Seq', 'Delivery ID', 'Customer Name', 'Phone', 'Address', 'Latitude', 'Longitude', 'Demand', 'ETA (seconds)', 'ETA Clock', 'Window', 'Status']
+    ];
+    jobs.forEach((job) => {
+      (job.stops || []).forEach((st: any) => {
+        rows.push([
+          job.id,
+          job.vehicle_id,
+          job.driver_id || 'Unassigned',
+          String(st.stop_sequence),
+          st.id,
+          `"${(st.customer_name || '').replace(/"/g, '""')}"`,
+          st.customer_phone || '',
+          `"${(st.address || '').replace(/"/g, '""')}"`,
+          String(st.lat),
+          String(st.lon),
+          String(st.demand),
+          String(st.eta_seconds),
+          fmtClock(st.eta_seconds || 0),
+          `${fmtClock(st.ready_time || 0)} - ${fmtClock(st.due_time || 0)}`,
+          st.status || 'OPTIMIZED'
+        ]);
+      });
+    });
+    const csvContent = 'data:text/csv;charset=utf-8,' + rows.map((e) => e.join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `${batch.id || 'route_plan'}_manifest.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleExportJson = (batch: any) => {
+    if (!batch) return;
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(batch, null, 2));
+    const link = document.createElement('a');
+    link.setAttribute('href', dataStr);
+    link.setAttribute('download', `${batch.id || 'route_plan'}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleCreateBatchAndOptimize = async () => {
     if (selectedLocs.length === 0 || selectedVehs.length === 0) {
       setBanner({ type: 'err', msg: 'Select at least 1 delivery location and 1 vehicle.' });
@@ -140,12 +208,21 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
         num_particles: particles,
         max_iters: iters,
         seed: 42,
+        planning_mode: planningMode,
+        optimization_profile: optimizationProfile,
+        fleet_mode: fleetMode,
+        target_fleet_size: fleetMode === 'target' ? targetFleetSize : undefined,
+        depot_return: depotReturn,
+        cost_per_km: costConfig.cost_per_km,
+        cost_per_hour: costConfig.cost_per_hour,
+        vehicle_activation_cost: costConfig.vehicle_activation_cost,
       });
+      setLastBatchResult(res);
       setActiveBatchGeojson(res.geojson);
       setActiveBatchId(res.batch_id);
       setBanner({
         type: 'ok',
-        msg: `Batch ${res.batch_id} optimized via QPSO + Prins Split! Created ${res.dispatch_jobs.length} vehicle routes (${(res.total_distance_m / 1000).toFixed(2)} km).`,
+        msg: `Batch ${res.batch_id} optimized via QPSO + Prins Split! ${res.dispatch_jobs.length} routes (${(res.total_distance_m / 1000).toFixed(2)} km). ${res.status_message || ''}`,
       });
       await refreshAll();
     } catch (e: any) {
@@ -192,6 +269,8 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
       ready_time: l.ready_time,
       due_time: l.due_time,
       service_time: l.service_time,
+      delivery_instructions: l.delivery_instructions || '',
+      time_window_type: (l.time_window_type as 'hard' | 'soft') || 'hard',
     });
     setActiveCoords({ lat: l.lat, lon: l.lon });
     setSelectedLocId(l.id);
@@ -210,7 +289,10 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
       ready_time: 28800,
       due_time: 50400,
       service_time: 600,
+      delivery_instructions: '',
+      time_window_type: 'hard',
     });
+    setLocationConfirmed(false);
     setActiveCoords({ lat: 22.3125, lon: 73.1785 });
     setSelectedLocId(null);
   }, []);
@@ -496,10 +578,152 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
                   <span>Selected Demand: <strong>{selectedDemand.toFixed(1)}</strong> units</span>
                   <span>Fleet Capacity: <strong style={{ color: selectedDemand <= selectedCap ? '#10b981' : '#ef4444' }}>{selectedCap.toFixed(1)}</strong> units</span>
                 </div>
-                <button className="btn btn-solve" disabled={busy || selectedDemand > selectedCap} onClick={handleCreateBatchAndOptimize}>
+                <button className="btn btn-solve" disabled={busy || (planningMode === 'complete' && selectedDemand > selectedCap)} onClick={handleCreateBatchAndOptimize}>
                   {busy ? 'Running QPSO + Prins Split…' : '⚛ Optimize & Create Dispatch Jobs'}
                 </button>
               </div>
+            </div>
+
+            {/* Enterprise Cost Configuration & Optimization Profiles Bar (R9, R16, R18, R19, R21, R24) */}
+            <div className="card-box" style={{ marginTop: 10, background: 'rgba(30, 41, 59, 0.7)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, flexWrap: 'wrap', gap: 8 }}>
+                <span style={{ fontSize: 13, fontWeight: 700, color: '#38bdf8' }}>⚙️ Enterprise Cost Parameters & Optimization Profiles (R9, R16, R18, R19, R21, R24)</span>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button
+                    className="btn-xs"
+                    onClick={() => {
+                      const activeBatch = batches.find((b) => b.id === activeBatchId) || lastBatchResult;
+                      handleExportCsv(activeBatch, dispatchJobs.filter((j) => j.batch_id === activeBatchId));
+                    }}
+                    style={{ background: '#0284c7', color: '#fff' }}
+                  >
+                    📥 Export Plan (CSV)
+                  </button>
+                  <button
+                    className="btn-xs"
+                    onClick={() => {
+                      const activeBatch = batches.find((b) => b.id === activeBatchId) || lastBatchResult;
+                      handleExportJson(activeBatch);
+                    }}
+                    style={{ background: '#475569', color: '#fff' }}
+                  >
+                    📥 Export Plan (JSON)
+                  </button>
+                </div>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10, fontSize: 12 }}>
+                <label>
+                  Cost / km (₹)
+                  <input
+                    type="number"
+                    step="0.5"
+                    className="setting-input full"
+                    value={costConfig.cost_per_km}
+                    onChange={(e) => setCostConfig({ ...costConfig, cost_per_km: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  Cost / driver hr (₹)
+                  <input
+                    type="number"
+                    step="5"
+                    className="setting-input full"
+                    value={costConfig.cost_per_hour}
+                    onChange={(e) => setCostConfig({ ...costConfig, cost_per_hour: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  Vehicle Activation (₹)
+                  <input
+                    type="number"
+                    step="10"
+                    className="setting-input full"
+                    value={costConfig.vehicle_activation_cost}
+                    onChange={(e) => setCostConfig({ ...costConfig, vehicle_activation_cost: Number(e.target.value) })}
+                  />
+                </label>
+                <label>
+                  Planning Mode
+                  <select
+                    className="setting-input full"
+                    value={planningMode}
+                    onChange={(e) => setPlanningMode(e.target.value as any)}
+                  >
+                    <option value="complete">Complete Plan (Mandatory Coverage)</option>
+                    <option value="partial">Partial Plan (Shed by Priority)</option>
+                  </select>
+                </label>
+                <label>
+                  Optimization Profile
+                  <select
+                    className="setting-input full"
+                    value={optimizationProfile}
+                    onChange={(e) => setOptimizationProfile(e.target.value as any)}
+                  >
+                    <option value="cost_focused">Cost-focused (Min Financial J)</option>
+                    <option value="balanced">Balanced (0.5 Cost + 0.5 Time)</option>
+                    <option value="driver_productivity">Driver Productivity (Min Idle)</option>
+                  </select>
+                </label>
+                <label>
+                  Fleet Mode
+                  <select
+                    className="setting-input full"
+                    value={fleetMode}
+                    onChange={(e) => setFleetMode(e.target.value as any)}
+                  >
+                    <option value="auto">Auto Fleet (Optimal size)</option>
+                    <option value="target">Target Fleet (Fixed budget)</option>
+                  </select>
+                </label>
+                {fleetMode === 'target' && (
+                  <label>
+                    Target Fleet Count
+                    <input
+                      type="number"
+                      min={1}
+                      className="setting-input full"
+                      value={targetFleetSize}
+                      onChange={(e) => setTargetFleetSize(Number(e.target.value))}
+                    />
+                  </label>
+                )}
+                <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 18 }}>
+                  <input
+                    type="checkbox"
+                    checked={depotReturn}
+                    onChange={(e) => setDepotReturn(e.target.checked)}
+                  />
+                  <span>Return to Depot (R16)</span>
+                </label>
+              </div>
+
+              {lastBatchResult?.cost_breakdown && (
+                <div style={{ marginTop: 12, padding: 10, background: 'rgba(15, 23, 42, 0.8)', borderRadius: 8, border: '1px solid rgba(56, 189, 248, 0.2)' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+                    <span style={{ fontWeight: 700, color: '#38bdf8' }}>💰 Financial Objective Cost Ledger:</span>
+                    <strong style={{ fontSize: 15, color: '#10b981' }}>Total Cost J: ₹{lastBatchResult.cost_breakdown.total.toFixed(2)}</strong>
+                  </div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: 8, fontSize: 11 }}>
+                    <div>OPEX Distance: <strong>₹{lastBatchResult.cost_breakdown.opex_distance.toFixed(2)}</strong></div>
+                    <div>OPEX Time: <strong>₹{lastBatchResult.cost_breakdown.opex_time.toFixed(2)}</strong></div>
+                    <div>Fleet Mobilization: <strong>₹{lastBatchResult.cost_breakdown.fleet_activation.toFixed(2)}</strong></div>
+                    <div>SLA Penalty: <strong style={{ color: lastBatchResult.cost_breakdown.sla_penalty > 0 ? '#f59e0b' : '#94a3b8' }}>₹{lastBatchResult.cost_breakdown.sla_penalty.toFixed(2)}</strong></div>
+                    <div>Fleet Utilization: <strong>{lastBatchResult.fleet_utilization_pct || 0}%</strong></div>
+                  </div>
+                  {lastBatchResult.unserved_orders && lastBatchResult.unserved_orders.length > 0 && (
+                    <div style={{ marginTop: 8, padding: 6, background: 'rgba(239, 68, 68, 0.1)', borderRadius: 6, color: '#fca5a5', fontSize: 11 }}>
+                      <strong>⚠️ Partial Plan: {lastBatchResult.unserved_orders.length} unserved order(s) shed by priority:</strong>
+                      <ul style={{ margin: '4px 0 0 16px', padding: 0 }}>
+                        {lastBatchResult.unserved_orders.map((u: any, idx: number) => (
+                          <li key={idx}>Order {u.customer_id} ({u.priority_level}) - Reason: {u.reason} - Rec: {u.recommendations?.[0]}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="split-view-grid" style={{ marginTop: 14 }}>
@@ -675,6 +899,45 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
                   )}
                 </div>
 
+                <div style={{ background: 'rgba(99,102,241,0.08)', padding: 10, borderRadius: 8, border: '1px solid rgba(99,102,241,0.2)', marginBottom: 6 }}>
+                  <label style={{ fontSize: 12, fontWeight: 600, color: '#c7d2fe', display: 'block', marginBottom: 4 }}>
+                    👤 Returning Customer (Autofill Confirmed Location)
+                  </label>
+                  <select
+                    className="setting-input full"
+                    onChange={(e) => {
+                      const selected = locations.find((l) => l.id === e.target.value);
+                      if (selected) {
+                        setLocForm({
+                          customer_name: selected.customer_name,
+                          customer_phone: selected.customer_phone,
+                          address: selected.address,
+                          lat: selected.lat,
+                          lon: selected.lon,
+                          demand: selected.demand,
+                          priority: selected.priority,
+                          ready_time: selected.ready_time,
+                          due_time: selected.due_time,
+                          service_time: selected.service_time,
+                          delivery_instructions: selected.delivery_instructions || '',
+                          time_window_type: selected.time_window_type || 'hard',
+                        });
+                        setActiveCoords({ lat: selected.lat, lon: selected.lon });
+                        setLocationConfirmed(true);
+                        setBanner({ type: 'ok', msg: `Autofilled saved coordinates for ${selected.customer_name}` });
+                      }
+                    }}
+                    defaultValue=""
+                  >
+                    <option value="" disabled>-- Select returning customer to reuse confirmed coordinates --</option>
+                    {locations.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.customer_name} ({l.address.slice(0, 30)}...)
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <input
                   required
                   placeholder="Customer / Business Name"
@@ -696,6 +959,18 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
                   value={locForm.address}
                   onChange={(e) => setLocForm({ ...locForm, address: e.target.value })}
                 />
+
+                <label style={{ fontSize: 12, fontWeight: 600, color: '#c7d2fe' }}>
+                  Delivery Instructions (Separate Dispatch Notes)
+                  <textarea
+                    rows={2}
+                    placeholder="e.g. Ring bell, leave package with security gate 2, call upon arrival"
+                    className="setting-input full"
+                    style={{ marginTop: 4, resize: 'vertical' }}
+                    value={locForm.delivery_instructions}
+                    onChange={(e) => setLocForm({ ...locForm, delivery_instructions: e.target.value })}
+                  />
+                </label>
 
                 <div className="two-col">
                   <label>
@@ -732,6 +1007,25 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
                   </label>
                 </div>
 
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 4, marginBottom: 8, padding: '6px 10px', background: locationConfirmed ? 'rgba(16,185,129,0.1)' : 'rgba(255,255,255,0.04)', borderRadius: 6, border: `1px solid ${locationConfirmed ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.08)'}` }}>
+                  <span style={{ fontSize: 12, color: locationConfirmed ? '#34d399' : '#94a3b8' }}>
+                    {locationConfirmed ? '✓ Coordinates Confirmed & Locked' : '📍 Confirm coordinates before dispatching'}
+                  </span>
+                  <button
+                    type="button"
+                    className="btn-xs"
+                    onClick={() => {
+                      setLocationConfirmed(!locationConfirmed);
+                      if (!locationConfirmed) {
+                        setBanner({ type: 'ok', msg: `Coordinates locked: ${locForm.lat.toFixed(6)}, ${locForm.lon.toFixed(6)}` });
+                      }
+                    }}
+                    style={{ background: locationConfirmed ? '#059669' : '#4f46e5', color: '#fff', border: 'none', padding: '4px 12px', borderRadius: 4, cursor: 'pointer' }}
+                  >
+                    {locationConfirmed ? 'Unlock' : 'Confirm Location'}
+                  </button>
+                </div>
+
                 <div className="two-col">
                   <label>
                     Demand (units)
@@ -752,6 +1046,30 @@ export function AdminPortal({ onOpenTracking }: AdminPortalProps) {
                       className="setting-input full"
                       value={locForm.priority}
                       onChange={(e) => setLocForm({ ...locForm, priority: Number(e.target.value) })}
+                    />
+                  </label>
+                </div>
+
+                <div className="two-col">
+                  <label>
+                    Window Type
+                    <select
+                      className="setting-input full"
+                      value={locForm.time_window_type}
+                      onChange={(e) => setLocForm({ ...locForm, time_window_type: e.target.value as 'hard' | 'soft' })}
+                    >
+                      <option value="hard">Hard Window (Strict completion)</option>
+                      <option value="soft">Soft Window (SLA Lateness Penalty)</option>
+                    </select>
+                  </label>
+                  <label>
+                    Turnaround Service Time (sec)
+                    <input
+                      type="number"
+                      step={30}
+                      className="setting-input full"
+                      value={locForm.service_time}
+                      onChange={(e) => setLocForm({ ...locForm, service_time: Number(e.target.value) })}
                     />
                   </label>
                 </div>

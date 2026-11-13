@@ -36,6 +36,11 @@ graph LR
    - **Tier 1**: Path repair (reroute edge via Valhalla alternative paths).
    - **Tier 2**: Local repair (local relocate/insertion).
    - **Tier 3**: QPSO warm start (particle swarm initialized around best tour with stability penalty).
+6. **Enterprise Cost & Feasibility Ledger**:
+   - $J = C_{\text{OPEX}} + C_{\text{Fleet}} + C_{\text{SLA}}$ (configurable distance rate, time rate, vehicle activation, and priority-scaled SLA penalties).
+   - Complete vs. Partial planning modes with priority shedding (Flexible $\rightarrow$ Standard $\rightarrow$ Critical).
+   - Export dispatches to CSV and JSON manifests directly from the Admin Portal.
+   - Comprehensive Requirements Traceability Matrix in [docs/requirements_traceability.md](docs/requirements_traceability.md) (71 audited items, 100% active requirements verified).
 
 ---
 

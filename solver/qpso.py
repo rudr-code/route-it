@@ -133,16 +133,19 @@ def solve_qpso(
     ready_times[0] = problem.depot.ready_time
     due_times[0] = problem.depot.due_time
 
+    is_comp = getattr(problem, "effective_time_window_boundary", getattr(problem, "time_window_boundary", "completion")) == "completion"
     for idx, c in enumerate(problem.customers, start=1):
         demands[idx] = c.demand
         services[idx] = c.service_time
         ready_times[idx] = c.ready_time
-        due_times[idx] = c.due_time
+        base_due = (c.due_time - c.service_time) if is_comp else c.due_time
+        due_times[idx] = max(c.ready_time, base_due)
         priority_factors[idx] = 1.0 + (c.priority - 1) * 2.0
 
         if config.enforce_priority_early_service and c.priority > 1:
             early_due = c.ready_time + config.priority_early_ratio * (c.due_time - c.ready_time)
-            due_times[idx] = early_due
+            eff_early = (early_due - c.service_time) if is_comp else early_due
+            due_times[idx] = max(c.ready_time, eff_early)
 
     capacity = problem.vehicles[0].capacity if problem.vehicles else 100.0
     limit_v = config.max_vehicles if config.max_vehicles is not None else (len(problem.vehicles) if (problem.vehicles and not config.allow_extra_vehicles) else -1)

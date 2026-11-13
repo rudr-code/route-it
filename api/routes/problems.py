@@ -27,6 +27,7 @@ from routing.cost_oracle import (
     ValhallaOracle,
 )
 from solver.models import Customer, Depot, Problem, Solution, Vehicle
+from solver.partial import solve_partial_plan
 from solver.qpso import QPSOConfig, solve_qpso
 
 router = APIRouter(prefix="/problems", tags=["Problems & Solver"])
@@ -82,6 +83,7 @@ def _run_solve_worker(
             oracle = ValhallaOracle(
                 base_url=val_endpoint,
                 traffic_adapter=traffic_adapter,
+                fallback_to_haversine=True,
             )
         else:
             coord_sys = req.coordinate_system or problem.coordinate_system
@@ -92,7 +94,13 @@ def _run_solve_worker(
             )
         store.save_oracle(problem.id, oracle)
 
-        # 2. Setup Solver Configuration
+        # 2. Setup Problem Options and Solver Configuration
+        problem.return_to_depot = req.depot_return
+        problem.planning_mode = req.planning_mode
+        problem.optimization_profile = req.optimization_profile
+        problem.fleet_mode = req.fleet_mode
+        problem.target_fleet_size = req.target_fleet_size
+
         qpso_cfg = QPSOConfig(
             num_particles=req.num_particles,
             max_iters=req.max_iters,
@@ -120,13 +128,19 @@ def _run_solve_worker(
                 },
             )
 
-        # 4. Execute Optimization
-        solution, _ = solve_qpso(
-            problem,
-            config=qpso_cfg,
-            cost_oracle=oracle,
-            callback=on_step,
-        )
+        # 4. Execute Optimization (Complete vs Partial plan)
+        if req.planning_mode == "partial":
+            solution = solve_partial_plan(
+                problem,
+                lambda p: solve_qpso(p, config=qpso_cfg, cost_oracle=oracle, callback=on_step),
+            )
+        else:
+            solution, _ = solve_qpso(
+                problem,
+                config=qpso_cfg,
+                cost_oracle=oracle,
+                callback=on_step,
+            )
 
         # 5. Save Solution & Update Job
         job.status = "completed"
@@ -332,6 +346,13 @@ def get_solution(
         problem_id=problem_id,
         total_cost=round(solution.total_cost, 2),
         is_feasible=solution.is_feasible,
+        feasibility_status=getattr(solution, "feasibility_status", "feasible" if solution.is_feasible else "infeasible"),
+        status_message=getattr(solution, "status_message", "Plan is fully feasible" if solution.is_feasible else "Plan has constraint violations"),
+        cost_breakdown=solution.cost_breakdown,
+        fleet_utilization_pct=getattr(solution, "fleet_utilization_pct", 0.0),
+        unserved_orders=getattr(solution, "unserved_orders", []),
+        total_idle_time_min=getattr(solution, "total_idle_time_min", 0.0),
+        total_sla_penalty=getattr(solution, "total_sla_penalty", 0.0),
         violations=solution.violations,
         num_routes=len(solution.routes),
         routes=solution.routes,

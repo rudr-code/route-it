@@ -16,6 +16,7 @@ export const vadodaraScenario: ProblemCreateRequest = {
     due_time: rawVadodaraJson.depot.due_time,
     service_time: rawVadodaraJson.depot.service_time,
   },
+  // rawVadodaraJson.customers.map
   customers: (rawVadodaraJson.customers as any[]).map((c: any) => ({
     id: c.id,
     name: c.name,
@@ -27,6 +28,7 @@ export const vadodaraScenario: ProblemCreateRequest = {
     service_time: c.service_time,
     priority: c.priority ?? 1,
   })),
+  // rawVadodaraJson.vehicles.map
   vehicles: (rawVadodaraJson.vehicles as any[]).map((v: any) => ({
     id: v.id,
     capacity: v.capacity,

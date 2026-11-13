@@ -57,35 +57,43 @@ def _simulate_route_timeline(
         arr = curr_time + tt
         arrival_times.append(arr)
 
-        if arr > cust.due_time:
-            lateness = arr - cust.due_time
+        start_serv = max(arr, cust.ready_time)
+        comp = start_serv + cust.service_time
+        is_comp = getattr(problem, "effective_time_window_boundary", getattr(problem, "time_window_boundary", "completion")) == "completion"
+        check_time = comp if is_comp else arr
+
+        if check_time > cust.due_time:
+            lateness = check_time - cust.due_time
             p_fac = 1.0 + (cust.priority - 1) * 2.0
             tw_viol += lateness * p_fac
 
-        start_serv = max(arr, cust.ready_time)
-        curr_time = start_serv + cust.service_time
+        curr_time = comp
         prev_idx = c_idx
         prev_loc = c_loc
         prev_pt = c_pt
 
-    # Return to depot
+    # Return to depot (R16)
     depot_pt = (problem.depot.lat, problem.depot.lon)
-    if cost_oracle is not None and prev_loc is not None and loc_depot is not None:
-        tt = float(cost_oracle.travel_time(prev_loc, loc_depot, depart_time=curr_time))
-        d = float(cost_oracle.distance(prev_loc, loc_depot))
-    elif matrix is not None:
-        tt = float(matrix[prev_idx][0])
-        d = float(dist_matrix[prev_idx][0]) if dist_matrix is not None else tt
+    should_return = getattr(problem, "return_to_depot", True)
+    if should_return:
+        if cost_oracle is not None and prev_loc is not None and loc_depot is not None:
+            tt = float(cost_oracle.travel_time(prev_loc, loc_depot, depart_time=curr_time))
+            d = float(cost_oracle.distance(prev_loc, loc_depot))
+        elif matrix is not None:
+            tt = float(matrix[prev_idx][0])
+            d = float(dist_matrix[prev_idx][0]) if dist_matrix is not None else tt
+        else:
+            d = math.hypot(prev_pt[0] - depot_pt[0], prev_pt[1] - depot_pt[1])
+            tt = d
+
+        route_dist += d
+        depot_arr = curr_time + tt
+        if depot_arr > problem.depot.due_time:
+            tw_viol += (depot_arr - problem.depot.due_time)
+        duration = depot_arr - problem.depot.ready_time
     else:
-        d = math.hypot(prev_pt[0] - depot_pt[0], prev_pt[1] - depot_pt[1])
-        tt = d
+        duration = curr_time - problem.depot.ready_time
 
-    route_dist += d
-    depot_arr = curr_time + tt
-    if depot_arr > problem.depot.due_time:
-        tw_viol += (depot_arr - problem.depot.due_time)
-
-    duration = depot_arr - problem.depot.ready_time
     return route_dist, duration, tw_viol, arrival_times
 
 
@@ -106,9 +114,6 @@ def repair_solution_time_windows(
     Returns:
         Repaired Solution (with updated routes, cost, and feasibility status).
     """
-    if solution.is_feasible and not solution.violations:
-        return solution
-
     customer_map: dict[str, Customer] = {c.id: c for c in problem.customers}
     customer_idx_map: dict[str, int] = {c.id: idx for idx, c in enumerate(problem.customers, start=1)}
 
@@ -161,7 +166,9 @@ def repair_solution_time_windows(
             for pos in range(len(stops)):
                 cid = stops[pos]
                 cust = customer_map[cid]
-                if arr_times[pos] <= cust.due_time:
+                is_comp = getattr(problem, "effective_time_window_boundary", getattr(problem, "time_window_boundary", "completion")) == "completion"
+                check_time = (max(arr_times[pos], cust.ready_time) + cust.service_time) if is_comp else arr_times[pos]
+                if check_time <= cust.due_time:
                     continue  # not late
 
                 # Strategy 1: Intra-route Relocate (Move late customer earlier in same route)

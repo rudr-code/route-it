@@ -13,7 +13,8 @@ from typing import Any, Literal
 from pydantic import BaseModel, Field
 
 from dynamic.events import EdgeCongestion, RoadBlockage, VehicleDelay
-from solver.models import Customer, Depot, Problem, Route, Solution, Vehicle
+from solver.cost import BusinessCostConfig
+from solver.models import CostBreakdown, Customer, Depot, Problem, Route, Solution, Vehicle
 
 
 class ProblemCreateRequest(BaseModel):
@@ -62,6 +63,14 @@ class SolveRequest(BaseModel):
     enforce_priority_early_service: bool = Field(
         False, description="Enforce earlier service for priority customers"
     )
+    cost_config: BusinessCostConfig | None = Field(None, description="Custom enterprise financial rates (R9, R21)")
+    planning_mode: Literal["complete", "partial"] = Field("complete", description="Complete vs Partial plan mode (R19)")
+    optimization_profile: Literal["cost_focused", "balanced", "driver_productivity"] = Field(
+        "cost_focused", description="Optimization profile weighting (R24)"
+    )
+    fleet_mode: Literal["auto", "target"] = Field("auto", description="Auto fleet vs target fleet mode (R18)")
+    target_fleet_size: int | None = Field(None, description="Requested fleet size in target mode (R18)")
+    depot_return: bool = Field(True, description="Whether routes return to depot (R16)")
 
 
 class SolveJob(BaseModel):
@@ -85,6 +94,13 @@ class SolutionResponse(BaseModel):
     problem_id: str
     total_cost: float
     is_feasible: bool
+    feasibility_status: str = "feasible"
+    status_message: str = "Plan is fully feasible"
+    cost_breakdown: CostBreakdown | None = None
+    fleet_utilization_pct: float = 0.0
+    unserved_orders: list[dict[str, Any]] = Field(default_factory=list)
+    total_idle_time_min: float = 0.0
+    total_sla_penalty: float = 0.0
     violations: dict[str, list[str]] = Field(default_factory=dict)
     num_routes: int
     routes: list[Route]

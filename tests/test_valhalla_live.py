@@ -27,7 +27,7 @@ def main():
     print('Testing Fallback with dead URL on uncached points...')
     # Points 20..23 were never queried yet
     uncached_points = [Location(f'TEST_{i}', 23.0 + i * 0.01, 72.5 + i * 0.01) for i in range(3)]
-    dead_oracle = ValhallaOracle(base_url='http://127.0.0.1:54321', timeout=0.8)
+    dead_oracle = ValhallaOracle(base_url='http://127.0.0.1:54321', timeout=0.8, fallback_to_haversine=True)
     dead_res = dead_oracle.matrix(uncached_points)
     print(f'Dead oracle fallback matrix done: {dead_res.durations[0][1]:.1f}s, fallback_active={dead_oracle.fallback_active}')
     assert dead_oracle.fallback_active is True, "Fallback should be active after failed network query"

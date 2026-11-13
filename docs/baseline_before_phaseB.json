@@ -1,0 +1,283 @@
+{
+  "created_at": 1794587230.7157047,
+  "date": "2026-11-13",
+  "description": "Baseline before Phase B implementation. Reference for regression tests.",
+  "solomon_instances_check": {
+    "C101": {
+      "type": "authentic_solomon_1987",
+      "customers": 100,
+      "capacity": 200,
+      "depot": [
+        40,
+        50
+      ]
+    },
+    "R101": {
+      "type": "authentic_solomon_1987",
+      "customers": 100,
+      "capacity": 200,
+      "depot": [
+        40,
+        50
+      ]
+    },
+    "RC101": {
+      "type": "authentic_solomon_1987",
+      "customers": 100,
+      "capacity": 200,
+      "depot": [
+        40,
+        50
+      ]
+    }
+  },
+  "pytest_baseline": {
+    "passed": 123,
+    "failed": 0,
+    "errors": 0,
+    "skipped": 1,
+    "total": 124
+  },
+  "qpso_20_seeds": {
+    "total_seeds": 20,
+    "feasible_seeds": 20,
+    "feasibility_rate_pct": 100.0,
+    "mean_distance_km": 5.15,
+    "mean_cost": 5149.2,
+    "mean_solve_time_ms": 96.3,
+    "runs": [
+      {
+        "seed": 42,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 94.8,
+        "violations": {}
+      },
+      {
+        "seed": 123,
+        "is_feasible": true,
+        "num_vehicles": 4,
+        "distance_km": 5.16,
+        "cost": 5162.89,
+        "solve_time_ms": 83.9,
+        "violations": {}
+      },
+      {
+        "seed": 456,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.27,
+        "cost": 5274.27,
+        "solve_time_ms": 73.1,
+        "violations": {}
+      },
+      {
+        "seed": 789,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 77.5,
+        "violations": {}
+      },
+      {
+        "seed": 999,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 98.4,
+        "violations": {}
+      },
+      {
+        "seed": 2024,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.35,
+        "cost": 5347.89,
+        "solve_time_ms": 95.4,
+        "violations": {}
+      },
+      {
+        "seed": 314,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.28,
+        "cost": 5277.83,
+        "solve_time_ms": 94.9,
+        "violations": {}
+      },
+      {
+        "seed": 888,
+        "is_feasible": true,
+        "num_vehicles": 4,
+        "distance_km": 5.65,
+        "cost": 5652.78,
+        "solve_time_ms": 98.3,
+        "violations": {}
+      },
+      {
+        "seed": 101,
+        "is_feasible": true,
+        "num_vehicles": 4,
+        "distance_km": 5.16,
+        "cost": 5162.89,
+        "solve_time_ms": 86.8,
+        "violations": {}
+      },
+      {
+        "seed": 777,
+        "is_feasible": true,
+        "num_vehicles": 4,
+        "distance_km": 5.16,
+        "cost": 5162.89,
+        "solve_time_ms": 103.4,
+        "violations": {}
+      },
+      {
+        "seed": 555,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.27,
+        "cost": 5274.27,
+        "solve_time_ms": 97.5,
+        "violations": {}
+      },
+      {
+        "seed": 111,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.63,
+        "cost": 5631.74,
+        "solve_time_ms": 89.9,
+        "violations": {}
+      },
+      {
+        "seed": 222,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 100.2,
+        "violations": {}
+      },
+      {
+        "seed": 333,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.27,
+        "cost": 5274.27,
+        "solve_time_ms": 121.0,
+        "violations": {}
+      },
+      {
+        "seed": 444,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 5.28,
+        "cost": 5277.83,
+        "solve_time_ms": 110.1,
+        "violations": {}
+      },
+      {
+        "seed": 666,
+        "is_feasible": true,
+        "num_vehicles": 4,
+        "distance_km": 5.16,
+        "cost": 5162.89,
+        "solve_time_ms": 128.5,
+        "violations": {}
+      },
+      {
+        "seed": 1337,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 97.8,
+        "violations": {}
+      },
+      {
+        "seed": 2025,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 93.9,
+        "violations": {}
+      },
+      {
+        "seed": 9000,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 86.7,
+        "violations": {}
+      },
+      {
+        "seed": 4242,
+        "is_feasible": true,
+        "num_vehicles": 3,
+        "distance_km": 4.92,
+        "cost": 4915.2,
+        "solve_time_ms": 94.4,
+        "violations": {}
+      }
+    ]
+  },
+  "five_solvers_benchmark": [
+    {
+      "algorithm": "qpso",
+      "display_name": "Quantum-behaved PSO (QPSO)",
+      "is_feasible": true,
+      "num_vehicles_used": 3,
+      "total_distance_km": 44.56,
+      "total_cost": 5347.89,
+      "execution_time_ms": 93.8,
+      "violations": {}
+    },
+    {
+      "algorithm": "pso",
+      "display_name": "Classical PSO",
+      "is_feasible": true,
+      "num_vehicles_used": 3,
+      "total_distance_km": 63.01,
+      "total_cost": 7561.72,
+      "execution_time_ms": 79.7,
+      "violations": {}
+    },
+    {
+      "algorithm": "ga",
+      "display_name": "Genetic Algorithm (GA)",
+      "is_feasible": true,
+      "num_vehicles_used": 3,
+      "total_distance_km": 59.99,
+      "total_cost": 7198.59,
+      "execution_time_ms": 91.2,
+      "violations": {}
+    },
+    {
+      "algorithm": "dijkstra",
+      "display_name": "Dijkstra Heuristic",
+      "is_feasible": true,
+      "num_vehicles_used": 2,
+      "total_distance_km": 60.57,
+      "total_cost": 7268.72,
+      "execution_time_ms": 10.4,
+      "violations": {}
+    },
+    {
+      "algorithm": "ortools",
+      "display_name": "Google OR-Tools (Guided Local Search)",
+      "is_feasible": true,
+      "num_vehicles_used": 2,
+      "total_distance_km": 41.18,
+      "total_cost": 41175.71,
+      "execution_time_ms": 2085.9,
+      "violations": {}
+    }
+  ]
+}

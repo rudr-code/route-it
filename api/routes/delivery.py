@@ -20,7 +20,9 @@ from api.store import ProblemStore, get_store
 from api.websocket import manager
 from dynamic.reoptimizer import DynamicReoptimizer, ReoptimizerConfig
 from routing.cost_oracle import EuclideanOracle, SimulatedEventAdapter, TimeOfDayProfileAdapter
+from solver.cost import BusinessCostConfig, compute_cost_breakdown
 from solver.models import Customer, Depot, Problem, Vehicle
+from solver.partial import solve_partial_plan
 from solver.qpso import QPSOConfig, solve_qpso
 
 router = APIRouter(prefix="/delivery", tags=["Delivery Management System"])
@@ -59,6 +61,8 @@ class LocationCreateRequest(BaseModel):
     ready_time: float = 28800.0
     due_time: float = 54000.0
     service_time: float = 600.0
+    delivery_instructions: str = ""
+    time_window_type: Literal["hard", "soft"] = "hard"
 
 class VehicleCreateRequest(BaseModel):
     id: str | None = None
@@ -77,6 +81,14 @@ class BatchCreateOptimizeRequest(BaseModel):
     num_particles: int = Field(25, ge=5, le=150)
     max_iters: int = Field(50, ge=5, le=500)
     seed: int = 42
+    planning_mode: Literal["complete", "partial"] = "complete"
+    optimization_profile: Literal["cost_focused", "balanced", "driver_productivity"] = "cost_focused"
+    fleet_mode: Literal["auto", "target"] = "auto"
+    target_fleet_size: int | None = None
+    depot_return: bool = True
+    cost_per_km: float = 8.0
+    cost_per_hour: float = 100.0
+    vehicle_activation_cost: float = 300.0
 
 class AssignDriverRequest(BaseModel):
     driver_id: str
@@ -323,11 +335,17 @@ def create_and_optimize_batch(
     total_capacity = sum(float(v["capacity"]) for v in veh_rows)
     max_single_cap = max(float(v["capacity"]) for v in veh_rows)
 
-    if total_demand > total_capacity:
-        raise HTTPException(status_code=400, detail=f"Capacity exceeded: demand ({total_demand:.1f}) > fleet capacity ({total_capacity:.1f}).")
+    if total_demand > total_capacity and req.planning_mode != "partial":
+        raise HTTPException(
+            status_code=400,
+            detail=f"Capacity exceeded: demand ({total_demand:.1f}) > fleet capacity ({total_capacity:.1f}). Enable Partial Plan mode to shed orders by priority.",
+        )
     for l in loc_rows:
-        if float(l["demand"]) > max_single_cap:
-            raise HTTPException(status_code=400, detail=f"Location {l['id']} demand exceeds max vehicle capacity ({max_single_cap}).")
+        if float(l["demand"]) > max_single_cap and req.planning_mode != "partial":
+            raise HTTPException(
+                status_code=400,
+                detail=f"Location {l['id']} demand exceeds max vehicle capacity ({max_single_cap}).",
+            )
 
     batch_id = f"BATCH_{uuid4().hex[:6].upper()}"
     problem_id = f"prob_{batch_id.lower()}"
@@ -343,6 +361,8 @@ def create_and_optimize_batch(
             due_time=float(l["due_time"]),
             service_time=float(l["service_time"]),
             priority=int(l["priority"]),
+            delivery_instructions=l.get("delivery_instructions"),
+            time_window_type=l.get("time_window_type", "hard"),
         )
         for l in loc_rows
     ]
@@ -355,18 +375,47 @@ def create_and_optimize_batch(
             fixed_cost=float(v["fixed_cost"]),
             cost_per_distance=float(v["cost_per_km"]) / 1000.0,
             cost_per_time=0.01,
+            return_to_depot=req.depot_return,
         )
         for v in veh_rows
     ]
 
-    problem = Problem(id=problem_id, depot=VADODARA_HUB, customers=solver_customers, vehicles=solver_vehicles, coordinate_system="geographic")
+    problem = Problem(
+        id=problem_id,
+        depot=VADODARA_HUB,
+        customers=solver_customers,
+        vehicles=solver_vehicles,
+        coordinate_system="geographic",
+        planning_mode=req.planning_mode,
+        optimization_profile=req.optimization_profile,
+        fleet_mode=req.fleet_mode,
+        target_fleet_size=req.target_fleet_size,
+        return_to_depot=req.depot_return,
+    )
     problem.compute_euclidean_matrices(speed=8.333)
 
     traffic_adapter = SimulatedEventAdapter(base_adapter=TimeOfDayProfileAdapter({h: 1.0 for h in range(24)}))
     oracle = EuclideanOracle(base_speed_mps=8.333, coordinate_system="geographic", traffic_adapter=traffic_adapter)
     qpso_cfg = QPSOConfig(num_particles=req.num_particles, max_iters=req.max_iters, seed=req.seed, apply_tw_repair=True)
 
-    solution, _ = solve_qpso(problem, config=qpso_cfg, cost_oracle=oracle)
+    if req.planning_mode == "partial":
+        solution = solve_partial_plan(problem, lambda p: solve_qpso(p, config=qpso_cfg, cost_oracle=oracle))
+    else:
+        solution, _ = solve_qpso(problem, config=qpso_cfg, cost_oracle=oracle)
+
+    cost_cfg = BusinessCostConfig(
+        cost_per_km=req.cost_per_km,
+        cost_per_hour=req.cost_per_hour,
+        vehicle_activation_cost=req.vehicle_activation_cost,
+    )
+    solution.cost_breakdown = compute_cost_breakdown(
+        total_distance_metres=sum(r.distance for r in solution.routes),
+        total_duration_seconds=sum(r.duration for r in solution.routes),
+        num_vehicles_used=len(solution.routes),
+        total_sla_penalty=solution.total_sla_penalty,
+        config=cost_cfg,
+    )
+
     geojson_data = solution_to_geojson(problem, solution, cost_oracle=oracle)
 
     store.save_problem(problem)
@@ -437,11 +486,23 @@ def create_and_optimize_batch(
 
     db.log_history("ADMIN", "admin", "BATCH_OPTIMIZED_QPSO", f"Batch {batch_id} optimized via QPSO + Prins Split.", batch_id=batch_id, old_status="CREATED", new_status="PENDING_DISPATCH")
     return {
-        "batch_id": batch_id, "problem_id": problem_id, "name": req.name, "status": "PENDING_DISPATCH",
-        "total_distance_m": round(total_dist_m, 2), "total_duration_sec": round(total_dur_sec, 2),
-        "total_cost": round(solution.total_cost, 2), "is_feasible": solution.is_feasible,
-        "num_routes": len(active_routes), "dispatch_jobs": created_jobs,
-        "deliveries": created_deliveries, "geojson": geojson_data,
+        "batch_id": batch_id,
+        "problem_id": problem_id,
+        "name": req.name,
+        "status": "PENDING_DISPATCH",
+        "total_distance_m": round(total_dist_m, 2),
+        "total_duration_sec": round(total_dur_sec, 2),
+        "total_cost": round(solution.total_cost, 2),
+        "is_feasible": solution.is_feasible,
+        "feasibility_status": getattr(solution, "feasibility_status", "feasible" if solution.is_feasible else "infeasible"),
+        "status_message": getattr(solution, "status_message", "Plan is fully feasible"),
+        "cost_breakdown": solution.cost_breakdown.model_dump() if solution.cost_breakdown else None,
+        "unserved_orders": getattr(solution, "unserved_orders", []),
+        "fleet_utilization_pct": getattr(solution, "fleet_utilization_pct", 0.0),
+        "num_routes": len(active_routes),
+        "dispatch_jobs": created_jobs,
+        "deliveries": created_deliveries,
+        "geojson": geojson_data,
     }
 
 @router.get("/batches")

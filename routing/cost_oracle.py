@@ -875,6 +875,7 @@ class ValhallaOracle(CostOracle):
         timeout: float = 8.0,
         cache: CostCache | None = None,
         traffic_adapter: TrafficAdapter | None = None,
+        fallback_to_haversine: bool = False,
     ) -> None:
         """Initialize Valhalla cost oracle.
 
@@ -885,6 +886,7 @@ class ValhallaOracle(CostOracle):
             timeout: HTTP socket timeout in seconds (default: 8.0).
             cache: Optional CostCache backend.
             traffic_adapter: Optional traffic adapter.
+            fallback_to_haversine: If True, fall back gracefully to Haversine if Valhalla is unreachable.
         """
         super().__init__(cache=cache, traffic_adapter=traffic_adapter)
         chosen_url = base_url if (base_url and base_url.strip()) else DEFAULT_VALHALLA_URL
@@ -893,6 +895,7 @@ class ValhallaOracle(CostOracle):
         # Public Valhalla enforces max 100 locations per sources_to_targets (10 x 10 = 100)
         self.chunk_size = max(1, min(chunk_size, 10))
         self.timeout = timeout
+        self.fallback_to_haversine = fallback_to_haversine
         self.fallback_active = False
         self.fallback_reason: str | None = None
 
@@ -1000,14 +1003,18 @@ class ValhallaOracle(CostOracle):
         try:
             res = self._http_post("sources_to_targets", payload, retries=2)
             raw = res.get("sources_to_targets", [])
-            for r_idx, row in enumerate(raw):
+            for r_idx in range(min(len(sources), len(raw))):
+                row = raw[r_idx]
                 s = sources[r_idx]
-                for c_idx, col in enumerate(row):
+                for c_idx in range(min(len(targets), len(row))):
+                    col = row[c_idx]
                     t = targets[c_idx]
                     key = (round(s.lat, 5), round(s.lon, 5), round(t.lat, 5), round(t.lon, 5), self.costing)
                     _VALHALLA_PAIR_CACHE[key] = (float(col.get("time", 0.0)), float(col.get("distance", 0.0)) * 1000.0)
             return raw
         except Exception as exc:
+            if not self.fallback_to_haversine:
+                raise ConnectionError(f"Failed to query Valhalla matrix endpoint: {exc}") from exc
             self.fallback_active = True
             self.fallback_reason = f"Valhalla unavailable ({exc}). Using simulated Haversine road model."
             logger.warning(
@@ -1092,9 +1099,11 @@ class ValhallaOracle(CostOracle):
                 # Query Valhalla for this submatrix
                 raw_matrix = self._query_sources_to_targets(src_chunk, tgt_chunk)
 
-                for r_idx, row in enumerate(raw_matrix):
+                for r_idx in range(min(len(src_chunk), len(raw_matrix))):
+                    row = raw_matrix[r_idx]
                     s_loc = src_chunk[r_idx]
-                    for c_idx, col in enumerate(row):
+                    for c_idx in range(min(len(tgt_chunk), len(row))):
+                        col = row[c_idx]
                         t_loc = tgt_chunk[c_idx]
                         if s_loc.id == t_loc.id:
                             durations[i + r_idx][j + c_idx] = 0.0

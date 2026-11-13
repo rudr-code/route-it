@@ -124,6 +124,7 @@ def load_solomon(file_path: str | Path) -> Problem:
         customers=customers,
         vehicles=vehicles,
         coordinate_system="planar",
+        time_window_boundary="start",
     )
     problem.compute_euclidean_matrices(speed=1.0)
     return problem
@@ -251,6 +252,7 @@ def load_cvrplib(file_path: str | Path) -> Problem:
         customers=customers,
         vehicles=vehicles,
         coordinate_system="planar",
+        time_window_boundary="start",
     )
     problem.compute_euclidean_matrices(speed=1.0)
     return problem

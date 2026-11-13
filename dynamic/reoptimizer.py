@@ -406,6 +406,7 @@ class DynamicReoptimizer:
         if not should_replan or not all_uncommitted:
             # Do Nothing: Keep current plan
             elapsed_ms = (time.perf_counter() - start_wall_clock) * 1000.0
+            msg = "no remaining work" if not all_uncommitted else reason
             rec = ReoptimizationRecord(
                 event_id=event_id,
                 timestamp=current_time,
@@ -418,7 +419,7 @@ class DynamicReoptimizer:
                 stops_changed_count=0,
                 stops_changed=[],
                 is_feasible=current_solution.is_feasible,
-                message=reason,
+                message=msg,
             )
             self.audit_log.append(rec)
             return current_solution, rec
